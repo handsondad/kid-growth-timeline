@@ -100,7 +100,12 @@ const formatGPSCoordinatesMultiLine = (
 
 const gpsCoordinates = computed(() => {
   // 优先使用数据库中存储的坐标
-  if (props.currentPhoto.latitude && props.currentPhoto.longitude) {
+  if (
+    typeof props.currentPhoto.latitude === 'number' &&
+    Number.isFinite(props.currentPhoto.latitude) &&
+    typeof props.currentPhoto.longitude === 'number' &&
+    Number.isFinite(props.currentPhoto.longitude)
+  ) {
     return {
       latitude: props.currentPhoto.latitude,
       longitude: props.currentPhoto.longitude,
@@ -110,10 +115,20 @@ const gpsCoordinates = computed(() => {
   // 如果数据库中没有，尝试从EXIF数据中获取
   if (!props.exifData) return null
   const { GPSLatitude, GPSLongitude } = props.exifData
-  if (GPSLatitude && GPSLongitude) {
+  if (
+    GPSLatitude !== undefined &&
+    GPSLatitude !== null &&
+    GPSLongitude !== undefined &&
+    GPSLongitude !== null
+  ) {
+    const latitude = parseFloat(`${GPSLatitude}`)
+    const longitude = parseFloat(`${GPSLongitude}`)
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return null
+    }
     return {
-      latitude: parseFloat(`${GPSLatitude}`),
-      longitude: parseFloat(`${GPSLongitude}`),
+      latitude,
+      longitude,
     }
   }
   return null

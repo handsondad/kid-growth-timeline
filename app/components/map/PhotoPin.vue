@@ -467,7 +467,10 @@ const onClick = () => {
                     <!-- Latlng -->
                     <div
                       v-if="
-                        marker.exif?.GPSLatitude || marker.exif?.GPSLongitude
+                        (marker.exif?.GPSLatitude !== undefined &&
+                          marker.exif?.GPSLatitude !== null) ||
+                        (marker.exif?.GPSLongitude !== undefined &&
+                          marker.exif?.GPSLongitude !== null)
                       "
                       class="flex items-center gap-1 text-xs text-neutral-600 dark:text-muted"
                     >
@@ -477,12 +480,14 @@ const onClick = () => {
                       />
                       <span class="truncate font-mono">
                         {{
-                          marker.exif?.GPSLatitude
+                          marker.exif?.GPSLatitude !== undefined &&
+                          marker.exif?.GPSLatitude !== null
                             ? `${Math.abs(Number(marker.exif?.GPSLatitude)).toFixed(4)}°${marker.exif?.GPSLatitudeRef}`
                             : $t('map.photo.unknownCoord')
                         }},
                         {{
-                          marker.exif?.GPSLongitude
+                          marker.exif?.GPSLongitude !== undefined &&
+                          marker.exif?.GPSLongitude !== null
                             ? `${Math.abs(Number(marker.exif?.GPSLongitude)).toFixed(4)}°${marker.exif?.GPSLongitudeRef}`
                             : $t('map.photo.unknownCoord')
                         }}

@@ -480,13 +480,13 @@
       "supportedFormats": "JPEG / PNG / HEIC / 原況照片 / 動態照片",
       "maxFileSize": "最大 {size}MB",
       "buttons": {
-        "upload": "上傳照片",
-        "importFolder": "匯入資料夾",
+        "importFolder": "掃描本機資料夾",
         "queue": "任務佇列"
       },
-      "uploader": {
-        "label": "拖曳或點擊選擇照片",
-        "description": "支援 JPEG、PNG、HEIC 格式的照片，以及 MOV 格式的原況照片影片。每個檔案的最大大小：{maxSize}MB"
+      "localImport": {
+        "hint": "伺服器會掃描 NUXT_LOCAL_PHOTO_IMPORT_DIR 設定的資料夾，不會從瀏覽器上傳照片。",
+        "completed": "本機資料夾掃描完成",
+        "summary": "已掃描 {scanned} 張、加入佇列 {queued} 張、略過 {skipped} 張、失敗 {failed} 張。"
       },
       "toolbar": {
         "title": "照片管理",

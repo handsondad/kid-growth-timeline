@@ -10,11 +10,6 @@ const appTitle = computed(() => {
   return value ? String(value) : $t('title.dashboard')
 })
 
-const avatarUrl = computed(() => {
-  const value = settingsStore.getSetting('app:avatarUrl')
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-})
-
 const navItems = computed<NavigationMenuItem[][]>(() => [
   [
     {
@@ -58,19 +53,9 @@ const navItems = computed<NavigationMenuItem[][]>(() => [
           to: '/dashboard/settings/storage',
         },
         {
-          label: $t('title.privacySettings'),
-          icon: 'tabler:shield-lock',
-          to: '/dashboard/settings/privacy',
-        },
-        {
           label: $t('title.mapAndLocation'),
           icon: 'tabler:map-pin',
           to: '/dashboard/settings/map',
-        },
-        {
-          label: $t('title.systemSettings'),
-          icon: 'tabler:cpu',
-          to: '/dashboard/settings/system',
         },
         {
           label: $t('title.analyticsSettings'),
@@ -96,7 +81,7 @@ const navItems = computed<NavigationMenuItem[][]>(() => [
   ],
 ])
 
-const accountMenuItems = computed<DropdownMenuItem[][]>(() => [
+const footerMenuItems = computed<DropdownMenuItem[][]>(() => [
   [
     {
       label: $t('ui.locale.label'),
@@ -180,7 +165,7 @@ useHead({
 
       <template #footer="{ collapsed }">
         <UDropdownMenu
-          :items="accountMenuItems"
+          :items="footerMenuItems"
           :content="{ align: 'center', collisionPadding: 12 }"
           :ui="{
             content: collapsed
@@ -189,15 +174,8 @@ useHead({
           }"
         >
           <UButton
-            :avatar="{
-              src: avatarUrl,
-              alt: user?.username || user?.email || 'User Avatar',
-              icon: 'tabler:user',
-              ui: {
-                image: 'object-cover',
-              },
-            }"
-            :label="collapsed ? undefined : user?.username || 'User'"
+            icon="tabler:language"
+            :label="collapsed ? undefined : $t('ui.locale.label')"
             :trailing-icon="collapsed ? undefined : 'tabler:selector'"
             size="lg"
             color="neutral"

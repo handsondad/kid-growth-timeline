@@ -554,13 +554,13 @@
       "supportedFormats": "JPEG / PNG / HEIC / 实况视频 / Motion Photo",
       "maxFileSize": "最大 {size}MB",
       "buttons": {
-        "upload": "上传照片",
-        "importFolder": "导入文件夹",
+        "importFolder": "扫描本地目录",
         "queue": "任务队列"
       },
-      "uploader": {
-        "label": "拖放或点击选择照片",
-        "description": "支持 JPEG、PNG、HEIC 格式照片，以及 MOV 格式 Live Photo 视频，单个文件最大 {maxSize}MB"
+      "localImport": {
+        "hint": "服务端会扫描 NUXT_LOCAL_PHOTO_IMPORT_DIR 配置的目录，不会从浏览器上传照片。",
+        "completed": "本地目录扫描完成",
+        "summary": "扫描 {scanned} 张，已加入队列 {queued} 张，跳过 {skipped} 张，失败 {failed} 张。"
       },
       "toolbar": {
         "title": "照片管理",

@@ -6,7 +6,6 @@ export default defineEventHandler(async (event) => {
       z.object({
         type: z.literal('photo'),
         storageKey: z.string().nonempty(),
-        eraseLocation: z.boolean().optional(),
       }),
       z.object({
         type: z.literal('live-photo-video'),

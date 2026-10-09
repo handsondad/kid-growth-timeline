@@ -68,7 +68,7 @@ const isRepoLinkHovering = ref(false)
           <h1
             class="text-2xl font-bold text-neutral-900 dark:text-white/90 mb-2"
           >
-            {{ getSetting('app:title') }}
+            {{ getSetting('app:title') || 'Kid Growth Timeline' }}
           </h1>
         </div>
         <div class="text-neutral-600 dark:text-white/30 space-y-1 text-center">
@@ -213,7 +213,11 @@ const isRepoLinkHovering = ref(false)
           class="text-xs text-neutral-500/80 dark:text-neutral-500 font-medium truncate"
         >
           © {{ $dayjs().format('YYYY') }}
-          {{ getSetting('app:author') || getSetting('app:title') }}
+          {{
+            getSetting('app:author') ||
+            getSetting('app:title') ||
+            'Kid Growth Timeline'
+          }}
         </div>
         <div
           class="text-xs text-neutral-500/60 dark:text-neutral-500/80 font-medium inline-flex justify-center items-center gap-0.5"

@@ -29,6 +29,7 @@ const hasAnimated = ref(false)
 const showFloatingActions = ref(false)
 const dateRange = ref<string>()
 const visiblePhotos = ref(new Set<number>())
+const activeYear = ref<number | null>(null)
 
 const isMobile = useMediaQuery('(max-width: 768px)')
 const { batchProcessLivePhotos } = useLivePhotoProcessor()
@@ -236,6 +237,7 @@ const updateDateRange = () => {
   if (visiblePhotos.value.size === 0) {
     dateRange.value = undefined
     visibleCities.value = undefined
+    activeYear.value = null
     return
   }
 
@@ -279,6 +281,8 @@ const updateDateRange = () => {
     dateRange.value = undefined
     return
   }
+
+  activeYear.value = startDate.year()
 
   // Check if dates are the same day
   if (startDate.isSame(endDate, 'day')) {
@@ -328,6 +332,11 @@ onUnmounted(() => {
 
 const handleOpenViewer = (index: number) => {
   router.push(`/${displayPhotos.value[index]?.id}`)
+}
+
+const handleSelectYear = (index: number, year: number) => {
+  activeYear.value = year
+  scrollToPhoto(index)
 }
 
 const handleStartSlideshow = () => {
@@ -381,6 +390,12 @@ watch(currentPhotoIndex, (newIndex) => {
       :locations="visibleCities"
       :is-visible="!!dateRange && showFloatingActions"
       :is-mobile="isMobile"
+    />
+
+    <MasonryTimeIndex
+      :photos="displayPhotos"
+      :active-year="activeYear"
+      @select-year="handleSelectYear"
     />
 
     <!-- Back to Top Button -->

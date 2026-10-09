@@ -20,7 +20,6 @@ import {
   extractLocationFromGPS,
   parseGPSCoordinates,
 } from '../location/geocoding'
-import { settingsManager } from '../settings/settingsManager'
 import { findLivePhotoVideoForImage } from '../video/livephoto'
 import { processMotionPhotoFromXmp } from '../video/motion-photo'
 import { getStorageManager } from '~~/server/plugins/3.storage'
@@ -32,6 +31,7 @@ const EXIF_LOCATION_KEYS = [
   'GPSLatitudeRef',
   'GPSLongitude',
   'GPSLongitudeRef',
+  'GPSCoordinates',
   'GPSPosition',
   'GPSDateStamp',
   'GPSTimeStamp',
@@ -346,18 +346,7 @@ export class QueueManager {
             imageBuffers.raw,
             this.logger,
           )
-          const systemAutoEraseLocationOnUpload =
-            (await settingsManager.get<boolean>(
-              'privacy',
-              'upload.autoEraseLocation',
-            )) ?? false
-          const shouldAutoEraseLocationOnUpload =
-            typeof payload.eraseLocation === 'boolean'
-              ? payload.eraseLocation
-              : systemAutoEraseLocationOnUpload
-          const normalizedExifData = shouldAutoEraseLocationOnUpload
-            ? stripLocationFromExif(exifData)
-            : exifData
+          const normalizedExifData = exifData
 
           // 提取照片基本信息
           const photoInfo = extractPhotoInfo(storageKey, normalizedExifData)
@@ -373,7 +362,7 @@ export class QueueManager {
             const { latitude, longitude } =
               parseGPSCoordinates(normalizedExifData)
             coordinates = { latitude, longitude }
-            if (latitude && longitude) {
+            if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
               locationInfo = await extractLocationFromGPS(latitude, longitude)
             }
           }
@@ -449,8 +438,8 @@ export class QueueManager {
               : null,
             exif: normalizedExifData,
             // 地理位置信息
-            latitude: coordinates?.latitude || null,
-            longitude: coordinates?.longitude || null,
+            latitude: coordinates?.latitude ?? null,
+            longitude: coordinates?.longitude ?? null,
             country: locationInfo?.country || null,
             city: locationInfo?.city || null,
             locationName: locationInfo?.locationName || null,

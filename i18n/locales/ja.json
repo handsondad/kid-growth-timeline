@@ -480,13 +480,13 @@
       "supportedFormats": "JPEG / PNG / HEIC / ライブフォト / モーションフォト",
       "maxFileSize": "最大 {size}MB",
       "buttons": {
-        "upload": "写真をアップロード",
-        "importFolder": "フォルダーを読み込む",
+        "importFolder": "ローカルフォルダーをスキャン",
         "queue": "タスクキュー"
       },
-      "uploader": {
-        "label": "ドラッグアンドドロップするか、クリックして写真を選択します",
-        "description": "JPEG、PNG、HEIC形式の写真、およびMOV形式のライブフォトビデオをサポート。ファイルあたりの最大サイズ：{maxSize}MB"
+      "localImport": {
+        "hint": "サーバーは NUXT_LOCAL_PHOTO_IMPORT_DIR に設定したフォルダーをスキャンします。ブラウザーから写真は送信されません。",
+        "completed": "ローカルフォルダーのスキャンが完了しました",
+        "summary": "スキャン {scanned} 枚、キュー追加 {queued} 枚、スキップ {skipped} 枚、失敗 {failed} 枚。"
       },
       "toolbar": {
         "title": "写真管理",

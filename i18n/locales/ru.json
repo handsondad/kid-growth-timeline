@@ -553,13 +553,13 @@
       "supportedFormats": "JPEG / PNG / HEIC / Live Photo / Motion Photo",
       "maxFileSize": "Не более {size} МБ",
       "buttons": {
-        "upload": "Загрузить фотографии",
-        "importFolder": "Импортировать папку",
+        "importFolder": "Сканировать локальную папку",
         "queue": "Очередь задач"
       },
-      "uploader": {
-        "label": "Перетащите фотографии сюда или нажмите, чтобы выбрать их",
-        "description": "Поддерживаются фотографии JPEG, PNG и HEIC, а также видео Live Photo в формате MOV. Максимальный размер одного файла: {maxSize} МБ"
+      "localImport": {
+        "hint": "Сервер сканирует папку, указанную в NUXT_LOCAL_PHOTO_IMPORT_DIR. Фото не передаются из браузера.",
+        "completed": "Сканирование локальной папки завершено",
+        "summary": "Найдено: {scanned}; добавлено в очередь: {queued}; пропущено: {skipped}; ошибок: {failed}."
       },
       "toolbar": {
         "title": "Управление фотографиями",

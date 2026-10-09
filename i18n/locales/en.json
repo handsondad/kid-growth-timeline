@@ -554,13 +554,13 @@
       "supportedFormats": "JPEG / PNG / HEIC / Live Photo / Motion Photo",
       "maxFileSize": "Max {size}MB",
       "buttons": {
-        "upload": "Upload Photos",
-        "importFolder": "Import Folder",
+        "importFolder": "Scan Local Folder",
         "queue": "Task Queue"
       },
-      "uploader": {
-        "label": "Drag and drop or click to select photos",
-        "description": "Supports JPEG, PNG, HEIC format photos, and MOV format Live Photo videos. Maximum file size: {maxSize}MB per file"
+      "localImport": {
+        "hint": "The server scans the directory set by NUXT_LOCAL_PHOTO_IMPORT_DIR. Photos are not sent from the browser.",
+        "completed": "Local folder scan complete",
+        "summary": "Scanned {scanned}; queued {queued}; skipped {skipped}; failed {failed}."
       },
       "toolbar": {
         "title": "Photo Management",

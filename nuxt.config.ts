@@ -63,6 +63,7 @@ export default defineNuxtConfig({
     nominatim: {
       baseUrl: 'https://nominatim.openstreetmap.org',
     },
+    localPhotoImportDir: '',
     STORAGE_PROVIDER: 'local' satisfies 's3' | 'local' | 'openlist',
     provider: {
       s3: {
@@ -106,17 +107,6 @@ export default defineNuxtConfig({
         }
         pathField: string
         cdnUrl: string
-      },
-    },
-    upload: {
-      mime: {
-        whitelistEnabled: true,
-        whitelist:
-          'image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,video/quicktime,video/mp4',
-      },
-      duplicateCheck: {
-        enabled: true,
-        mode: 'skip' as 'warn' | 'block' | 'skip',
       },
     },
   },

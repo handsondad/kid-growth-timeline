@@ -13,7 +13,6 @@ type PipelineQueuePayload =
   | {
       type: 'photo'
       storageKey: string
-      eraseLocation?: boolean
     }
   | {
       type: 'live-photo-video'

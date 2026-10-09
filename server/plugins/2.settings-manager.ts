@@ -18,6 +18,9 @@ export default defineNitroPlugin(async (_nitroApp) => {
     // Clean up deprecated settings keys from pre-release iterations.
     await removeDeprecatedSettings()
 
+    // Replace the previous product title without overwriting custom titles.
+    await migrateLegacyAppTitle()
+
     // Migrate existing configurations from runtimeConfig
     // Note: Storage manager will be initialized in the next plugin (2_storage.ts)
     await migrateRuntimeConfigToSettings()
@@ -52,8 +55,12 @@ async function migrateRuntimeConfigToSettings() {
 
   try {
     _logger.info('Migrating app settings from explicit env')
+    const configuredTitle = getExplicitEnv('NUXT_PUBLIC_APP_TITLE')
     const appEnvSeeds: Array<[string, string | undefined]> = [
-      ['title', getExplicitEnv('NUXT_PUBLIC_APP_TITLE')],
+      [
+        'title',
+        configuredTitle === 'ChronoFrame' ? undefined : configuredTitle,
+      ],
       ['slogan', getExplicitEnv('NUXT_PUBLIC_APP_SLOGAN')],
       ['author', getExplicitEnv('NUXT_PUBLIC_APP_AUTHOR')],
       ['avatarUrl', getExplicitEnv('NUXT_PUBLIC_APP_AVATAR_URL')],
@@ -184,6 +191,19 @@ async function removeDeprecatedSettings() {
       ),
     )
     .run()
+}
+
+async function migrateLegacyAppTitle() {
+  const appTitle = await settingsManager.get('app', 'title')
+  if (appTitle !== 'ChronoFrame') return
+
+  await settingsManager.set(
+    'app',
+    'title',
+    'Kid Growth Timeline',
+    undefined,
+    true,
+  )
 }
 
 /**
