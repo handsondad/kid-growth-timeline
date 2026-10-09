@@ -1,0 +1,67 @@
+---
+# https://vitepress.dev/reference/default-theme-home-page
+layout: home
+
+hero:
+  name: '成长时光轴'
+  text: '自部署个人画廊'
+  tagline: '在线管理照片，多存储后端、LivePhoto、地球仪视图'
+  image:
+    src: /logo.png
+    alt: 成长时光轴
+    style: 'filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.7)) drop-shadow(0 0 60px rgba(59, 130, 246, 0.5)) drop-shadow(0 0 100px rgba(168, 85, 247, 0.3)); width: 300px; height: 300px;'
+  actions:
+    - theme: brand
+      text: 快速开始
+      link: /zh/guide/getting-started
+    - theme: alt
+      text: 查看 GitHub
+      link: https://github.com/handsondad/kid-growth-timeline
+    - theme: alt
+      text: 查看演示
+      link: https://lens.bh8.ga
+
+features:
+  - title: 强大的照片管理
+    icon: 🖼️
+    details: 通过网页界面轻松管理和浏览照片，并在地图上查看照片拍摄地点。
+  - title: 简单部署
+    icon: 🚀
+    details: 使用 SQLite 和本地文件存储，仅监听本机，无需账号或容器配置。
+  - title: 灵活的存储方案
+    icon: 💾
+    details: 支持多种存储后端，包括兼容 S3 的存储和本地文件系统。
+  - title: 智能地理位置
+    icon: 🌍
+    details: 自动提取照片 GPS 信息，使用 Mapbox 进行地理编码，在地图上展示照片拍摄位置。
+  - title: 响应式设计
+    icon: 📱
+    details: 完美适配桌面端和移动端，支持触摸操作和手势控制，提供原生应用般的体验。
+  - title: Live/Motion Photo 支持
+    icon: 🎬
+    details: 完整支持 Apple LivePhoto 格式和 Google 标准的 Motion Photo，自动检测和处理 MOV 视频文件，保留动态照片效果。
+---
+
+## 🌍 演示站点
+
+下面是一些由开发者、社区成员搭建的，运行良好的 成长时光轴 实例：
+
+- [**懒洋洋喝咖啡**](https://oreo.tanmantang.com) — 用镜头记录每个精彩瞬间
+- [**My Photo Gallery**](https://photo.fivk.cn)
+- [**An ISFP Conductor of Current, Pixels, and Code.**](https://gallery.xiaoten.com)
+- [**我的旅行相册**](https://gallery.junlan.site) — 记录光影，留存回忆
+- [**Z.Zhou's Photography**](https://photography.zzhou612.com/) — Catch the Moment
+- [**Each Photo Turns a Moment Into Eternity.**](https://eachphoto.com)
+- [**WhyPhoto**](https://photo.limina.top/)
+- [**用图片记录生活**](https://gallery.d.cr)
+- [**Ahmet Ömer's Photography**](https://photography.ahmeto.com/)
+- [**何来尘埃飞舞**](https://photo.jefftay.com/)
+
+## 💬 社区支持
+
+- **GitHub Issues**: [报告问题](https://github.com/handsondad/kid-growth-timeline/issues)
+- **GitHub Discussions**: [讨论分享](https://github.com/handsondad/kid-growth-timeline/discussions)
+
+## 📄 开源协议
+
+成长时光轴 基于 [MIT 协议](https://github.com/handsondad/kid-growth-timeline/blob/main/LICENSE) 开源，欢迎自由使用和贡献。
