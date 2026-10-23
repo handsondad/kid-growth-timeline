@@ -81,6 +81,12 @@ export default eventHandler(async (event) => {
         }
 
         const photo = photos[0]
+        if (!photo || photo.mediaType === 'video') {
+          throw createError({
+            statusCode: 400,
+            statusMessage: 'Live Photo detection only supports photos',
+          })
+        }
         const livePhotoVideo = await findLivePhotoVideoForImage(
           photo.storageKey!,
         )

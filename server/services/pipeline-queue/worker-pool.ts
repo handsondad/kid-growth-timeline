@@ -271,6 +271,7 @@ export class WorkerPool {
             status: 'pending',
             priority: 1,
             statusStage: null,
+            progress: 0,
           })
           .where(eq(tables.pipelineQueue.status, 'in-stages'))
 

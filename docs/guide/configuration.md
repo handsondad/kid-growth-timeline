@@ -1,70 +1,70 @@
-# Configuration Reference
+# 配置项说明
 
-The local application uses built-in SQLite and local filesystem storage by default. Optional map, analytics and storage settings can be provided through environment variables.
+本地应用默认使用内置 SQLite 和本地文件存储。地图、分析和其他存储提供者可通过环境变量配置。
 
-## Environment Variables List
+## 环境变量列表
 
-| Environment Variable                     | Description                                                     | Default                               | Required                                             |
-| ---------------------------------------- | --------------------------------------------------------------- | ------------------------------------- | ---------------------------------------------------- |
-| NUXT_PUBLIC_APP_TITLE                    | Application title                                               | `admin`                               | No                                                   |
-| NUXT_PUBLIC_APP_SLOGAN                   | Application slogan                                              | None                                  | No                                                   |
-| NUXT_PUBLIC_APP_AUTHOR                   | Application author                                              | None                                  | No                                                   |
-| NUXT_PUBLIC_APP_AVATAR_URL               | Application avatar URL                                          | None                                  | No                                                   |
-| NUXT_PUBLIC_COLOR_MODE_PREFERENCE        | Color mode preference, options: `light`, `dark`, `system`       | `system`                              | No                                                   |
-| NUXT_PUBLIC_MAP_PROVIDER                 | Map provider, options: `mapbox`, `maplibre`                     | `maplibre`                            | No                                                   |
-| NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN          | Mapbox access token (URL restricted), for map services          | None                                  | Required when `NUXT_PUBLIC_MAP_PROVIDER` is `mapbox` |
-| NUXT_NOMINATIM_BASE_URL                  | Nominatim base URL for reverse geocoding service                | `https://nominatim.openstreetmap.org` | No                                                   |
-| NUXT_MAPBOX_ACCESS_TOKEN                 | Mapbox access token (no URL restriction), for location services | None                                  | No                                                   |
-| NUXT_STORAGE_PROVIDER                    | Storage provider, supports `local`, `s3`, `openlist`            | `local`                               | Yes                                                  |
-| NUXT_PROVIDER_LOCAL_PATH                 | Local storage path                                              | `/app/data/storage`                   | No                                                   |
-| NUXT_PROVIDER_LOCAL_BASE_URL             | Local storage access URL                                        | `/storage`                            | No                                                   |
-| NUXT_PROVIDER_S3_ENDPOINT                | S3 compatible storage service endpoint                          | None                                  | Required when `NUXT_STORAGE_PROVIDER` is `s3`        |
-| NUXT_PROVIDER_S3_BUCKET                  | S3 bucket name                                                  | `kid-growth-timeline`                 | Required when `NUXT_STORAGE_PROVIDER` is `s3`        |
-| NUXT_PROVIDER_S3_REGION                  | S3 bucket region                                                | `auto`                                | Required when `NUXT_STORAGE_PROVIDER` is `s3`        |
-| NUXT_PROVIDER_S3_ACCESS_KEY_ID           | S3 access key ID                                                | None                                  | Required when `NUXT_STORAGE_PROVIDER` is `s3`        |
-| NUXT_PROVIDER_S3_SECRET_ACCESS_KEY       | S3 secret access key                                            | None                                  | Required when `NUXT_STORAGE_PROVIDER` is `s3`        |
-| NUXT_PROVIDER_S3_PREFIX                  | S3 storage prefix                                               | `photos/`                             | No                                                   |
-| NUXT_PROVIDER_S3_CDN_URL                 | S3 storage CDN URL                                              | None                                  | No                                                   |
-| NUXT_PROVIDER_OPENLIST_BASE_URL          | OpenList server URL                                             | None                                  | Required when `NUXT_STORAGE_PROVIDER` is `openlist`  |
-| NUXT_PROVIDER_OPENLIST_ROOT_PATH         | OpenList root path                                              | None                                  | Required when `NUXT_STORAGE_PROVIDER` is `openlist`  |
-| NUXT_PROVIDER_OPENLIST_TOKEN             | OpenList API token                                              | None                                  | Recommended (for OpenList authentication)            |
-| NUXT_PROVIDER_OPENLIST_ENDPOINT_UPLOAD   | OpenList upload endpoint                                        | `/api/fs/put`                         | No                                                   |
-| NUXT_PROVIDER_OPENLIST_ENDPOINT_DOWNLOAD | OpenList download endpoint                                      | None                                  | No                                                   |
-| NUXT_PROVIDER_OPENLIST_ENDPOINT_LIST     | OpenList list endpoint                                          | None                                  | No                                                   |
-| NUXT_PROVIDER_OPENLIST_ENDPOINT_DELETE   | OpenList delete endpoint                                        | `/api/fs/remove`                      | No                                                   |
-| NUXT_PROVIDER_OPENLIST_ENDPOINT_META     | OpenList metadata endpoint                                      | `/api/fs/get`                         | No                                                   |
-| NUXT_PROVIDER_OPENLIST_PATH_FIELD        | OpenList path field name                                        | `path`                                | No                                                   |
-| NUXT_PROVIDER_OPENLIST_CDN_URL           | OpenList CDN URL                                                | None                                  | No                                                   |
-| NUXT_PUBLIC_GTAG_ID                      | Google Analytics Tracking ID                                    | None                                  | No                                                   |
-| NUXT_PUBLIC_ANALYTICS_MATOMO_ENABLED     | Enable Matomo analytics tracking                                | `false`                               | No                                                   |
-| NUXT_PUBLIC_ANALYTICS_MATOMO_URL         | Matomo instance URL (e.g., https://matomo.example.com)          | None                                  | No (required when Matomo is enabled)                 |
-| NUXT_PUBLIC_ANALYTICS_MATOMO_SITE_ID     | Matomo site ID                                                  | None                                  | No (required when Matomo is enabled)                 |
-| NUXT_UPLOAD_MIME_WHITELIST_ENABLED       | Enable MIME type whitelist validation for uploads               | `true`                                | No                                                   |
-| NUXT_UPLOAD_MIME_WHITELIST               | Allowed MIME types for uploads (comma-separated)                | See below                             | No                                                   |
-| ALLOW_INSECURE_COOKIE                    | Allow insecure cookies (only for development environment)       | `false`                               | No                                                   |
+| 环境变量                                 | 说明                                                 | 默认值                                | 必需                                                                  |
+| ---------------------------------------- | ---------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------- |
+| NUXT_PUBLIC_APP_TITLE                    | 应用标题                                             | `admin`                               | 否                                                                    |
+| NUXT_PUBLIC_APP_SLOGAN                   | 应用口号                                             | 无                                    | 否                                                                    |
+| NUXT_PUBLIC_APP_AUTHOR                   | 应用作者                                             | 无                                    | 否                                                                    |
+| NUXT_PUBLIC_APP_AVATAR_URL               | 应用头像 URL                                         | 无                                    | 否                                                                    |
+| NUXT_PUBLIC_COLOR_MODE_PREFERENCE        | 颜色模式偏好，可选 `light`、`dark`、`system`         | system                                | 否                                                                    |
+| NUXT_PUBLIC_MAP_PROVIDER                 | 地图提供者，可选 `mapbox`、`maplibre`                | `maplibre`                            | 否                                                                    |
+| NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN          | Mapbox 访问令牌(可限制 URL)，用于地图服务            | 无                                    | 当 `NUXT_PUBLIC_MAP_PROVIDER` 为 `mapbox` 时必需                      |
+| NUXT_NOMINATIM_BASE_URL                  | Nominatim 反向地理编码服务的基础 URL                 | `https://nominatim.openstreetmap.org` | 否                                                                    |
+| NUXT_MAPBOX_ACCESS_TOKEN                 | Mapbox 访问令牌(无 URL 限制)，用于位置信息服务       | 无                                    | 否                                                                    |
+| NUXT_STORAGE_PROVIDER                    | 存储提供者，支持 `local`、`s3`、`openlist`           | `local`                               | 是                                                                    |
+| NUXT_PROVIDER_LOCAL_PATH                 | 本地存储路径                                         | `/app/data/storage`                   | 否                                                                    |
+| NUXT_PROVIDER_LOCAL_BASE_URL             | 本地存储的访问 URL                                   | `/storage`                            | 否                                                                    |
+| NUXT_PROVIDER_S3_ENDPOINT                | S3 兼容存储服务的 Endpoint                           | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需                             |
+| NUXT_PROVIDER_S3_BUCKET                  | S3 存储桶名称                                        | `kid-growth-timeline`                 | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需                             |
+| NUXT_PROVIDER_S3_REGION                  | S3 存储桶区域                                        | `auto`                                | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需                             |
+| NUXT_PROVIDER_S3_ACCESS_KEY_ID           | S3 访问密钥 ID                                       | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需                             |
+| NUXT_PROVIDER_S3_SECRET_ACCESS_KEY       | S3 访问密钥                                          | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需                             |
+| NUXT_PROVIDER_S3_PREFIX                  | S3 存储前缀                                          | `photos/`                             | 否                                                                    |
+| NUXT_PROVIDER_S3_CDN_URL                 | S3 存储的 CDN 地址                                   | 无                                    | 否                                                                    |
+| NUXT_PROVIDER_OPENLIST_BASE_URL          | OpenList 服务器 URL                                  | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `openlist` 时必需                       |
+| NUXT_PROVIDER_OPENLIST_ROOT_PATH         | OpenList 根路径                                      | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `openlist` 时必需                       |
+| NUXT_PROVIDER_OPENLIST_TOKEN             | OpenList API 令牌                                    | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `openlist` 时必需（用于 OpenList 认证） |
+| NUXT_PROVIDER_OPENLIST_ENDPOINT_UPLOAD   | OpenList 上传端点                                    | `/api/fs/put`                         | 否                                                                    |
+| NUXT_PROVIDER_OPENLIST_ENDPOINT_DOWNLOAD | OpenList 下载端点                                    | 无                                    | 否                                                                    |
+| NUXT_PROVIDER_OPENLIST_ENDPOINT_LIST     | OpenList 列表端点                                    | 无                                    | 否                                                                    |
+| NUXT_PROVIDER_OPENLIST_ENDPOINT_DELETE   | OpenList 删除端点                                    | `/api/fs/remove`                      | 否                                                                    |
+| NUXT_PROVIDER_OPENLIST_ENDPOINT_META     | OpenList 元数据端点                                  | `/api/fs/get`                         | 否                                                                    |
+| NUXT_PROVIDER_OPENLIST_PATH_FIELD        | OpenList 路径字段名                                  | `path`                                | 否                                                                    |
+| NUXT_PROVIDER_OPENLIST_CDN_URL           | OpenList CDN 地址                                    | 无                                    | 否                                                                    |
+| NUXT_PUBLIC_GTAG_ID                      | Google Analytics 追踪 ID                             | 无                                    | 否                                                                    |
+| NUXT_PUBLIC_ANALYTICS_MATOMO_ENABLED     | 是否启用 Matomo 分析追踪                             | `false`                               | 否                                                                    |
+| NUXT_PUBLIC_ANALYTICS_MATOMO_URL         | Matomo 实例 URL 地址(如: https://matomo.example.com) | 无                                    | 否(启用 Matomo 时必需)                                                |
+| NUXT_PUBLIC_ANALYTICS_MATOMO_SITE_ID     | Matomo 站点 ID                                       | 无                                    | 否(启用 Matomo 时必需)                                                |
+| NUXT_UPLOAD_MIME_WHITELIST_ENABLED       | 是否启用上传文件 MIME 类型白名单验证                 | `true`                                | 否                                                                    |
+| NUXT_UPLOAD_MIME_WHITELIST               | 上传文件允许的 MIME 类型列表（逗号分隔）             | 见下方说明                            | 否                                                                    |
+| ALLOW_INSECURE_COOKIE                    | 是否允许非安全 Cookie（仅在开发环境使用）            | `false`                               | 否                                                                    |
 
-## Upload File Type Whitelist
+## 上传文件类型白名单
 
-The default value of `NUXT_UPLOAD_MIME_WHITELIST` includes the following MIME types:
+`NUXT_UPLOAD_MIME_WHITELIST` 的默认值包含以下 MIME 类型：
 
-- `image/jpeg` - JPEG images
-- `image/png` - PNG images
-- `image/webp` - WebP images
-- `image/gif` - GIF images
-- `image/bmp` - BMP images
-- `image/tiff` - TIFF images
-- `image/heic` - HEIC images (Apple)
-- `image/heif` - HEIF images
-- `video/quicktime` - QuickTime videos (MOV)
-- `video/mp4` - MP4 videos
+- `image/jpeg` - JPEG 图片
+- `image/png` - PNG 图片
+- `image/webp` - WebP 图片
+- `image/gif` - GIF 图片
+- `image/bmp` - BMP 图片
+- `image/tiff` - TIFF 图片
+- `image/heic` - HEIC 图片（Apple）
+- `image/heif` - HEIF 图片
+- `video/quicktime` - QuickTime 视频（MOV）
+- `video/mp4` - MP4 视频
 
-To customize the whitelist, use a comma-separated string of MIME types, for example:
+如需自定义白名单，请使用逗号分隔的 MIME 类型字符串，例如：
 
 ```
 NUXT_UPLOAD_MIME_WHITELIST=image/jpeg,image/png,video/mp4
 ```
 
-To disable whitelist validation (allow any file type), set:
+如需禁用白名单验证（允许任何文件类型），可设置：
 
 ```
 NUXT_UPLOAD_MIME_WHITELIST_ENABLED=false

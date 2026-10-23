@@ -1,4 +1,5 @@
 import type { PhotoMarker, ClusterPoint } from '~~/shared/types/map'
+import { hasCoordinates } from '~~/shared/utils'
 
 /**
  * Simple clustering algorithm for small datasets
@@ -88,23 +89,15 @@ export function clusterMarkers(
 }
 
 export function photosToMarkers(photos: Photo[]): PhotoMarker[] {
-  return photos
-    .filter(
-      (photo) =>
-        photo.latitude !== null &&
-        photo.longitude !== null &&
-        photo.latitude !== undefined &&
-        photo.longitude !== undefined,
-    )
-    .map((photo) => ({
-      id: photo.id,
-      latitude: photo.latitude!,
-      longitude: photo.longitude!,
-      title: photo.title || undefined,
-      thumbnailUrl: photo.thumbnailUrl || undefined,
-      thumbnailHash: photo.thumbnailHash || undefined,
-      dateTaken: photo.dateTaken || undefined,
-      city: photo.city || undefined,
-      exif: photo.exif || undefined,
-    }))
+  return photos.filter(hasCoordinates).map((photo) => ({
+    id: photo.id,
+    latitude: photo.latitude,
+    longitude: photo.longitude,
+    title: photo.title || undefined,
+    thumbnailUrl: photo.thumbnailUrl || undefined,
+    thumbnailHash: photo.thumbnailHash || undefined,
+    dateTaken: photo.dateTaken || undefined,
+    city: photo.city || undefined,
+    exif: photo.exif || undefined,
+  }))
 }

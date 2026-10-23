@@ -45,7 +45,6 @@ const normalizeTags = (tags: string[] | undefined) => {
 }
 
 export default eventHandler(async (event) => {
-  const t = await useTranslation(event)
   const { photoId } = paramsSchema.parse(event.context.params ?? {})
   const payload = bodySchema.parse(await readBody(event))
 
@@ -58,7 +57,7 @@ export default eventHandler(async (event) => {
   ) {
     throw createError({
       statusCode: 400,
-      statusMessage: t('dashboard.photos.messages.noChangesProvided'),
+      statusMessage: '没有可应用的修改',
     })
   }
 
@@ -72,14 +71,20 @@ export default eventHandler(async (event) => {
   if (!photo) {
     throw createError({
       statusCode: 404,
-      statusMessage: t('dashboard.photos.messages.photoNotFound'),
+      statusMessage: '找不到照片',
     })
   }
 
   if (!photo.storageKey) {
     throw createError({
       statusCode: 400,
-      statusMessage: t('dashboard.photos.messages.noStorageKey'),
+      statusMessage: '无法处理：缺少存储信息',
+    })
+  }
+  if (photo.mediaType === 'video') {
+    throw createError({
+      statusCode: 400,
+      statusMessage: '此操作仅支持照片，请先取消选择视频。',
     })
   }
 
@@ -89,7 +94,7 @@ export default eventHandler(async (event) => {
   if (!originalBuffer) {
     throw createError({
       statusCode: 404,
-      statusMessage: t('dashboard.photos.messages.photoFileMissing'),
+      statusMessage: '照片文件已丢失',
     })
   }
 
@@ -264,7 +269,7 @@ export default eventHandler(async (event) => {
     logger.image.error('Failed to update photo metadata', error)
     throw createError({
       statusCode: 500,
-      statusMessage: t('dashboard.photos.messages.metadataUpdateFailed'),
+      statusMessage: '更新照片信息失败',
     })
   } finally {
     await rm(tempDir, { recursive: true, force: true })

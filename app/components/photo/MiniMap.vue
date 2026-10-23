@@ -88,7 +88,6 @@ onUnmounted(() => {
       :map-id="MAPID"
       :zoom="12"
       :interactive="false"
-      :language="$i18n.locale"
       @load="onMapLoad"
     >
       <AnimatePresence>
@@ -113,9 +112,7 @@ onUnmounted(() => {
         v-if="!loaded"
         class="absolute inset-0 bg-default/80 flex items-center justify-center backdrop-blur-sm"
       >
-        <p class="text-xs font-medium text-white/60">
-          {{ $t('minimap.loading') }}
-        </p>
+        <p class="text-xs font-medium text-white/60">加载小地图...</p>
       </div>
     </MapProvider>
   </div>

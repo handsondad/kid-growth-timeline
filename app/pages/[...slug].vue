@@ -68,7 +68,7 @@ watch(
     if (foundIndex === -1) return
 
     useHead({
-      title: activePhotos[foundIndex]?.title || $t('title.fallback.photo'),
+      title: activePhotos[foundIndex]?.title || '照片',
     })
 
     if (!isViewerOpen.value) {

@@ -1,4 +1,3 @@
-import i18nOptions from '~~/i18n/i18n.options'
 import type { FieldUIConfig } from '~~/shared/types/settings'
 
 /**
@@ -18,38 +17,38 @@ export const APP_SETTINGS_UI: Record<string, FieldUIConfig> = {
   },
   slogan: {
     type: 'input',
-    placeholder: 'Your gallery slogan',
-    help: 'settings.app.slogan.help',
+    placeholder: '图库标语',
+    help: '标语显示在首页的标题下方',
   },
   author: {
     type: 'input',
-    placeholder: 'Your name',
+    placeholder: '你的名字',
   },
   avatarUrl: {
     type: 'url',
     placeholder: 'https://example.com/avatar.jpg',
-    help: 'settings.app.avatarUrl.help',
+    help: '头像显示加载页面和首页头像中',
   },
   'appearance.theme': {
     type: 'tabs',
     options: [
       {
-        label: 'settings.app.appearance.theme.light',
+        label: '浅色',
         value: 'light',
         icon: 'tabler:sun',
       },
       {
-        label: 'settings.app.appearance.theme.dark',
+        label: '深色',
         value: 'dark',
         icon: 'tabler:moon',
       },
       {
-        label: 'settings.app.appearance.theme.system',
+        label: '系统',
         value: 'system',
         icon: 'tabler:device-desktop',
       },
     ],
-    help: 'settings.app.appearance.theme.help',
+    help: '用户可以在自己的浏览器中覆盖此项',
   },
 }
 
@@ -66,7 +65,7 @@ export const MAP_SETTINGS_UI: Record<string, FieldUIConfig> = {
     placeholder: 'pk.xxxxxx',
     required: true,
     visibleIf: { fieldKey: 'provider', value: 'mapbox' },
-    help: 'settings.map.mapbox.token.help',
+    help: '应当使用没有域名限制的令牌',
   },
   'mapbox.style': {
     type: 'input',
@@ -78,7 +77,7 @@ export const MAP_SETTINGS_UI: Record<string, FieldUIConfig> = {
     placeholder: 'pk.xxxxxx',
     required: true,
     visibleIf: { fieldKey: 'provider', value: 'maplibre' },
-    help: 'settings.map.maplibre.token.help',
+    help: 'MapLibre 默认使用免费地图服务商 MapTiler',
   },
   'maplibre.style': {
     type: 'input',
@@ -88,30 +87,22 @@ export const MAP_SETTINGS_UI: Record<string, FieldUIConfig> = {
 }
 
 export const LOCATION_SETTINGS_UI: Record<string, FieldUIConfig> = {
-  language: {
-    type: 'select',
-    options: i18nOptions.locales.map((locale) => ({
-      label: locale.label,
-      value: locale.language,
-    })),
-    help: 'settings.location.language.help',
-  },
   'mapbox.token': {
     type: 'password',
     placeholder: 'pk.xxxxxx',
-    help: 'settings.location.mapbox.token.help',
+    help: '配置后将取代 Nominatim 作为位置信息服务',
   },
   'nominatim.baseUrl': {
     type: 'url',
     placeholder: 'https://nominatim.openstreetmap.org',
-    help: 'settings.location.nominatim.baseUrl.help',
+    help: '留空则默认使用公共 Nominatim 服务',
   },
 }
 
 export const PRIVACY_SETTINGS_UI: Record<string, FieldUIConfig> = {
   'upload.autoEraseLocation': {
     type: 'toggle',
-    help: 'settings.privacy.upload.autoEraseLocation.help',
+    help: '启用后会将抹除位置信息操作放入队列异步执行',
   },
 }
 
@@ -121,48 +112,48 @@ export const ANALYTICS_SETTINGS_UI: Record<string, FieldUIConfig> = {
     rows: 12,
     placeholder:
       "<!-- Google Analytics -->\n<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-XXXX\"></script>\n<script>\n  window.dataLayer = window.dataLayer || [];\n  function gtag(){dataLayer.push(arguments);}\n  gtag('js', new Date());\n  gtag('config', 'G-XXXX');\n</script>",
-    help: 'settings.analytics.headScripts.help',
+    help: '粘贴完整的 script 标签（支持多个）。适用于 GA、百度统计、Plausible、Umami、JSON-LD 等。已有的 Matomo 集成独立运行，互不干扰。',
   },
   bodyScripts: {
     type: 'textarea',
     rows: 12,
     placeholder:
       '<!-- Umami / Openpanel SDK -->\n<script src="https://analytics.example.com/script.js" data-website-id="xxx" defer></script>',
-    help: 'settings.analytics.bodyScripts.help',
+    help: '粘贴完整的 script 标签（支持多个）。适用于需要在 body 开始处执行的脚本。',
   },
 }
 
 export const SYSTEM_SETTINGS_UI: Record<string, FieldUIConfig> = {
   'upload.maxFileSize': {
     type: 'number',
-    help: 'settings.app.upload.maxFileSize.help',
+    help: '设置后将立即生效，影响所有用户的文件上传操作',
     min: 1,
     max: 10240,
   },
   'upload.duplicateCheck.enabled': {
     type: 'toggle',
-    help: 'settings.system.upload.duplicateCheck.enabled.help',
+    help: '关闭后将不进行重复预检查，同名文件会直接进入上传流程',
   },
   'upload.duplicateCheck.mode': {
     type: 'tabs',
     options: [
       {
-        label: 'settings.system.upload.duplicateCheck.mode.options.skip',
+        label: '跳过',
         value: 'skip',
         icon: 'tabler:player-track-next',
       },
       {
-        label: 'settings.system.upload.duplicateCheck.mode.options.warn',
+        label: '警告并覆盖',
         value: 'warn',
         icon: 'tabler:alert-triangle',
       },
       {
-        label: 'settings.system.upload.duplicateCheck.mode.options.block',
+        label: '阻止上传',
         value: 'block',
         icon: 'tabler:ban',
       },
     ],
-    help: 'settings.system.upload.duplicateCheck.mode.help',
+    help: '仅在开启重复文件检测时生效',
   },
 }
 
@@ -171,22 +162,22 @@ export const STORAGE_SETTINGS_UI: Record<string, FieldUIConfig> = {
     type: 'custom',
     options: [
       {
-        label: 'settings.storage.provider.options.local.label',
+        label: '本地存储',
         value: 'local',
         icon: 'tabler:server',
-        description: 'settings.storage.provider.options.local.description',
+        description: '直接将照片存储在服务器的文件系统中。',
       },
       {
-        label: 'settings.storage.provider.options.s3.label',
+        label: 'S3 兼容存储',
         value: 's3',
         icon: 'tabler:brand-aws',
-        description: 'settings.storage.provider.options.s3.description',
+        description: '使用 AWS S3、Cloudflare R2 或其他 S3 兼容服务。',
       },
       {
-        label: 'settings.storage.provider.options.openlist.label',
+        label: 'OpenList',
         value: 'openlist',
         icon: 'tabler:stack',
-        description: 'settings.storage.provider.options.openlist.description',
+        description: '连接到 Alist 或 OpenList 实例进行存储。',
       },
     ],
   },
@@ -198,18 +189,18 @@ export const STORAGE_SETTINGS_UI: Record<string, FieldUIConfig> = {
   'local.basePath': {
     type: 'input',
     required: true,
-    help: 'settings.storage.local.basePath.description',
+    help: '用于存储照片的本地文件系统路径',
     visibleIf: { fieldKey: 'provider', value: 'local' },
   },
   'local.baseUrl': {
     type: 'input',
-    help: 'settings.storage.local.baseUrl.description',
+    help: '用于访问存储照片的公开 URL 基础',
     visibleIf: { fieldKey: 'provider', value: 'local' },
   },
   'local.prefix': {
     type: 'input',
     placeholder: 'photos/',
-    help: 'settings.storage.local.prefix.description',
+    help: '用于在存储中组织照片的前缀路径',
     visibleIf: { fieldKey: 'provider', value: 'local' },
   },
   // S3
@@ -217,52 +208,52 @@ export const STORAGE_SETTINGS_UI: Record<string, FieldUIConfig> = {
     type: 'input',
     required: true,
     placeholder: 'https://s3.amazonaws.com',
-    help: 'settings.storage.s3.endpoint.description',
+    help: '自定义 S3 兼容端点 URL（例如 MinIO）',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   's3.bucket': {
     type: 'input',
     required: true,
-    help: 'settings.storage.s3.bucket.description',
+    help: '用于存储照片的 S3 存储桶名称',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   's3.region': {
     type: 'input',
     required: true,
-    help: 'settings.storage.s3.region.description',
+    help: 'S3 存储桶所在的 AWS 区域',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   's3.accessKeyId': {
     type: 'input',
     required: true,
-    help: 'settings.storage.s3.accessKeyId.description',
+    help: 'AWS 访问密钥 ID 或等效项',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   's3.secretAccessKey': {
     type: 'password',
     required: true,
-    help: 'settings.storage.s3.secretAccessKey.description',
+    help: 'AWS 秘密访问密钥或等效项',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   's3.prefix': {
     type: 'input',
     placeholder: '/photos',
-    help: 'settings.storage.s3.prefix.description',
+    help: '存储桶中对象的前缀路径',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   's3.cdnUrl': {
     type: 'input',
-    help: 'settings.storage.s3.cdnUrl.description',
+    help: '用于访问图像的自定义 CDN URL',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   's3.forcePathStyle': {
     type: 'toggle',
-    help: 'settings.storage.s3.forcePathStyle.description',
+    help: '使用路径风格 URL 而不是虚拟主机风格',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   's3.maxKeys': {
     type: 'number',
-    help: 'settings.storage.s3.maxKeys.description',
+    help: '每个请求检索的最大密钥数',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   // OpenList
@@ -270,59 +261,59 @@ export const STORAGE_SETTINGS_UI: Record<string, FieldUIConfig> = {
     type: 'input',
     required: true,
     placeholder: 'https://alist.example.com',
-    help: 'settings.storage.openlist.baseUrl.description',
+    help: 'OpenList 服务器的基础 URL',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
   'openlist.rootPath': {
     type: 'input',
     required: true,
     placeholder: '/photos',
-    help: 'settings.storage.openlist.rootPath.description',
+    help: '在 OpenList 中存储照片的根路径',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
   'openlist.token': {
     type: 'password',
     required: true,
-    help: 'settings.storage.openlist.token.description',
+    help: 'OpenList API 身份验证令牌',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
   'openlist.cdnUrl': {
     type: 'input',
-    help: 'settings.storage.openlist.cdnUrl.description',
+    help: '用于访问图像的自定义 CDN URL',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
   'openlist.uploadEndpoint': {
     type: 'input',
     placeholder: '/api/fs/put',
-    help: 'settings.storage.openlist.uploadEndpoint.description',
+    help: '用于上传文件的 API 端点（默认：/api/fs/put）',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
   'openlist.downloadEndpoint': {
     type: 'input',
-    help: 'settings.storage.openlist.downloadEndpoint.description',
+    help: '用于下载文件的 API 端点（可选）',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
   'openlist.listEndpoint': {
     type: 'input',
-    help: 'settings.storage.openlist.listEndpoint.description',
+    help: '用于列出文件的 API 端点（可选）',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
   'openlist.deleteEndpoint': {
     type: 'input',
     placeholder: '/api/fs/remove',
-    help: 'settings.storage.openlist.deleteEndpoint.description',
+    help: '用于删除文件的 API 端点（默认：/api/fs/remove）',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
   'openlist.metaEndpoint': {
     type: 'input',
     placeholder: '/api/fs/get',
-    help: 'settings.storage.openlist.metaEndpoint.description',
+    help: '用于检索文件元数据的 API 端点（默认：/api/fs/get）',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
   'openlist.pathField': {
     type: 'input',
     placeholder: 'path',
-    help: 'settings.storage.openlist.pathField.description',
+    help: 'API 请求中文件路径的参数名称（默认：path）',
     visibleIf: { fieldKey: 'provider', value: 'openlist' },
   },
 }

@@ -1,6 +1,5 @@
 import pkg from './package.json'
 import type { AnalyticsConfig } from './shared/types/config'
-import i18n, { dayjsLocales } from './i18n/i18n.options'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -16,7 +15,6 @@ export default defineNuxtConfig({
     'motion-v/nuxt',
     '@vueuse/nuxt',
     'dayjs-nuxt',
-    '@nuxtjs/i18n',
     'nuxt-mapbox',
     'nuxt-maplibre',
     'nuxt-og-image',
@@ -64,6 +62,8 @@ export default defineNuxtConfig({
       baseUrl: 'https://nominatim.openstreetmap.org',
     },
     localPhotoImportDir: '',
+    ffmpegPath: '',
+    ffprobePath: '',
     STORAGE_PROVIDER: 'local' satisfies 's3' | 'local' | 'openlist',
     provider: {
       s3: {
@@ -125,12 +125,7 @@ export default defineNuxtConfig({
         '@indoorequal/vue-maplibre-gl',
         '@yeger/vue-masonry-wall',
         'dayjs', // CJS
-        'dayjs/locale/en', // CJS
-        'dayjs/locale/ja', // CJS
-        'dayjs/locale/ru', // CJS
         'dayjs/locale/zh-cn', // CJS
-        'dayjs/locale/zh-hk', // CJS
-        'dayjs/locale/zh-tw', // CJS
         'dayjs/plugin/duration', // CJS
         'dayjs/plugin/isBetween', // CJS
         'dayjs/plugin/localizedFormat', // CJS
@@ -232,7 +227,8 @@ export default defineNuxtConfig({
   },
 
   dayjs: {
-    locales: dayjsLocales,
+    locales: ['zh-cn'],
+    defaultLocale: 'zh-cn',
     plugins: [
       'relativeTime',
       'utc',
@@ -243,6 +239,4 @@ export default defineNuxtConfig({
     ],
     defaultTimezone: 'Asia/Shanghai',
   },
-
-  i18n,
 })

@@ -1,4 +1,5 @@
 import { getStorageManager } from '~~/server/plugins/3.storage'
+import path from 'node:path'
 import { processLivePhotoVideo, isLivePhotoVideo } from '../video/livephoto'
 
 /**
@@ -47,6 +48,10 @@ export const processSpecificLivePhotoVideo = async (
     const storageProvider = getStorageManager().getProvider()
 
     // 获取文件信息
+    const meta = await storageProvider.getFileMeta(videoKey)
+    if (!meta?.size || !isLivePhotoVideo(path.basename(videoKey), meta.size)) {
+      throw new Error('Not a Live Photo companion video (MOV, maximum 12 MiB)')
+    }
     const fileBuffer = await storageProvider.get(videoKey)
     if (!fileBuffer) {
       logger.main.error(`Video file not found: ${videoKey}`)

@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { Readable } from 'node:stream'
 import { tables, useDB } from '../../utils/db'
+import { VIDEO_EXTENSIONS } from '../../../shared/utils/video'
 
 export default eventHandler(async (event) => {
   const { storageProvider } = useStorageProvider(event)
@@ -54,7 +55,7 @@ export default eventHandler(async (event) => {
       absoluteTarget,
       Object.keys(headers).length ? { headers } : undefined,
     )
-    if (!response.ok) {
+    if (!response.ok && response.status !== 416) {
       throw createError({ statusCode: 404, statusMessage: 'Photo not found' })
     }
     event.node.res.statusCode = response.status
@@ -71,12 +72,23 @@ export default eventHandler(async (event) => {
       const value = response.headers.get(name)
       if (value) setHeader(event, name, value)
     }
+    if (response.status === 416) return null
     if (!response.body) {
       throw createError({ statusCode: 404, statusMessage: 'Photo not found' })
     }
     return sendStream(event, Readable.fromWeb(response.body))
   }
 
+  if (
+    VIDEO_EXTENSIONS.some((extension) =>
+      cleanKey.toLowerCase().endsWith(extension),
+    )
+  ) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Use the streaming storage URL for video files',
+    })
+  }
   const photo = await storageProvider.get(cleanKey)
   if (!photo) {
     throw createError({ statusCode: 404, statusMessage: 'Photo not found' })

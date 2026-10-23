@@ -2,7 +2,7 @@
 import type { Photo } from '~~/server/utils/db'
 
 useHead({
-  title: () => $t('title.memories'),
+  title: () => '成长回忆',
 })
 
 const dayjs = useDayjs()
@@ -60,9 +60,9 @@ const startMemory = (memory: MonthlyMemory) => {
         class="mb-8 flex items-center justify-between gap-4 border-b border-neutral-200 pb-5 dark:border-neutral-800"
       >
         <div class="min-w-0">
-          <h1 class="text-2xl font-semibold">{{ $t('title.memories') }}</h1>
+          <h1 class="text-2xl font-semibold">成长回忆</h1>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            {{ $t('title.memoriesDescription') }}
+            按拍摄月份整理的成长瞬间
           </p>
         </div>
         <UButton
@@ -70,7 +70,7 @@ const startMemory = (memory: MonthlyMemory) => {
           variant="soft"
           color="neutral"
           icon="tabler:arrow-left"
-          :aria-label="$t('ui.action.home.tooltip')"
+          aria-label="返回首页"
         />
       </header>
 
@@ -96,11 +96,7 @@ const startMemory = (memory: MonthlyMemory) => {
             >
               <h2 class="text-lg font-semibold">{{ memory.label }}</h2>
               <p class="mt-1 text-sm text-white/80">
-                {{
-                  $t('title.memoriesPhotoCount', {
-                    count: memory.photos.length,
-                  })
-                }}
+                {{ `${memory.photos.length} 张照片` }}
               </p>
             </div>
           </div>
@@ -111,14 +107,14 @@ const startMemory = (memory: MonthlyMemory) => {
                 – {{ dayjs(memory.photos.at(-1)?.dateTaken).format('ll') }}
               </template>
             </span>
-            <UTooltip :text="$t('viewer.slideshow.playCurrent')">
+            <UTooltip text="放映当前照片">
               <UButton
                 size="sm"
                 variant="soft"
                 color="neutral"
                 icon="tabler:player-play"
                 :disabled="memory.photos.length < 2"
-                :aria-label="$t('viewer.slideshow.playCurrent')"
+                aria-label="放映当前照片"
                 @click="startMemory(memory)"
               />
             </UTooltip>
@@ -135,7 +131,7 @@ const startMemory = (memory: MonthlyMemory) => {
           class="size-10 text-neutral-400"
         />
         <p class="text-sm text-neutral-500 dark:text-neutral-400">
-          {{ $t('ui.stats.noPhotosTip') }}
+          还没有照片，快去上传一些吧！
         </p>
       </div>
     </div>

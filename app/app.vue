@@ -1,24 +1,9 @@
 <script setup lang="ts">
-import dayjsLocale_zhCN from 'dayjs/locale/zh-cn'
-import dayjsLocale_zhTW from 'dayjs/locale/zh-tw'
-import dayjsLocale_zhHK from 'dayjs/locale/zh-hk'
+import { zh_cn } from '@nuxt/ui/locale'
 
 const router = useRouter()
-const dayjs = useDayjs()
+const route = useRoute()
 const colorMode = useColorMode()
-const localeRef = ref('en')
-try {
-  const { locale } = useI18n()
-  watch(
-    locale,
-    (value) => {
-      localeRef.value = value
-    },
-    { immediate: true },
-  )
-} catch {
-  // i18n context may be unavailable during early server-side error rendering
-}
 
 // 初始化设置系统 - 一次性加载所有设置
 const settingsStore = useSettingsStore()
@@ -29,7 +14,7 @@ const appTitle = useSettingRef('app:title')
 colorMode.preference = useSettingRef('app:appearance.theme').value as string
 
 useHead({
-  htmlAttrs: { lang: localeRef },
+  htmlAttrs: { lang: 'zh-CN' },
   titleTemplate: (title) =>
     `${title ? title + ' | ' : ''}${appTitle.value || 'Kid Growth Timeline'}`,
 })
@@ -90,13 +75,6 @@ const handleClose = () => {
   }
 }
 
-watchEffect(() => {
-  dayjs.locale('zh-Hans', dayjsLocale_zhCN)
-  dayjs.locale('zh-Hant-TW', dayjsLocale_zhTW)
-  dayjs.locale('zh-Hant-HK', dayjsLocale_zhHK)
-  dayjs.locale(localeRef.value)
-})
-
 // 在全局级别提供筛选功能的状态管理
 provide(
   'photosFiltering',
@@ -113,7 +91,7 @@ provide(
 </script>
 
 <template>
-  <UApp>
+  <UApp :locale="zh_cn">
     <NuxtLoadingIndicator />
     <PhotosProvider
       :photos="photos"

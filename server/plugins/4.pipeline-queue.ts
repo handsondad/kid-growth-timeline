@@ -1,4 +1,5 @@
 import { WorkerPool } from '../services/pipeline-queue'
+import { shutdownVideoTasks } from '../services/video/tasks'
 
 export default defineNitroPlugin(async (_nitroApp) => {
   const _logger = logger.dynamic('queue')
@@ -19,12 +20,14 @@ export default defineNitroPlugin(async (_nitroApp) => {
 
   const exitHandler = async () => {
     _logger.info('Shutting down worker pool...')
+    await shutdownVideoTasks()
     await workerPool.stop()
     process.exit(0)
   }
 
   process.on('SIGINT', exitHandler)
   process.on('SIGTERM', exitHandler)
+  _nitroApp.hooks.hook('close', shutdownVideoTasks)
 
   // 每 5 分钟进行一次负载均衡检查
   setInterval(

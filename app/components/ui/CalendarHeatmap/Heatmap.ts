@@ -23,14 +23,6 @@ export interface Month {
   index: number
 }
 
-export interface Locale {
-  months: string[]
-  days: string[]
-  on: string
-  less: string
-  more: string
-}
-
 export type TooltipFormatter = (item: CalendarItem, unit: string) => string
 
 // 颜色主题配置

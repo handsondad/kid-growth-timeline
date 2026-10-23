@@ -10,6 +10,13 @@ function getFileName(storageKey: string | null | undefined) {
 }
 
 function getTaskPhotoRef(payload: PipelineQueueItem['payload']) {
+  if (payload.type === 'video' || payload.type === 'video-trim') {
+    return {
+      photoId:
+        payload.type === 'video-trim' ? payload.outputId : payload.mediaId,
+      storageKey: payload.type === 'video' ? payload.storageKey : null,
+    }
+  }
   if (payload.type === 'photo' || payload.type === 'live-photo-video') {
     return {
       photoId: null as string | null,
@@ -39,6 +46,7 @@ export default defineEventHandler(async (event) => {
       payload: pipelineQueue.payload,
       status: pipelineQueue.status,
       statusStage: pipelineQueue.statusStage,
+      progress: pipelineQueue.progress,
       errorMessage: pipelineQueue.errorMessage,
       createdAt: pipelineQueue.createdAt,
       completedAt: pipelineQueue.completedAt,
@@ -106,6 +114,7 @@ export default defineEventHandler(async (event) => {
       type: task.payload.type,
       status: task.status,
       statusStage: task.statusStage,
+      progress: task.progress,
       errorMessage: task.errorMessage,
       createdAt: task.createdAt,
       completedAt: task.completedAt,

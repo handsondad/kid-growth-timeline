@@ -62,7 +62,7 @@ const isRepoLinkHovering = ref(false)
                 '/web-app-manifest-192x192.png'
               "
               class="size-16 rounded-full object-cover"
-              :alt="$t('ui.photo.avatarAlt')"
+              alt="作者头像"
             />
           </div>
           <h1
@@ -76,18 +76,13 @@ const isRepoLinkHovering = ref(false)
             v-if="stats?.total"
             class="text-xs font-medium"
           >
-            {{
-              $t('ui.stats.totalPhotosWithRange', {
-                range: dateRangeText,
-                count: stats?.total,
-              })
-            }}
+            {{ `${dateRangeText}, 共 ${stats?.total} 张照片` }}
           </p>
           <p
             v-else
             class="text-xs font-medium"
           >
-            {{ $t('ui.stats.noPhotosTip') }}
+            还没有照片，快去上传一些吧！
           </p>
           <p
             v-if="getSetting('app:slogan')"
@@ -99,7 +94,7 @@ const isRepoLinkHovering = ref(false)
         <div
           class="flex items-center gap-0 p-1 bg-white/30 dark:bg-neutral-900/50 rounded-full"
         >
-          <UTooltip :text="$t('viewer.slideshow.playCurrent')">
+          <UTooltip text="放映当前照片">
             <UButton
               variant="soft"
               color="neutral"
@@ -110,7 +105,7 @@ const isRepoLinkHovering = ref(false)
               @click="emit('startSlideshow')"
             />
           </UTooltip>
-          <UTooltip :text="$t('ui.action.globe.tooltip')">
+          <UTooltip text="地球仪">
             <UButton
               variant="soft"
               color="neutral"
@@ -120,7 +115,7 @@ const isRepoLinkHovering = ref(false)
               to="/globe"
             />
           </UTooltip>
-          <UTooltip :text="$t('title.albums')">
+          <UTooltip text="相簿">
             <UButton
               variant="soft"
               color="neutral"
@@ -130,7 +125,7 @@ const isRepoLinkHovering = ref(false)
               to="/albums"
             />
           </UTooltip>
-          <UTooltip :text="$t('title.memories')">
+          <UTooltip text="成长回忆">
             <UButton
               variant="soft"
               color="neutral"
@@ -141,7 +136,7 @@ const isRepoLinkHovering = ref(false)
             />
           </UTooltip>
           <UPopover>
-            <UTooltip :text="$t('ui.action.filter.tooltip')">
+            <UTooltip text="筛选照片">
               <UChip
                 inset
                 size="sm"
@@ -165,7 +160,7 @@ const isRepoLinkHovering = ref(false)
             </template>
           </UPopover>
           <UPopover>
-            <UTooltip :text="$t('ui.action.sort.tooltip')">
+            <UTooltip text="照片排序">
               <UButton
                 variant="soft"
                 :color="
@@ -183,7 +178,7 @@ const isRepoLinkHovering = ref(false)
               <OverlaySortPanel />
             </template>
           </UPopover>
-          <UTooltip :text="$t('ui.action.theme.tooltip')">
+          <UTooltip text="颜色主题">
             <UButton
               variant="soft"
               color="neutral"
@@ -193,7 +188,7 @@ const isRepoLinkHovering = ref(false)
               @click="isDark = !isDark"
             />
           </UTooltip>
-          <UTooltip :text="$t('ui.action.dashboard.tooltip')">
+          <UTooltip text="控制台">
             <UButton
               size="sm"
               color="info"

@@ -1,5 +1,4 @@
 import type { SettingConfig } from '~~/shared/types/settings'
-import i18nOptions from '~~/i18n/i18n.options'
 
 // 存储提供商的枚举值
 export const STORAGE_PROVIDERS = ['local', 's3', 'openlist'] as const
@@ -13,8 +12,8 @@ export const DEFAULT_SETTINGS = [
     key: 'title',
     type: 'string',
     defaultValue: 'Kid Growth Timeline',
-    label: 'settings.app.title.label',
-    description: 'settings.app.title.description',
+    label: '实例名称',
+    description: '实例的标题',
     isPublic: true,
   },
   {
@@ -22,8 +21,8 @@ export const DEFAULT_SETTINGS = [
     key: 'slogan',
     type: 'string',
     defaultValue: '',
-    label: 'settings.app.slogan.label',
-    description: 'settings.app.slogan.description',
+    label: '标语',
+    description: '实例的标语',
     isPublic: true,
   },
   {
@@ -31,8 +30,8 @@ export const DEFAULT_SETTINGS = [
     key: 'author',
     type: 'string',
     defaultValue: '',
-    label: 'settings.app.author.label',
-    description: 'settings.app.author.description',
+    label: '所有者',
+    description: '实例的所有者名称',
     isPublic: true,
   },
   {
@@ -40,8 +39,8 @@ export const DEFAULT_SETTINGS = [
     key: 'avatarUrl',
     type: 'string',
     defaultValue: '',
-    label: 'settings.app.avatarUrl.label',
-    description: 'settings.app.avatarUrl.description',
+    label: '头像 URL',
+    description: '所有者头像的图片链接',
     isPublic: true,
   },
   {
@@ -50,8 +49,8 @@ export const DEFAULT_SETTINGS = [
     type: 'string',
     defaultValue: 'system',
     enum: ['light', 'dark', 'system'],
-    label: 'settings.app.appearance.theme.label',
-    description: 'settings.app.appearance.theme.description',
+    label: '主题',
+    description: '选择应用主题',
     isPublic: true,
   },
   // NAMESPACE: map
@@ -61,8 +60,8 @@ export const DEFAULT_SETTINGS = [
     type: 'string',
     defaultValue: 'maplibre',
     enum: ['mapbox', 'maplibre'],
-    label: 'settings.map.provider.label',
-    description: 'settings.map.provider.description',
+    label: '地图服务商',
+    description: '选择地图服务商提供者',
     isPublic: true,
   },
   {
@@ -70,8 +69,8 @@ export const DEFAULT_SETTINGS = [
     key: 'mapbox.token',
     type: 'string',
     defaultValue: '',
-    label: 'settings.map.mapbox.token.label',
-    description: 'settings.map.mapbox.token.description',
+    label: 'Mapbox Token',
+    description: 'Mapbox API 访问令牌',
     isPublic: true,
   },
   {
@@ -79,8 +78,8 @@ export const DEFAULT_SETTINGS = [
     key: 'mapbox.style',
     type: 'string',
     defaultValue: '',
-    label: 'settings.map.mapbox.style.label',
-    description: 'settings.map.mapbox.style.description',
+    label: 'Mapbox 样式',
+    description: 'Mapbox 地图样式 URL',
     isPublic: true,
   },
   {
@@ -88,8 +87,8 @@ export const DEFAULT_SETTINGS = [
     key: 'maplibre.token',
     type: 'string',
     defaultValue: '',
-    label: 'settings.map.maplibre.token.label',
-    description: 'settings.map.maplibre.token.description',
+    label: 'MapTiler Token',
+    description: 'MapTiler API 访问令牌',
     isPublic: true,
   },
   {
@@ -97,28 +96,18 @@ export const DEFAULT_SETTINGS = [
     key: 'maplibre.style',
     type: 'string',
     defaultValue: '',
-    label: 'settings.map.maplibre.style.label',
-    description: 'settings.map.maplibre.style.description',
+    label: 'MapLibre 样式',
+    description: 'MapLibre 地图样式 URL',
     isPublic: true,
   },
   // NAMESPACE: location
   {
     namespace: 'location',
-    key: 'language',
-    type: 'string',
-    defaultValue: 'en',
-    enum: i18nOptions.locales.map(({ language }) => language),
-    label: 'settings.location.language.label',
-    description: 'settings.location.language.description',
-    isPublic: true,
-  },
-  {
-    namespace: 'location',
     key: 'mapbox.token',
     type: 'string',
     defaultValue: '',
-    label: 'settings.location.mapbox.token.label',
-    description: 'settings.location.mapbox.token.description',
+    label: 'Mapbox Token',
+    description: 'Mapbox API 访问令牌',
     isPublic: true,
   },
   {
@@ -126,8 +115,8 @@ export const DEFAULT_SETTINGS = [
     key: 'nominatim.baseUrl',
     type: 'string',
     defaultValue: '',
-    label: 'settings.location.nominatim.baseUrl.label',
-    description: 'settings.location.nominatim.baseUrl.description',
+    label: 'Nominatim 基础 URL',
+    description: 'Nominatim 反向地理编码 API 的基础 URL',
     isPublic: true,
   },
   // NAMESPACE: storage
@@ -136,8 +125,8 @@ export const DEFAULT_SETTINGS = [
     key: 'provider',
     type: 'number',
     defaultValue: null,
-    label: 'settings.storage_provider.provider.label',
-    description: 'settings.storage_provider.provider.description',
+    label: '默认存储配置',
+    description: '选择应用管理媒体文件时默认使用的存储配置',
   },
   // NAMESPACE: analytics
   {
@@ -145,8 +134,8 @@ export const DEFAULT_SETTINGS = [
     key: 'headScripts',
     type: 'string',
     defaultValue: '',
-    label: 'settings.analytics.headScripts.label',
-    description: 'settings.analytics.headScripts.description',
+    label: 'Head 脚本',
+    description: '包含 script 标签的 HTML 片段，注入到页面 head 中。',
     isPublic: true,
   },
   {
@@ -154,8 +143,8 @@ export const DEFAULT_SETTINGS = [
     key: 'bodyScripts',
     type: 'string',
     defaultValue: '',
-    label: 'settings.analytics.bodyScripts.label',
-    description: 'settings.analytics.bodyScripts.description',
+    label: 'Body 脚本',
+    description: '包含 script 标签的 HTML 片段，注入到 body 开头。',
     isPublic: true,
   },
 ] as const satisfies SettingConfig[]

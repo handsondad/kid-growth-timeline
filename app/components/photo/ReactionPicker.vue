@@ -43,7 +43,7 @@ const reactions = computed<Reaction[]>(() =>
   REACTION_DEFINITIONS.map((reaction) => ({
     id: reaction.id,
     iconName: reaction.iconName,
-    label: $t(reaction.labelKey),
+    label: reaction.label,
     count: props.reactionCounts?.[reaction.id] || 0,
   })),
 )

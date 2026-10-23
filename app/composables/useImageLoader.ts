@@ -15,12 +15,6 @@ export const useImageLoader = (
   updateHighResImageRendered?: (isRendered: boolean) => void,
   onImageLoaded?: () => void,
 ) => {
-  // useImageLoader() is invoked from loadImage(), which also runs inside watch
-  // callbacks (outside the synchronous setup context) — useI18n() would throw
-  // "Must be called at the top of a `setup` function". Use the Nuxt-global
-  // i18n instead, which is safe to access outside setup.
-  const { $i18n } = useNuxtApp()
-  const t = $i18n.t
   if (highResLoaded || !isCurrentImage || error) return null
 
   const loaderManager = new ImageLoaderManager()
@@ -51,7 +45,7 @@ export const useImageLoader = (
       loadingIndicatorRef?.updateLoadingState({
         isVisible: true,
         isError: true,
-        message: t('viewer.photoload.loadError'),
+        message: '图片加载失败',
       })
     }
   }

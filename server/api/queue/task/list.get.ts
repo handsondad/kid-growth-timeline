@@ -18,6 +18,8 @@ export default defineEventHandler(async (event) => {
             'live-photo-video',
             'photo-reverse-geocoding',
             'photo-erase-location',
+            'video',
+            'video-trim',
           ])
           .optional(),
       })
@@ -52,6 +54,7 @@ export default defineEventHandler(async (event) => {
         status: tables.pipelineQueue.status,
         statusStage: tables.pipelineQueue.statusStage,
         errorMessage: tables.pipelineQueue.errorMessage,
+        progress: tables.pipelineQueue.progress,
         createdAt: tables.pipelineQueue.createdAt,
         completedAt: tables.pipelineQueue.completedAt,
       })

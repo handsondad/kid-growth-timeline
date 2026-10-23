@@ -1,152 +1,154 @@
-# Contributing Guide
+# 开始贡献
 
-This document will guide you through setting up the Kid Growth Timeline development environment, including environment requirements, dependency installation, configuration settings, and development tools.
+本文档将指导您搭建 成长时光轴 的开发环境，包括环境要求、依赖安装、配置设置和开发工具。
 
-## Environment Requirements
+## 环境要求
 
-### Required Software
+### 必需软件
 
 - **Node.js**: 22 LTS
 - **pnpm**: 10.34.1
-- **Git**: Latest version
+- **Git**: 最新版本
 
-## Clone and Install
+## 克隆与安装
 
-### 1. Clone Repository
+### 1. 克隆代码库
 
 ```bash
-# Using HTTPS
+# 使用 HTTPS
 git clone https://github.com/handsondad/kid-growth-timeline.git
 
-# Or using SSH
+# 或使用 SSH
 git clone git@github.com:handsondad/kid-growth-timeline.git
 
-# Enter project directory
+# 进入项目目录
 cd kid-growth-timeline
 
-# Set upstream remote repository
+# 设置上游远程仓库
 git remote add upstream https://github.com/handsondad/kid-growth-timeline.git
 ```
 
-### 2. Install Dependencies
+### 2. 安装依赖
 
 ```bash
-# Install pnpm (if not already installed)
+# 安装 pnpm（如果尚未安装）
 npm install -g pnpm
 
-# Install project dependencies
+# 安装项目依赖
 pnpm install
 ```
 
-### 3. Run Locally
+### 3. 本机运行
 
-No environment file is required for local development. SQLite and local file storage are initialized under `data/` automatically. The server binds to `127.0.0.1`; keep it local because authentication is disabled.
+本地开发无需环境文件。应用会在 `data/` 下自动初始化 SQLite 和本地文件存储。服务仅监听 `127.0.0.1`；由于应用不启用身份验证，请保持本机访问。
 
-## Project Architecture
+## 项目架构
 
-### Directory Structure
+### 目录结构
 
 ```
 kid-growth-timeline/
-├── app/                    # Nuxt 4 application directory
-│   ├── components/         # Vue components
-│   │   ├── ui/            # Common UI components
-│   │   ├── photo/         # Photo-related components
-│   │   ├── masonry/       # Masonry layout components
+├── app/                    # Nuxt 4 应用目录
+│   ├── components/         # Vue 组件
+│   │   ├── ui/            # 通用 UI 组件
+│   │   ├── photo/         # 照片相关组件
+│   │   ├── masonry/       # 瀑布流布局组件
 │   │   └── ...
-│   ├── pages/             # Route pages
-│   ├── composables/       # Vue composables
-│   ├── stores/            # Pinia state management
-│   ├── layouts/           # Layout templates
-│   ├── plugins/           # Nuxt plugins
-│   └── utils/             # Utility functions
+│   ├── pages/             # 路由页面
+│   ├── composables/       # Vue 组合式函数
+│   ├── stores/            # Pinia 状态管理
+│   ├── layouts/           # 布局模板
+│   ├── plugins/           # Nuxt 插件
+│   └── utils/             # 工具函数
 │       ├── src/
-│       │   ├── core/      # Core engine
-│       │   ├── components/ # Vue components
-│       │   └── types/     # Type definitions
+│       │   ├── core/      # 核心引擎
+│       │   ├── components/ # Vue 组件
+│       │   └── types/     # 类型定义
 │       └── package.json
-├── server/                # Nitro server-side
-│   ├── api/              # API routes
-│   │   ├── photos/       # Photo management API
-│   │   └── system/       # System API
-│   ├── database/         # Database related
-│   │   ├── schema.ts     # Database schema
-│   │   └── migrations/   # Migration files
-│   ├── services/         # Business logic services
-│   │   ├── storage/      # Storage services
-│   │   ├── image/        # Image processing
-│   │   ├── location/     # Geolocation
-│   │   └── pipeline-queue/ # Processing queue
-│   ├── tasks/            # Background tasks
-│   └── utils/            # Server-side utilities
-├── shared/               # Shared code between frontend and backend
-│   ├── types/           # TypeScript type definitions
-│   └── utils/           # Shared utilities
-├── docs/                # Project documentation
-├── scripts/             # Build and deployment scripts
-└── Configuration files...
+├── server/                # Nitro 服务端
+│   ├── api/              # API 路由
+│   │   ├── photos/       # 照片管理 API
+│   │   └── system/       # 系统 API
+│   ├── database/         # 数据库相关
+│   │   ├── schema.ts     # 数据库模式
+│   │   └── migrations/   # 迁移文件
+│   ├── services/         # 业务逻辑服务
+│   │   ├── storage/      # 存储服务
+│   │   ├── image/        # 图片处理
+│   │   ├── location/     # 地理位置
+│   │   └── pipeline-queue/ # 处理队列
+│   ├── tasks/            # 后台任务
+│   └── utils/            # 服务端工具
+├── shared/               # 前后端共享代码
+│   ├── types/           # TypeScript 类型定义
+│   └── utils/           # 共享工具函数
+├── docs/                # 项目文档
+├── scripts/             # 构建和部署脚本
+└── 配置文件...
 ```
 
-### Technology Stack
+### 技术栈
 
-#### Frontend Technologies
+#### 前端技术
 
-- **Nuxt 4**: Vue.js full-stack framework
-- **TypeScript**: Type-safe JavaScript
-- **TailwindCSS**: Utility-first CSS framework
+- **Nuxt 4**: Vue.js 全栈框架
+- **TypeScript**: 类型安全的 JavaScript
+- **TailwindCSS**: 实用优先的 CSS 框架
 
-#### Backend Technologies
+#### 后端技术
 
-- **Nitro**: Server-side framework
-- **SQLite**: Lightweight database
-- **Drizzle ORM**: Type-safe ORM
-- **Sharp**: High-performance image processing
-- **ExifTool**: EXIF data extraction
+- **Nitro**: 服务端框架
+- **SQLite**: 轻量级数据库
+- **Drizzle ORM**: 类型安全的 ORM
+- **Sharp**: 高性能图片处理
+- **ExifTool**: EXIF 数据提取
 
-## Development Workflow
+## 开发流程
 
-### Start Development Server
+### 启动开发服务器
 
 ```bash
-# Start development server on localhost
+# 启动本机开发服务器
 pnpm dev
 ```
 
-### Database Operations
+### 数据库操作
 
 ```bash
-# Generate migration files
+# 生成迁移文件
 pnpm db:generate
 
-# Execute database migrations
+# 执行数据库迁移
 pnpm db:migrate
 ```
 
-### Build Project
+### 构建项目
 
 ```bash
-# Build complete project
+# 构建完整项目
 pnpm build
 
-# Preview production build
+# 预览生产构建
 pnpm preview
 ```
 
-## Testing Environment
+## 测试环境
 
-### Mapbox Development Tokens
+运行 `pnpm test` 执行坐标、可选地图和照片处理管线的回归测试（Node.js 22），无需额外测试框架。测试仅使用合成输入，不读取 `.env`，也不访问应用数据库或媒体存储。
 
-1. Register [Mapbox account](https://account.mapbox.com/)
-2. Create development access tokens
-3. Set URL restriction: `http://localhost:3000`
-4. Add tokens to `.env` file
+### Mapbox 开发令牌
 
-## Code Standards
+1. 注册 [Mapbox 账户](https://account.mapbox.com/)
+2. 创建开发用的访问令牌
+3. 设置 URL 限制：`http://localhost:3000`
+4. 将令牌添加到 `.env` 文件
 
-### TypeScript Standards
+## 代码规范
+
+### TypeScript 规范
 
 ```typescript
-// ✅ Good practice
+// ✅ 好的做法
 interface PhotoMetadata {
   id: string
   title?: string
@@ -155,23 +157,23 @@ interface PhotoMetadata {
   createdAt: Date
 }
 
-// ❌ Avoid using any
+// ❌ 避免使用 any
 const processPhoto = (photo: any) => { ... }
 
-// ✅ Use specific types
+// ✅ 使用具体类型
 const processPhoto = (photo: PhotoMetadata) => { ... }
 ```
 
-### Vue Component Standards
+### Vue 组件规范
 
 ```vue
-<!-- ✅ Recommended component structure -->
+<!-- ✅ 推荐的组件结构 -->
 <script setup lang="ts">
-// Imports
+// 导入
 import { ref, computed } from 'vue'
 import type { Photo } from '~/types'
 
-// Props and Emits
+// Props 和 Emits
 interface Props {
   photos: Photo[]
   loading?: boolean
@@ -188,13 +190,13 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-// Reactive data
+// 响应式数据
 const selectedPhoto = ref<Photo | null>(null)
 
-// Computed properties
+// 计算属性
 const photoCount = computed(() => props.photos.length)
 
-// Methods
+// 方法
 const handlePhotoClick = (photo: Photo) => {
   selectedPhoto.value = photo
   emit('select', photo)
@@ -203,18 +205,18 @@ const handlePhotoClick = (photo: Photo) => {
 
 <template>
   <div class="photo-grid">
-    <!-- Template content -->
+    <!-- 模板内容 -->
   </div>
 </template>
 
 <style scoped>
-/* Component styles */
+/* 组件样式 */
 </style>
 ```
 
-### Database Calls
+### 数据库调用
 
-When using database operations in `server`, use `useDB()` to get the Drizzle instance. This composable is globally auto-imported on the server side:
+在 `server` 中使用数据库操作时，使用 `useDB()` 获取数据库的 Drizzle 实例。该 composable 在服务端是全局自动导入的：
 
 ```typescript
 const db = useDB()
@@ -222,61 +224,61 @@ const db = useDB()
 const photos = await db.select().from(photosTable)
 ```
 
-### Commit Message Standards
+### 提交信息规范
 
-Use [Conventional Commits](https://www.conventionalcommits.org/) standard:
+使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
 
 ```
-feat: add photo batch delete functionality
-fix: fix image viewer compatibility issue in Safari
-docs: update deployment documentation
-style: unify code formatting
-refactor: refactor storage service interface
-test: add unit tests for photo upload
-chore: update dependency versions
+feat: 添加照片批量删除功能
+fix: 修复图片查看器在 Safari 中的兼容性问题
+docs: 更新部署文档
+style: 统一代码格式
+refactor: 重构存储服务接口
+test: 添加照片上传的单元测试
+chore: 更新依赖包版本
 ```
 
-## Contribution Guidelines
+## 贡献指南
 
-### Development Process
+### 开发流程
 
-1. **Fork Project**: Fork the project on GitHub
-2. **Create Branch**: `git checkout -b feature/new-feature`
-3. **Develop Feature**: Write code and tests
-4. **Commit Changes**: Use standard commit messages
-5. **Push Branch**: `git push origin feature/new-feature`
-6. **Create PR**: Create Pull Request on GitHub
+1. **Fork 项目**: 在 GitHub 上 fork 项目
+2. **创建分支**: `git checkout -b feature/new-feature`
+3. **开发功能**: 编写代码和测试
+4. **提交更改**: 使用规范的提交信息
+5. **推送分支**: `git push origin feature/new-feature`
+6. **创建 PR**: 在 GitHub 上创建 Pull Request
 
-### Pull Request Checklist
+### Pull Request 检查清单
 
-Before submitting PR, ensure:
+提交 PR 前请确保：
 
-- Code passes all tests
-- Follows code standards
-- Updates relevant documentation
-- Adds appropriate test cases
-- PR description is clear with change explanations
+- 代码通过所有测试
+- 遵循代码规范
+- 更新相关文档
+- 添加适当的测试用例
+- PR 描述清晰，包含变更说明
 
-## Contribution Opportunities
+## 贡献机会
 
-### Beginner-friendly Tasks
+### 适合新手的任务
 
-Look for Issues labeled with:
+寻找标有以下标签的 Issues：
 
-- `good first issue`: Tasks suitable for beginners
-- `help wanted`: Tasks needing community help
-- `documentation`: Documentation-related improvements
+- `good first issue`: 适合新手的任务
+- `help wanted`: 需要社区帮助的任务
+- `documentation`: 文档相关的改进
 
-## Useful Resources
+## 有用资源
 
-### Official Documentation
+### 官方文档
 
-- [Nuxt 4 Documentation](https://nuxt.com/)
-- [Vue 3 Documentation](https://vuejs.org/)
-- [Drizzle ORM Documentation](https://orm.drizzle.team/)
-- [TailwindCSS Documentation](https://tailwindcss.com/)
+- [Nuxt 4 文档](https://nuxt.com/)
+- [Vue 3 文档](https://vuejs.org/)
+- [Drizzle ORM 文档](https://orm.drizzle.team/)
+- [TailwindCSS 文档](https://tailwindcss.com/)
 
-### Community Resources
+### 社区资源
 
 - [GitHub Issues](https://github.com/handsondad/kid-growth-timeline/issues)
 - [GitHub Discussions](https://github.com/handsondad/kid-growth-timeline/discussions)

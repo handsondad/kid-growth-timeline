@@ -21,7 +21,7 @@ const {
 if (error.value) {
   throw createError({
     statusCode: 404,
-    statusMessage: $t('album.notFound'),
+    statusMessage: '相簿未找到',
   })
 }
 
@@ -183,7 +183,7 @@ onUnmounted(() => {
 })
 
 useHead({
-  title: () => albumData.value?.title || $t('album.notFound'),
+  title: () => albumData.value?.title || '相簿未找到',
 })
 </script>
 
@@ -197,9 +197,7 @@ useHead({
         name="tabler:loader"
         class="animate-spin size-8 text-primary-600"
       />
-      <p class="text-sm text-neutral-600 dark:text-neutral-400">
-        {{ $t('ui.loading') }}
-      </p>
+      <p class="text-sm text-neutral-600 dark:text-neutral-400">加载中</p>
     </div>
 
     <template v-else-if="albumData">
@@ -254,7 +252,7 @@ useHead({
               <p
                 class="text-base text-neutral-600 dark:text-neutral-300 leading-relaxed max-w-2xl"
               >
-                {{ albumData.description || $t('album.noDescription') }}
+                {{ albumData.description || '无描述' }}
               </p>
 
               <!-- metadata row -->
@@ -267,7 +265,7 @@ useHead({
                   icon="tabler:player-play"
                   @click="handleStartSlideshow"
                 >
-                  {{ $t('viewer.slideshow.playCurrent') }}
+                  放映当前照片
                 </UButton>
                 <!-- Photos -->
                 <div class="flex items-center gap-1">
@@ -280,7 +278,7 @@ useHead({
                       {{ albumStats?.total || 0 }}
                     </span>
                     <span class="text-neutral-500 dark:text-neutral-400 ml-1">
-                      {{ $t('album.metadata.photos') }}
+                      照片
                     </span>
                   </span>
                 </div>
@@ -302,20 +300,16 @@ useHead({
                 <!-- Created -->
                 <div
                   class="flex items-center gap-1"
-                  :title="
-                    $t('album.createdTooltip', {
-                      date: $dayjs(albumData.createdAt).format(
-                        'YYYY-MM-DD HH:mm:ss',
-                      ),
-                    })
-                  "
+                  :title="`创建于：${$dayjs(albumData.createdAt).format(
+                    'YYYY-MM-DD HH:mm:ss',
+                  )}`"
                 >
                   <Icon
                     name="tabler:clock-plus"
                     class="size-4 -mt-0.5 text-neutral-400 dark:text-neutral-500"
                   />
                   <span class="text-neutral-700 dark:text-neutral-200">
-                    {{ $t('album.metadata.created') }}
+                    创建
                     {{ $dayjs(albumData.createdAt).fromNow() }}
                   </span>
                 </div>
@@ -345,7 +339,7 @@ useHead({
                 <p
                   class="text-xl font-normal text-neutral-800 dark:text-neutral-200 mb-2"
                 >
-                  {{ $t('album.emptyAlbumTitle') }}
+                  相簿是空的
                 </p>
               </div>
             </div>
@@ -391,18 +385,16 @@ useHead({
             <p
               class="text-2xl font-semibold text-neutral-800 dark:text-neutral-200 mb-2"
             >
-              {{ $t('album.failedToLoadTitle') }}
+              加载相簿失败
             </p>
             <p
               class="text-base text-neutral-600 dark:text-neutral-400 max-w-md"
             >
-              {{ $t('album.failedToLoadDescription') }}
+              加载此相簿时出现问题。
             </p>
           </div>
         </div>
-        <UButton @click="goBackToAlbums">
-          {{ $t('album.backToAlbums') }}
-        </UButton>
+        <UButton @click="goBackToAlbums"> 返回相簿 </UButton>
       </div>
     </template>
 
@@ -415,14 +407,14 @@ useHead({
       :exit="{ opacity: 0, scale: 0.8 }"
       :transition="{ duration: 0.2 }"
     >
-      <UTooltip :text="$t('ui.action.backtotop.tooltip')">
+      <UTooltip text="回到顶部">
         <UButton
           variant="soft"
           color="neutral"
           class="cursor-pointer bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm flex justify-center items-center rounded-full shadow-lg hover:bg-white dark:hover:bg-neutral-800 transition-all duration-300 border border-neutral-200/50 dark:border-neutral-700/50"
           icon="tabler:arrow-up"
           size="lg"
-          :aria-label="$t('ui.action.backtotop.ariaLabel')"
+          aria-label="回到顶部"
           @click="scrollToTop"
         />
       </UTooltip>

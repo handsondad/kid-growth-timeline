@@ -13,13 +13,13 @@
         v-if="getSetting('app:avatarUrl')"
         class="w-full h-full object-cover"
         :src="getSetting('app:avatarUrl')?.toString()"
-        :alt="$t('ui.loading')"
+        alt="加载中"
       />
       <img
         v-else
         class="w-full h-full object-cover"
         src="/web-app-manifest-192x192.png"
-        :alt="$t('ui.loading')"
+        alt="加载中"
       />
     </div>
   </div>

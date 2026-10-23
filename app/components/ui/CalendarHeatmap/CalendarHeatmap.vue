@@ -7,7 +7,6 @@ import {
   Heatmap,
   COLOR_THEMES,
   type CalendarItem,
-  type Locale,
   type Month,
   type TooltipFormatter,
   type Value,
@@ -18,7 +17,6 @@ interface Props {
   values: Value[]
   max?: number
   rangeColor?: string[]
-  locale?: Partial<Locale>
   tooltip?: boolean
   tooltipUnit?: string
   tooltipFormatter?: TooltipFormatter
@@ -33,7 +31,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   max: undefined,
   rangeColor: undefined,
-  locale: undefined,
   tooltip: true,
   tooltipUnit: undefined,
   tooltipFormatter: undefined,
@@ -52,40 +49,28 @@ interface Emits {
 
 const emit = defineEmits<Emits>()
 
-const { t } = useI18n()
-
-const i18nLocale = computed<Locale>(() => ({
+const lo = {
   months: [
-    t('common.months.jan'),
-    t('common.months.feb'),
-    t('common.months.mar'),
-    t('common.months.apr'),
-    t('common.months.may'),
-    t('common.months.jun'),
-    t('common.months.jul'),
-    t('common.months.aug'),
-    t('common.months.sep'),
-    t('common.months.oct'),
-    t('common.months.nov'),
-    t('common.months.dec'),
+    '一月',
+    '二月',
+    '三月',
+    '四月',
+    '五月',
+    '六月',
+    '七月',
+    '八月',
+    '九月',
+    '十月',
+    '十一月',
+    '十二月',
   ],
-  days: [
-    t('common.days.sun'),
-    t('common.days.mon'),
-    t('common.days.tue'),
-    t('common.days.wed'),
-    t('common.days.thu'),
-    t('common.days.fri'),
-    t('common.days.sat'),
-  ],
-  on: t('ui.calendarHeatmap.on'),
-  less: t('common.heatmap.legend.less'),
-  more: t('common.heatmap.legend.more'),
-}))
+  days: ['日', '一', '二', '三', '四', '五', '六'],
+  on: '于',
+  less: '更少',
+  more: '更多',
+}
 
-const effectiveTooltipUnit = computed(
-  () => props.tooltipUnit ?? t('ui.calendarHeatmap.contributions'),
-)
+const effectiveTooltipUnit = computed(() => props.tooltipUnit ?? '项贡献')
 
 const BASE_SQUARE_SIZE = 10
 const DAYS_IN_WEEK = 7
@@ -116,7 +101,6 @@ const legendViewbox = ref('0 0 0 0')
 const daysLabelWrapperTransform = ref('')
 const monthsLabelWrapperTransform = ref('')
 const legendWrapperTransform = ref('')
-const lo = ref<Locale>(i18nLocale.value)
 
 const rangeColor = ref<string[]>(
   props.rangeColor || [
@@ -148,11 +132,11 @@ function tooltipOptions(day: CalendarItem): string | undefined {
       if (props.tooltipFormatter) {
         return props.tooltipFormatter(day, effectiveTooltipUnit.value)
       }
-      return `<b>${day.count} ${effectiveTooltipUnit.value}</b> ${lo.value.on} ${lo.value.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
+      return `<b>${day.count} ${effectiveTooltipUnit.value}</b> ${lo.on} ${lo.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
     } else if (props.tooltipNoDataFormatter) {
       return props.tooltipNoDataFormatter(day.date)
     } else {
-      return `<b>No ${effectiveTooltipUnit.value}</b> ${lo.value.on} ${lo.value.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
+      return `<b>无${effectiveTooltipUnit.value}</b> ${lo.on} ${lo.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
     }
   }
   return undefined
@@ -290,14 +274,6 @@ watch(
     legendWrapperTransform.value = props.vertical
       ? `translate(${LEFT_SECTION_WIDTH + SQUARE_SIZE * DAYS_IN_WEEK}, ${TOP_SECTION_HEIGHT})`
       : `translate(${w - SQUARE_SIZE * rc.length - 30}, ${h - BOTTOM_SECTION_HEIGHT})`
-  },
-  { immediate: true },
-)
-
-watch(
-  [() => props.locale, i18nLocale],
-  ([l, base]) => {
-    lo.value = l ? { ...base, ...l } : base
   },
   { immediate: true },
 )

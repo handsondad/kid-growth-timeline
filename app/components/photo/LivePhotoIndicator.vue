@@ -34,7 +34,7 @@ defineProps<{
       name="tabler:live-photo"
       class="size-[17px]"
     />
-    <span>{{ $t('ui.livePhoto') }}</span>
+    <span>实况</span>
 
     <span
       v-if="processingState?.isProcessing"

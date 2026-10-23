@@ -11,6 +11,19 @@ import type { StorageConfig } from '../services/storage'
 
 type PipelineQueuePayload =
   | {
+      type: 'video'
+      mediaId: string
+      storageKey: string
+    }
+  | {
+      type: 'video-trim'
+      mediaId: string
+      startMs: number
+      endMs: number
+      outputId: string
+      outputKey: string
+    }
+  | {
       type: 'photo'
       storageKey: string
     }
@@ -54,6 +67,14 @@ export const photos = sqliteTable('photos', {
   originalUrl: text('original_url'),
   thumbnailUrl: text('thumbnail_url'),
   thumbnailHash: text('thumbnail_hash'),
+  mediaType: text('media_type', { enum: ['photo', 'video'] })
+    .notNull()
+    .default('photo'),
+  durationMs: integer('duration_ms'),
+  videoPlaybackKey: text('video_playback_key'),
+  sourceMediaId: text('source_media_id'),
+  trimStartMs: integer('trim_start_ms'),
+  trimEndMs: integer('trim_end_ms'),
   tags: text('tags', { mode: 'json' }).$type<string[]>(),
   exif: text('exif', { mode: 'json' }).$type<NeededExif>(),
   // 地理位置信息
@@ -100,9 +121,14 @@ export const pipelineQueue = sqliteTable('pipeline_queue', {
       'reverse-geocoding',
       'live-photo',
       'location-erase',
+      'video-probe',
+      'video-encode',
+      'video-cover',
     ],
   }),
   errorMessage: text('error_message'),
+  progress: integer('progress').notNull().default(0),
+  dedupeKey: text('dedupe_key').unique(),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),

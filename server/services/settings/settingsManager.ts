@@ -6,6 +6,7 @@ import type {
   SettingValue,
 } from '~~/shared/types/settings'
 import type { SettingKey, SettingNamespace } from './contants'
+import { DEFAULT_SETTINGS } from './contants'
 
 export class SettingsManager {
   private static instance: SettingsManager
@@ -398,21 +399,27 @@ export class SettingsManager {
     const db = useDB()
     const settings = db.select().from(tables.settings).all()
 
-    return settings.map((setting) => ({
-      namespace: setting.namespace,
-      key: setting.key,
-      type: setting.type,
-      value: this.deserialize(setting.value, setting.type),
-      defaultValue:
-        setting.defaultValue &&
-        this.deserialize(setting.defaultValue, setting.type),
-      label: setting.label,
-      description: setting.description,
-      isReadonly: setting.isReadonly,
-      isSecret: setting.isSecret,
-      // 包含枚举值，过滤掉 null
-      ...(setting.enum ? { enum: setting.enum } : {}),
-    }))
+    return settings.map((setting) => {
+      const config = DEFAULT_SETTINGS.find(
+        (item) =>
+          item.namespace === setting.namespace && item.key === setting.key,
+      )
+      return {
+        namespace: setting.namespace,
+        key: setting.key,
+        type: setting.type,
+        value: this.deserialize(setting.value, setting.type),
+        defaultValue:
+          setting.defaultValue &&
+          this.deserialize(setting.defaultValue, setting.type),
+        label: config?.label ?? setting.label,
+        description: config?.description ?? setting.description,
+        isReadonly: setting.isReadonly,
+        isSecret: setting.isSecret,
+        // 包含枚举值，过滤掉 null
+        ...(setting.enum ? { enum: setting.enum } : {}),
+      }
+    })
   }
 
   // Storage Providers Management

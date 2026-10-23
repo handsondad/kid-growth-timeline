@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-  title: () => $t('title.analyticsSettings'),
+  title: () => '分析与追踪',
 })
 
 const {
@@ -48,7 +48,7 @@ const handleAnalyticsSettingsSubmit = async () => {
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="$t('title.analyticsSettings')" />
+      <UDashboardNavbar title="分析与追踪" />
     </template>
 
     <template #body>
@@ -59,10 +59,11 @@ const handleAnalyticsSettingsSubmit = async () => {
           <h2
             class="text-xl font-semibold text-neutral-900 dark:text-neutral-100"
           >
-            {{ $t('title.analyticsSettings') }}
+            分析与追踪
           </h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            {{ $t('settings.analytics.sectionDescription') }}
+            将自定义 script 标签注入到页面 head 和 body
+            中，用于分析、追踪或结构化数据。脚本对所有访客执行，请仅粘贴可信代码。
           </p>
         </section>
 
@@ -75,7 +76,7 @@ const handleAnalyticsSettingsSubmit = async () => {
             <h3
               class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
             >
-              {{ $t('title.analyticsSettings') }}
+              分析与追踪
             </h3>
           </header>
 
@@ -109,7 +110,7 @@ const handleAnalyticsSettingsSubmit = async () => {
               v-if="isAnalyticsDirty"
               class="mb-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-900/60 dark:bg-warning-950/30 dark:text-warning-200"
             >
-              {{ $t('common.unsavedChanges') }}
+              存在未保存的更改。
             </div>
 
             <div class="flex items-center justify-end gap-2">
@@ -119,7 +120,7 @@ const handleAnalyticsSettingsSubmit = async () => {
                 :disabled="!isAnalyticsDirty"
                 @click="resetAnalyticsSettings"
               >
-                {{ $t('common.actions.reset') }}
+                重置
               </UButton>
               <UButton
                 :loading="analyticsLoading"
@@ -128,7 +129,7 @@ const handleAnalyticsSettingsSubmit = async () => {
                 :disabled="!isAnalyticsDirty"
                 icon="tabler:device-floppy"
               >
-                {{ $t('common.actions.saveSettings') }}
+                保存设置
               </UButton>
             </div>
           </footer>

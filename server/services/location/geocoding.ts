@@ -15,7 +15,7 @@ export interface GeocodingProvider {
 
 /**
  * Mapbox 地理编码提供者
- * 高精度商业地理编码服务，支持全球范围和多语言
+ * 高精度商业地理编码服务，使用中文地点名称
  */
 export class MapboxGeocodingProvider implements GeocodingProvider {
   private accessToken: string
@@ -34,24 +34,13 @@ export class MapboxGeocodingProvider implements GeocodingProvider {
           // 应用速率限制
           await this.applyRateLimit()
 
-          // 获取设置的地理编码语言，默认 'en'
-          const language =
-            (await settingsManager.get<string>('location', 'language')) || 'en'
-
           const url = new URL('/search/geocode/v6/reverse', this.baseUrl)
           url.searchParams.set('access_token', this.accessToken)
           url.searchParams.set('longitude', lon.toString())
           url.searchParams.set('latitude', lat.toString())
           url.searchParams.set('types', 'address,place,district,region,country')
 
-          // 映射 Mapbox 首选语言格式
-          let mapboxLang = language
-          if (language === 'zh-CN') {
-            mapboxLang = 'zh-Hans'
-          } else if (language === 'zh-TW') {
-            mapboxLang = 'zh-Hant'
-          }
-          url.searchParams.set('language', mapboxLang)
+          url.searchParams.set('language', 'zh-Hans')
 
           logger.location.info(`Mapbox API URL: ${url.toString()}`)
 
@@ -150,16 +139,12 @@ export class NominatimGeocodingProvider implements GeocodingProvider {
           // 应用速率限制
           await this.applyRateLimit()
 
-          // 获取设置的地理编码语言，默认 'en'
-          const language =
-            (await settingsManager.get<string>('location', 'language')) || 'en'
-
           const url = new URL('/reverse', this.baseUrl)
           url.searchParams.set('lat', lat.toString())
           url.searchParams.set('lon', lon.toString())
           url.searchParams.set('format', 'json')
           url.searchParams.set('addressdetails', '1')
-          url.searchParams.set('accept-language', `${language},en`)
+          url.searchParams.set('accept-language', 'zh-CN')
 
           const response = await fetch(url.toString(), {
             headers: {

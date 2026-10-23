@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { motion } from 'motion-v'
 import { clusterMarkers, photosToMarkers } from '~/utils/clustering'
+import { hasCoordinates } from '~~/shared/utils'
 
 useHead({
-  title: () => $t('title.globe'),
+  title: () => '照片地球仪',
 })
 
 const route = useRoute()
@@ -12,15 +13,7 @@ const dayjs = useDayjs()
 
 const { photos } = usePhotos()
 
-const photosWithLocation = computed(() => {
-  return photos.value.filter(
-    (photo) =>
-      photo.latitude !== null &&
-      photo.longitude !== null &&
-      photo.latitude !== undefined &&
-      photo.longitude !== undefined,
-  )
-})
+const photosWithLocation = computed(() => photos.value.filter(hasCoordinates))
 
 const timelineProgress = ref(100)
 const isTimelineEnabled = ref(false)
@@ -243,27 +236,27 @@ const analysisModeOptions = computed(
     [
       {
         value: 'none',
-        label: $t('globe.analysis.mode.none.label'),
+        label: '默认',
         icon: 'tabler:circle-off',
-        description: $t('globe.analysis.mode.none.description'),
+        description: '关闭标注',
       },
       {
         value: 'focalLength',
-        label: $t('globe.analysis.mode.focalLength.label'),
+        label: '焦段',
         icon: 'tabler:zoom-scan',
-        description: $t('globe.analysis.mode.focalLength.description'),
+        description: '广角 / 标准 / 长焦',
       },
       {
         value: 'shutterSpeed',
-        label: $t('globe.analysis.mode.shutterSpeed.label'),
+        label: '快门',
         icon: 'tabler:clock-hour-4',
-        description: $t('globe.analysis.mode.shutterSpeed.description'),
+        description: '高速 / 中速 / 低速',
       },
       {
         value: 'altitude',
-        label: $t('globe.analysis.mode.altitude.label'),
+        label: '海拔',
         icon: 'tabler:mountain',
-        description: $t('globe.analysis.mode.altitude.description'),
+        description: '低 / 中 / 高海拔',
       },
     ] as const,
 )
@@ -271,20 +264,20 @@ const analysisModeOptions = computed(
 const analysisLegend = computed(() => {
   if (analysisMode.value === 'focalLength') {
     return {
-      title: $t('globe.analysis.legend.focalLength.title'),
+      title: '焦段分布',
       items: [
         {
-          label: $t('globe.analysis.legend.focalLength.wide'),
+          label: '广角',
           range: '<35mm',
           color: 'bg-cyan-500',
         },
         {
-          label: $t('globe.analysis.legend.focalLength.standard'),
+          label: '标准',
           range: '35-85mm',
           color: 'bg-amber-500',
         },
         {
-          label: $t('globe.analysis.legend.focalLength.telephoto'),
+          label: '长焦',
           range: '>85mm',
           color: 'bg-rose-500',
         },
@@ -294,20 +287,20 @@ const analysisLegend = computed(() => {
 
   if (analysisMode.value === 'shutterSpeed') {
     return {
-      title: $t('globe.analysis.legend.shutterSpeed.title'),
+      title: '快门分布',
       items: [
         {
-          label: $t('globe.analysis.legend.shutterSpeed.fast'),
+          label: '高速',
           range: '≤1/250s',
           color: 'bg-emerald-500',
         },
         {
-          label: $t('globe.analysis.legend.shutterSpeed.medium'),
+          label: '中速',
           range: '1/250-1/30s',
           color: 'bg-amber-500',
         },
         {
-          label: $t('globe.analysis.legend.shutterSpeed.slow'),
+          label: '低速',
           range: '>1/30s',
           color: 'bg-indigo-500',
         },
@@ -317,20 +310,20 @@ const analysisLegend = computed(() => {
 
   if (analysisMode.value === 'altitude') {
     return {
-      title: $t('globe.analysis.legend.altitude.title'),
+      title: '海拔分布',
       items: [
         {
-          label: $t('globe.analysis.legend.altitude.low'),
+          label: '低海拔',
           range: '<200m',
           color: 'bg-lime-500',
         },
         {
-          label: $t('globe.analysis.legend.altitude.medium'),
+          label: '中海拔',
           range: '200-1500m',
           color: 'bg-orange-500',
         },
         {
-          label: $t('globe.analysis.legend.altitude.high'),
+          label: '高海拔',
           range: '>1500m',
           color: 'bg-fuchsia-500',
         },
@@ -391,8 +384,8 @@ const mapViewState = computed(() => {
     }
   }
 
-  const latitudes = photosWithLocation.value.map((photo) => photo.latitude!)
-  const longitudes = photosWithLocation.value.map((photo) => photo.longitude!)
+  const latitudes = photosWithLocation.value.map((photo) => photo.latitude)
+  const longitudes = photosWithLocation.value.map((photo) => photo.longitude)
 
   const minLat = Math.min(...latitudes)
   const maxLat = Math.max(...latitudes)
@@ -473,7 +466,7 @@ const onMapLoaded = (map: any) => {
   const { photoId } = route.query
   if (photoId && typeof photoId === 'string') {
     const photo = photosWithLocation.value.find((photo) => photo.id === photoId)
-    if (photo && photo.latitude && photo.longitude) {
+    if (photo) {
       setTimeout(() => {
         map.flyTo({
           center: [photo.longitude, photo.latitude],
@@ -553,7 +546,7 @@ onBeforeUnmount(() => {
     <div class="absolute top-4 right-4 z-10 flex flex-col items-end">
       <div class="relative">
         <UTooltip
-          :text="$t('globe.analysis.annotation')"
+          text="拍摄参数标注"
           :delay-duration="0"
         >
           <GlassButton
@@ -580,10 +573,10 @@ onBeforeUnmount(() => {
                   name="tabler:adjustments-horizontal"
                   class="size-4 text-primary"
                 />
-                <span>{{ $t('globe.analysis.annotation') }}</span>
+                <span>拍摄参数标注</span>
               </div>
               <p class="mt-1 text-[11px] text-neutral-600 dark:text-white/60">
-                {{ $t('globe.analysis.annotationDescription') }}
+                按拍摄参数查看地理分布
               </p>
             </div>
 
@@ -660,7 +653,7 @@ onBeforeUnmount(() => {
 
       <div class="mt-2 relative">
         <UTooltip
-          :text="$t('globe.timeline.toggle')"
+          text="启用/关闭时间回溯"
           :delay-duration="0"
         >
           <GlassButton
@@ -702,7 +695,7 @@ onBeforeUnmount(() => {
       >
         <div class="flex items-center gap-2">
           <UTooltip
-            :text="$t('globe.timeline.playPause')"
+            text="播放/暂停时间回溯"
             :delay-duration="0"
           >
             <GlassButton
@@ -720,7 +713,7 @@ onBeforeUnmount(() => {
           </UTooltip>
           <div class="min-w-0 flex-1">
             <div class="flex items-center justify-between gap-2 text-[11px]">
-              <span class="font-medium">{{ $t('globe.timeline.title') }}</span>
+              <span class="font-medium">时间回溯</span>
               <span class="text-neutral-600 dark:text-white/60">
                 {{ filteredPhotosWithLocation.length }}/{{
                   photosWithLocation.length
@@ -778,7 +771,6 @@ onBeforeUnmount(() => {
           :zoom="mapViewState.zoom"
           :center="[mapViewState.longitude, mapViewState.latitude]"
           :attribution-control="false"
-          :language="$i18n.locale"
           @load="onMapLoaded"
           @zoom="onMapZoom"
         >

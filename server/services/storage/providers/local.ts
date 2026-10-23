@@ -1,10 +1,9 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import type {
-  LocalStorageConfig,
-  StorageObject,
-  StorageProvider,
-} from '../interfaces'
+import { randomUUID } from 'node:crypto'
+import { constants } from 'node:fs'
+import type { LocalStorageConfig } from '..'
+import type { StorageObject, StorageProvider } from '../interfaces'
 
 const ensureDir = async (dirPath: string) => {
   await fs.mkdir(dirPath, { recursive: true })
@@ -46,6 +45,66 @@ export class LocalStorageProvider implements StorageProvider {
     }
 
     return { absFile, relKey }
+  }
+
+  private assertWithinBase(base: string, target: string): void {
+    const relative = path.relative(base, target)
+    if (
+      relative === '..' ||
+      relative.startsWith(`..${path.sep}`) ||
+      path.isAbsolute(relative)
+    ) {
+      throw new Error('Invalid storage key: directory boundary exceeded')
+    }
+  }
+
+  async getFilePath(key: string): Promise<string> {
+    const meta = await this.getFileMeta(key)
+    if (!meta) throw new Error('Storage file does not exist')
+    const absFile = path.resolve(this.config.basePath, meta.key)
+    const [base, file] = await Promise.all([
+      fs.realpath(this.config.basePath),
+      fs.realpath(absFile),
+    ])
+    this.assertWithinBase(base, file)
+    if (!(await fs.stat(file)).isFile()) {
+      throw new Error('Storage object is not a file')
+    }
+    return file
+  }
+
+  async createFromFile(
+    key: string,
+    sourceFile: string,
+  ): Promise<StorageObject> {
+    const { absFile, relKey } = this.resolveAbsoluteKey(key)
+    await ensureDir(this.config.basePath)
+    const base = await fs.realpath(this.config.basePath)
+    let parent = base
+    const relative = path.relative(path.resolve(this.config.basePath), absFile)
+    for (const segment of relative.split(path.sep).slice(0, -1)) {
+      parent = path.join(parent, segment)
+      try {
+        await fs.mkdir(parent)
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+      }
+      parent = await fs.realpath(parent)
+      this.assertWithinBase(base, parent)
+    }
+    const target = path.join(parent, path.basename(absFile))
+    const temporary = path.join(parent, `.copy-${randomUUID()}.tmp`)
+    try {
+      await fs.copyFile(sourceFile, temporary, constants.COPYFILE_EXCL)
+      const sourceInfo = await fs.stat(sourceFile)
+      await fs.utimes(temporary, sourceInfo.atime, sourceInfo.mtime)
+      // An exclusive hard link publishes a complete file without replacing one.
+      await fs.link(temporary, target)
+      const info = await fs.stat(target)
+      return { key: relKey, size: info.size, lastModified: info.mtime }
+    } finally {
+      await fs.rm(temporary, { force: true })
+    }
   }
 
   async create(key: string, fileBuffer: Buffer): Promise<StorageObject> {

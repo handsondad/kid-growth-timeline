@@ -24,6 +24,12 @@ export default eventHandler(async (event) => {
           statusMessage: 'Photo not found',
         })
       }
+      if (photo.mediaType === 'video') {
+        throw createError({
+          statusCode: 400,
+          statusMessage: 'EXIF reindexing is only available for photos',
+        })
+      }
 
       logger.main.info(`Reindexing EXIF for photo ${photoId}`)
 
@@ -78,6 +84,7 @@ export default eventHandler(async (event) => {
           .where(
             and(
               isNotNull(tables.photos.storageKey),
+              eq(tables.photos.mediaType, 'photo'),
               inArray(tables.photos.id, photoIds),
             ),
           )
@@ -89,7 +96,12 @@ export default eventHandler(async (event) => {
             storageKey: tables.photos.storageKey,
           })
           .from(tables.photos)
-          .where(isNotNull(tables.photos.storageKey))
+          .where(
+            and(
+              isNotNull(tables.photos.storageKey),
+              eq(tables.photos.mediaType, 'photo'),
+            ),
+          )
       }
 
       if (photos.length === 0) {

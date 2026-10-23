@@ -23,6 +23,8 @@ import {
 import { findLivePhotoVideoForImage } from '../video/livephoto'
 import { processMotionPhotoFromXmp } from '../video/motion-photo'
 import { getStorageManager } from '~~/server/plugins/3.storage'
+import { processVideoTask } from '../video/tasks'
+import { VIDEO_EXTENSIONS } from '../../../shared/utils/video'
 
 const EXIF_LOCATION_KEYS = [
   'GPSAltitude',
@@ -127,9 +129,19 @@ export class QueueManager {
         payload,
         ...options,
       })
+      .onConflictDoNothing()
       .returning({ id: tables.pipelineQueue.id })
       .get()
-    return result.id
+    if (result) return result.id
+    if (options?.dedupeKey) {
+      const existing = db
+        .select({ id: tables.pipelineQueue.id })
+        .from(tables.pipelineQueue)
+        .where(eq(tables.pipelineQueue.dedupeKey, options.dedupeKey))
+        .get()
+      if (existing) return existing.id
+    }
+    throw new Error('Unable to enqueue the task')
   }
 
   /**
@@ -208,6 +220,7 @@ export class QueueManager {
       .update(tables.pipelineQueue)
       .set({
         status: 'completed',
+        progress: 100,
         completedAt: sql`(unixepoch())`,
       })
       .where(eq(tables.pipelineQueue.id, taskId))
@@ -273,6 +286,11 @@ export class QueueManager {
           )
         }
         const { storageKey } = payload
+        if (VIDEO_EXTENSIONS.includes(path.extname(storageKey).toLowerCase())) {
+          throw new Error(
+            'Ordinary videos require the independent video processing task',
+          )
+        }
         const storageProvider = getStorageManager().getProvider()
         const photoId = generateSafePhotoId(storageKey)
 
@@ -341,13 +359,11 @@ export class QueueManager {
           // STEP 4: 提取 EXIF 数据
           await this.updateTaskStage(taskId, 'exif')
           this.logger.info(`[${taskId}:in-stage] exif extraction`)
-          const exifData = await extractExifData(
+          const normalizedExifData = await extractExifData(
             imageBuffer,
             imageBuffers.raw,
             this.logger,
           )
-          const normalizedExifData = exifData
-
           // 提取照片基本信息
           const photoInfo = extractPhotoInfo(storageKey, normalizedExifData)
 
@@ -358,7 +374,7 @@ export class QueueManager {
 
           let coordinates = null
           let locationInfo = null
-          if (!shouldAutoEraseLocationOnUpload && normalizedExifData) {
+          if (normalizedExifData) {
             const { latitude, longitude } =
               parseGPSCoordinates(normalizedExifData)
             coordinates = { latitude, longitude }
@@ -416,6 +432,12 @@ export class QueueManager {
           // 构建最终的 Photo 对象
           const result: Photo = {
             id: photoId,
+            mediaType: 'photo',
+            durationMs: null,
+            videoPlaybackKey: null,
+            sourceMediaId: null,
+            trimStartMs: null,
+            trimEndMs: null,
             title: photoInfo.title,
             description: photoInfo.description,
             dateTaken: photoInfo.dateTaken,
@@ -463,26 +485,6 @@ export class QueueManager {
             target: tables.photos.id,
             set: result,
           })
-
-          if (shouldAutoEraseLocationOnUpload) {
-            try {
-              await this.addTask(
-                {
-                  type: 'photo-erase-location',
-                  photoId,
-                },
-                {
-                  priority: 2,
-                  maxAttempts: 3,
-                },
-              )
-            } catch (enqueueError) {
-              this.logger.warn(
-                `[${taskId}:location-erase] failed to enqueue location erase task for ${photoId}`,
-                enqueueError,
-              )
-            }
-          }
 
           this.logger.success(`Task ${taskId} processed successfully`)
           return result
@@ -619,6 +621,9 @@ export class QueueManager {
 
         if (!photo) {
           throw new Error(`Photo ${payload.photoId} not found`)
+        }
+        if (photo.mediaType === 'video') {
+          throw new Error('Location erasure of video files is not supported')
         }
 
         if (!photo.storageKey) {
@@ -808,6 +813,14 @@ export class QueueManager {
         const { type } = task.payload
 
         switch (type) {
+          case 'video':
+          case 'video-trim':
+            await processVideoTask(
+              task,
+              getStorageManager().getProvider(),
+              useRuntimeConfig(),
+            )
+            break
           case 'live-photo-video':
             await this.processors.livePhotoDetect(task)
             break

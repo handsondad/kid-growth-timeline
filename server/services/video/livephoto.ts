@@ -104,6 +104,12 @@ export const findLivePhotoVideoForImage = async (
     // 检查存储中是否存在对应的视频文件
     for (const videoKey of possibleVideoKeys) {
       try {
+        const meta = await storageProvider.getFileMeta(videoKey)
+        if (
+          !meta?.size ||
+          !isLivePhotoVideo(path.basename(videoKey), meta.size)
+        )
+          continue
         const videoBuffer = await storageProvider.get(videoKey)
         if (videoBuffer) {
           const videoSize = videoBuffer.length

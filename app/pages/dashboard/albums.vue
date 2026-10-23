@@ -7,7 +7,7 @@ definePageMeta({
 })
 
 useHead({
-  title: () => $t('title.albums'),
+  title: () => '相簿',
 })
 
 interface AlbumItem extends Album {
@@ -66,7 +66,7 @@ const validateForm = (state: any): FormError[] => {
   if (!state.title?.trim()) {
     errors.push({
       name: 'title',
-      message: $t('dashboard.albums.form.titleRequired'),
+      message: '请输入相簿标题',
     })
   }
   return errors
@@ -95,7 +95,7 @@ const loadAlbums = async () => {
   } catch (error) {
     console.error('Failed to load albums:', error)
     useToast().add({
-      title: $t('dashboard.albums.messages.loadError'),
+      title: '加载相簿失败',
       color: 'error',
     })
   } finally {
@@ -137,7 +137,7 @@ const openEditSlideover = async (album: AlbumItem) => {
   } catch (error) {
     console.error('Failed to load album details:', error)
     useToast().add({
-      title: $t('dashboard.albums.messages.loadDetailError'),
+      title: '加载相簿详情失败',
       color: 'error',
     })
   }
@@ -164,7 +164,7 @@ const onFormSubmit = async (event: FormSubmitEvent<AlbumFormState>) => {
       })
 
       useToast().add({
-        title: $t('dashboard.albums.messages.updateSuccess'),
+        title: '相簿更新成功',
         color: 'success',
       })
 
@@ -181,7 +181,7 @@ const onFormSubmit = async (event: FormSubmitEvent<AlbumFormState>) => {
       })
 
       useToast().add({
-        title: $t('dashboard.albums.messages.createSuccess'),
+        title: '相簿创建成功',
         color: 'success',
       })
 
@@ -192,9 +192,7 @@ const onFormSubmit = async (event: FormSubmitEvent<AlbumFormState>) => {
   } catch (error) {
     console.error('Failed to save album:', error)
     useToast().add({
-      title: currentAlbum.value
-        ? $t('dashboard.albums.messages.updateError')
-        : $t('dashboard.albums.messages.createError'),
+      title: currentAlbum.value ? '更新相簿失败' : '创建相簿失败',
       color: 'error',
     })
   } finally {
@@ -211,7 +209,7 @@ const deleteAlbum = async () => {
     })
 
     useToast().add({
-      title: $t('dashboard.albums.messages.deleteSuccess'),
+      title: '相簿删除成功',
       color: 'success',
     })
 
@@ -220,7 +218,7 @@ const deleteAlbum = async () => {
   } catch (error) {
     console.error('Failed to delete album:', error)
     useToast().add({
-      title: $t('dashboard.albums.messages.deleteError'),
+      title: '删除相簿失败',
       color: 'error',
     })
   }
@@ -250,7 +248,7 @@ const moveAlbum = async (index: number, direction: -1 | 1) => {
     console.error('Failed to reorder albums:', error)
     albums.value = previous
     useToast().add({
-      title: $t('dashboard.albums.messages.reorderError'),
+      title: '相簿排序失败',
       color: 'error',
     })
   } finally {
@@ -423,52 +421,48 @@ onMounted(async () => {
 const dayjs = useDayjs()
 
 const slideoverTitle = computed(() => {
-  return currentAlbum.value
-    ? $t('dashboard.albums.slideover.edit.title')
-    : $t('dashboard.albums.slideover.create.title')
+  return currentAlbum.value ? '编辑相簿' : '创建相簿'
 })
 
 const slideoverDescription = computed(() => {
   return currentAlbum.value
-    ? $t('dashboard.albums.slideover.edit.description')
-    : $t('dashboard.albums.slideover.create.description')
+    ? '修改相簿的信息和照片'
+    : '创建一个新的相簿来组织您的照片'
 })
 
 const submitButtonLabel = computed(() => {
-  return currentAlbum.value
-    ? $t('dashboard.albums.slideover.submitEdit')
-    : $t('dashboard.albums.slideover.submitCreate')
+  return currentAlbum.value ? '保存' : '创建'
 })
 
 const columns = computed<any[]>(() => [
   {
     id: 'coverPhoto',
     accessorKey: 'coverPhoto',
-    header: $t('dashboard.albums.table.columns.cover'),
+    header: '封面',
   },
   {
     id: 'title',
     accessorKey: 'title',
-    header: $t('dashboard.albums.table.columns.title'),
+    header: '标题',
   },
   {
     id: 'description',
     accessorKey: 'description',
-    header: $t('dashboard.albums.table.columns.description'),
+    header: '描述',
   },
   {
     id: 'photoCount',
     accessorKey: 'photoCount',
-    header: $t('dashboard.albums.table.columns.photoCount'),
+    header: '照片数',
   },
   {
     id: 'createdAt',
     accessorKey: 'createdAt',
-    header: $t('dashboard.albums.table.columns.createdAt'),
+    header: '创建时间',
   },
   {
     id: 'actions',
-    header: $t('dashboard.albums.table.columns.actions'),
+    header: '操作',
   },
 ])
 </script>
@@ -476,14 +470,14 @@ const columns = computed<any[]>(() => [
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="$t('title.albums')">
+      <UDashboardNavbar title="相簿">
         <template #right>
           <UButton
             icon="tabler:plus"
             variant="soft"
             @click="openCreateSlideover"
           >
-            {{ $t('dashboard.albums.createButton') }}
+            创建相簿
           </UButton>
         </template>
       </UDashboardNavbar>
@@ -560,10 +554,7 @@ const columns = computed<any[]>(() => [
                 color="neutral"
               >
                 {{
-                  $t('dashboard.albums.photoCount', {
-                    count:
-                      (row.original as unknown as AlbumItem).photoCount || 0,
-                  })
+                  `${(row.original as unknown as AlbumItem).photoCount || 0} 张`
                 }}
               </UBadge>
             </template>
@@ -586,7 +577,7 @@ const columns = computed<any[]>(() => [
                   size="xs"
                   icon="tabler:chevron-up"
                   :disabled="row.index === 0 || isReorderingAlbums"
-                  :aria-label="$t('dashboard.albums.actions.moveUp')"
+                  aria-label="上移"
                   @click="moveAlbum(row.index, -1)"
                 />
                 <UButton
@@ -597,7 +588,7 @@ const columns = computed<any[]>(() => [
                   :disabled="
                     row.index === albums.length - 1 || isReorderingAlbums
                   "
-                  :aria-label="$t('dashboard.albums.actions.moveDown')"
+                  aria-label="下移"
                   @click="moveAlbum(row.index, 1)"
                 />
                 <UButton
@@ -633,16 +624,16 @@ const columns = computed<any[]>(() => [
             class="text-gray-400 dark:text-gray-600 mb-4"
           />
           <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            {{ $t('dashboard.albums.noAlbums') }}
+            还没有相簿
           </h3>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mb-4">
-            {{ $t('dashboard.albums.noAlbumsTip') }}
+            创建您的第一个相簿来组织您的照片
           </p>
           <UButton
             icon="tabler:plus"
             @click="openCreateSlideover"
           >
-            {{ $t('dashboard.albums.createButton') }}
+            创建相簿
           </UButton>
         </div>
         <div
@@ -695,9 +686,7 @@ const columns = computed<any[]>(() => [
                 size="40"
                 class="mb-2"
               />
-              <p class="text-sm font-medium">
-                {{ $t('dashboard.albums.form.addCoverPhoto') }}
-              </p>
+              <p class="text-sm font-medium">添加封面照片</p>
             </button>
             <div class="space-y-4 px-4">
               <UForm
@@ -708,27 +697,25 @@ const columns = computed<any[]>(() => [
                 @submit="onFormSubmit"
               >
                 <UFormField
-                  :label="$t('dashboard.albums.form.title')"
+                  label="标题"
                   name="title"
                   required
                 >
                   <UInput
                     v-model="formData.title"
                     class="w-full"
-                    :placeholder="$t('dashboard.albums.form.titlePlaceholder')"
+                    placeholder="输入相簿标题"
                   />
                 </UFormField>
 
                 <UFormField
-                  :label="$t('dashboard.albums.form.description')"
+                  label="描述"
                   name="description"
                 >
                   <UTextarea
                     v-model="formData.description"
                     class="w-full"
-                    :placeholder="
-                      $t('dashboard.albums.form.descriptionPlaceholder')
-                    "
+                    placeholder="输入相簿描述（可选）"
                     :rows="3"
                   />
                 </UFormField>
@@ -745,9 +732,7 @@ const columns = computed<any[]>(() => [
                   @click="openPhotoSelector"
                 >
                   {{
-                    selectedPhotoIds.length > 0
-                      ? $t('dashboard.albums.form.editPhotos')
-                      : $t('dashboard.albums.form.selectPhotos')
+                    selectedPhotoIds.length > 0 ? '修改照片选择' : '选择照片'
                   }}
                 </UButton>
 
@@ -758,11 +743,7 @@ const columns = computed<any[]>(() => [
                   <div class="flex items-center justify-between">
                     <label
                       class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                      >{{
-                        $t('dashboard.albums.form.selectedCount', {
-                          count: selectedPhotoIds.length,
-                        })
-                      }}</label
+                      >{{ `已选择 ${selectedPhotoIds.length} 张照片` }}</label
                     >
                     <UButton
                       variant="ghost"
@@ -771,7 +752,7 @@ const columns = computed<any[]>(() => [
                       icon="tabler:trash"
                       @click="selectedPhotoIds = []"
                     >
-                      {{ $t('dashboard.albums.form.clearAll') }}
+                      全部清除
                     </UButton>
                   </div>
 
@@ -796,7 +777,7 @@ const columns = computed<any[]>(() => [
                         v-if="coverPhotoId === photoId"
                         class="absolute top-1 left-1 bg-primary-500 text-white px-1.5 py-0.5 rounded text-xs font-medium"
                       >
-                        {{ $t('dashboard.albums.modal.setCover') }}
+                        设为封面
                       </div>
 
                       <div
@@ -814,7 +795,7 @@ const columns = computed<any[]>(() => [
                           variant="solid"
                           icon="tabler:chevron-up"
                           :disabled="index === 0"
-                          :aria-label="$t('dashboard.albums.form.movePhotoUp')"
+                          aria-label="上移照片"
                           @click="movePhoto(index, -1)"
                         />
                         <UButton
@@ -823,9 +804,7 @@ const columns = computed<any[]>(() => [
                           variant="solid"
                           icon="tabler:chevron-down"
                           :disabled="index === selectedPhotoIds.length - 1"
-                          :aria-label="
-                            $t('dashboard.albums.form.movePhotoDown')
-                          "
+                          aria-label="下移照片"
                           @click="movePhoto(index, 1)"
                         />
                         <UButton
@@ -833,7 +812,7 @@ const columns = computed<any[]>(() => [
                           color="error"
                           variant="solid"
                           icon="tabler:x"
-                          :aria-label="$t('dashboard.albums.form.removePhoto')"
+                          aria-label="移除照片"
                           @click="togglePhotoSelection(photoId)"
                         />
                       </div>
@@ -850,7 +829,7 @@ const columns = computed<any[]>(() => [
               color="neutral"
               @click="close"
             >
-              {{ $t('dashboard.albums.slideover.cancel') }}
+              取消
             </UButton>
             <UButton
               icon="tabler:check"
@@ -879,9 +858,7 @@ const columns = computed<any[]>(() => [
               >
                 <div class="flex items-center justify-between gap-2">
                   <div>
-                    <h2 class="text-lg font-semibold sm:text-xl">
-                      {{ $t('dashboard.albums.modal.selectPhotos') }}
-                    </h2>
+                    <h2 class="text-lg font-semibold sm:text-xl">选择照片</h2>
                   </div>
                   <UButton
                     icon="tabler:x"
@@ -908,7 +885,7 @@ const columns = computed<any[]>(() => [
                         :variant="hasActiveFilters ? 'soft' : 'outline'"
                         size="sm"
                       >
-                        {{ $t('ui.action.filter.title') }}
+                        筛选照片
                         <UBadge
                           v-if="totalSelectedFilters > 0"
                           size="xs"
@@ -935,7 +912,7 @@ const columns = computed<any[]>(() => [
                       size="sm"
                       @click="clearAllFilters()"
                     >
-                      {{ $t('ui.action.filter.clearAll') }}
+                      清除全部
                     </UButton>
 
                     <UButton
@@ -952,7 +929,7 @@ const columns = computed<any[]>(() => [
                       "
                       @click="toggleAllFilteredPhotos"
                     >
-                      {{ $t('dashboard.albums.modal.selectAll') }}
+                      全选
                     </UButton>
 
                     <div class="ml-auto flex flex-wrap items-center gap-1.5">
@@ -960,11 +937,7 @@ const columns = computed<any[]>(() => [
                         color="primary"
                         variant="soft"
                       >
-                        {{
-                          $t('dashboard.albums.modal.selectedPhotos', {
-                            count: draftSelectedPhotoIds.length,
-                          })
-                        }}
+                        {{ `已选 ${draftSelectedPhotoIds.length} 张` }}
                       </UBadge>
                       <UBadge
                         v-if="draftCoverPhotoId"
@@ -972,7 +945,7 @@ const columns = computed<any[]>(() => [
                         variant="soft"
                         icon="tabler:star-filled"
                       >
-                        {{ $t('dashboard.albums.modal.coverSetInfo') }}
+                        已设置封面
                       </UBadge>
                     </div>
                   </div>
@@ -984,7 +957,7 @@ const columns = computed<any[]>(() => [
                       name="tabler:info-circle"
                       class="size-3.5 shrink-0"
                     />
-                    {{ $t('ui.action.select.rangeTip') }}
+                    提示：按住 Shift 键并点击，即可选择一个范围内的照片
                   </p>
 
                   <div class="flex flex-wrap gap-1">
@@ -994,7 +967,7 @@ const columns = computed<any[]>(() => [
                       color="neutral"
                       variant="outline"
                     >
-                      {{ $t('ui.action.filter.tabs.tags') }}:
+                      标签:
                       {{ selectedCounts.tags }}
                     </UBadge>
                     <UBadge
@@ -1003,7 +976,7 @@ const columns = computed<any[]>(() => [
                       color="neutral"
                       variant="outline"
                     >
-                      {{ $t('ui.action.filter.tabs.cameras') }}:
+                      相机:
                       {{ selectedCounts.cameras }}
                     </UBadge>
                     <UBadge
@@ -1012,7 +985,7 @@ const columns = computed<any[]>(() => [
                       color="neutral"
                       variant="outline"
                     >
-                      {{ $t('ui.action.filter.tabs.lenses') }}:
+                      镜头:
                       {{ selectedCounts.lenses }}
                     </UBadge>
                     <UBadge
@@ -1021,7 +994,7 @@ const columns = computed<any[]>(() => [
                       color="neutral"
                       variant="outline"
                     >
-                      {{ $t('ui.action.filter.tabs.cities') }}:
+                      城市:
                       {{ selectedCounts.cities }}
                     </UBadge>
                     <UBadge
@@ -1030,7 +1003,7 @@ const columns = computed<any[]>(() => [
                       color="neutral"
                       variant="outline"
                     >
-                      {{ $t('ui.action.filter.tabs.ratings') }}
+                      评分
                     </UBadge>
                   </div>
 
@@ -1058,7 +1031,7 @@ const columns = computed<any[]>(() => [
                         >
                           <ThumbImage
                             :src="photo.thumbnailUrl || ''"
-                            :alt="photo.title || $t('ui.photo.altFallback')"
+                            :alt="photo.title || '照片'"
                             class="h-full w-full object-cover"
                           />
                           <div
@@ -1094,9 +1067,7 @@ const columns = computed<any[]>(() => [
                             size="14"
                             class="shrink-0 text-gray-500 dark:text-gray-400"
                           />
-                          <span class="truncate">
-                            {{ $t('dashboard.albums.form.selectPhotos') }}
-                          </span>
+                          <span class="truncate"> 选择照片 </span>
                         </div>
                       </div>
                     </div>
@@ -1129,7 +1100,7 @@ const columns = computed<any[]>(() => [
                     >
                       <ThumbImage
                         :src="photo.thumbnailUrl || ''"
-                        :alt="photo.title || $t('ui.photo.altFallback')"
+                        :alt="photo.title || '照片'"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                       />
 
@@ -1144,11 +1115,7 @@ const columns = computed<any[]>(() => [
                           <p
                             class="truncate text-[10px] font-medium text-white/92"
                           >
-                            {{
-                              photo.title ||
-                              photo.storageKey ||
-                              $t('ui.photo.untitled')
-                            }}
+                            {{ photo.title || photo.storageKey || '未命名' }}
                           </p>
                           <p class="truncate text-[9px] text-white/72">
                             {{
@@ -1194,7 +1161,7 @@ const columns = computed<any[]>(() => [
                         icon="tabler:star-filled"
                         class="absolute right-1.5 top-1.5"
                       >
-                        {{ $t('dashboard.albums.modal.setCover') }}
+                        设为封面
                       </UBadge>
                     </div>
                   </button>
@@ -1210,17 +1177,13 @@ const columns = computed<any[]>(() => [
                     class="mb-3 opacity-50"
                   />
                   <p class="font-medium">
-                    {{
-                      hasActiveFilters
-                        ? $t('dashboard.albums.modal.noResults')
-                        : $t('dashboard.albums.modal.noPhotos')
-                    }}
+                    {{ hasActiveFilters ? '未找到匹配的照片' : '暂无照片' }}
                   </p>
                   <p
                     v-if="hasActiveFilters"
                     class="mt-1 text-sm"
                   >
-                    {{ $t('dashboard.albums.modal.tryOtherKeywords') }}
+                    尝试使用其他关键词搜索
                   </p>
                 </div>
               </div>
@@ -1237,7 +1200,7 @@ const columns = computed<any[]>(() => [
                     class="w-full sm:w-auto"
                     @click="closePhotoSelector"
                   >
-                    {{ $t('dashboard.albums.slideover.cancel') }}
+                    取消
                   </UButton>
                   <UButton
                     icon="tabler:check"
@@ -1245,11 +1208,7 @@ const columns = computed<any[]>(() => [
                     class="w-full sm:w-auto"
                     @click="confirmPhotoSelection"
                   >
-                    {{
-                      $t('dashboard.albums.modal.confirm', {
-                        count: draftSelectedPhotoIds.length,
-                      })
-                    }}
+                    {{ `确认 (${draftSelectedPhotoIds.length})` }}
                   </UButton>
                 </div>
               </div>
@@ -1270,14 +1229,10 @@ const columns = computed<any[]>(() => [
                   />
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">
-                    {{ $t('dashboard.albums.delete.title') }}
-                  </h3>
+                  <h3 class="text-lg font-semibold">删除相簿</h3>
                   <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     {{
-                      $t('dashboard.albums.delete.message', {
-                        title: currentAlbum?.title,
-                      })
+                      `确定要删除相簿\u0022${currentAlbum?.title}\u0022吗？删除相簿不会删除其中的照片，仅删除相簿本身。`
                     }}
                   </p>
                 </div>
@@ -1289,14 +1244,14 @@ const columns = computed<any[]>(() => [
                   color="neutral"
                   @click="isDeleteConfirmOpen = false"
                 >
-                  {{ $t('dashboard.albums.delete.cancel') }}
+                  取消
                 </UButton>
                 <UButton
                   color="error"
                   icon="tabler:trash"
                   @click="deleteAlbum"
                 >
-                  {{ $t('dashboard.albums.delete.confirm') }}
+                  确认删除
                 </UButton>
               </div>
             </div>

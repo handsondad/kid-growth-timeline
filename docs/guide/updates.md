@@ -1,8 +1,8 @@
-# Update Guide
+# 升级指南
 
-## Update the Local Checkout
+## 更新本地代码
 
-Stop the development server and back up the `data/` directory before updating:
+先停止开发服务器，并备份 `data/` 目录：
 
 ```bash
 git pull
@@ -10,4 +10,4 @@ pnpm install
 pnpm build
 ```
 
-Database migrations run automatically when the application starts. Start it again with `pnpm dev` and open [http://127.0.0.1:3000](http://127.0.0.1:3000).
+数据库迁移会在应用启动时自动执行。之后运行 `pnpm dev`，并打开 [http://127.0.0.1:3000](http://127.0.0.1:3000)。

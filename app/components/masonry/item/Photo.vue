@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatVideoTime } from '~~/shared/utils/video'
 import { formatCameraInfo } from '~/utils/camera'
 import { motion, useDomRef } from 'motion-v'
 
@@ -501,7 +502,7 @@ onUnmounted(() => {
       >
         <ThumbImage
           :src="photo.thumbnailUrl || ''"
-          :alt="photo.title || $t('ui.photo.altFallback')"
+          :alt="photo.title || '照片'"
           :thumbhash="photo.thumbnailHash || ''"
           class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           @load="handleImageLoad"
@@ -552,6 +553,17 @@ onUnmounted(() => {
       />
 
       <!-- Live Photo indicator -->
+      <span
+        v-if="photo.mediaType === 'video'"
+        class="absolute top-2 left-2 rounded-full bg-black/60 px-2 py-1 text-xs text-white"
+      >
+        <Icon
+          name="tabler:player-play"
+          class="inline size-3"
+        />
+        {{ formatVideoTime(photo.durationMs || 0) }}
+        <span v-if="photo.sourceMediaId"> · 裁剪版</span>
+      </span>
       <PhotoLivePhotoIndicator
         v-if="photo.isLivePhoto"
         class="absolute top-2 left-2"

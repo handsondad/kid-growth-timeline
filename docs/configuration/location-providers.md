@@ -1,21 +1,21 @@
-# Location Providers
+# 位置提供器
 
-Location providers convert photo GPS coordinates (latitude and longitude) into human-readable city or country names during photo processing. This process is called Reverse Geocoding.
+位置提供器在处理照片的过程中，将照片的经纬度信息转换为人类可读的城市或国家名称，这一过程成为逆向地理编码（Reverse Geocoding）。
 
-By default, no configuration is required. Kid Growth Timeline uses OpenStreetMap Nominatim as the default location provider.
+默认情况下，您不需要进行任何配置，成长时光轴 会使用 OpenStreetMap Nominatim 作为默认的位置提供器。
 
-However, you may need to configure a custom location provider in the following cases:
+然而，在下列情况下，您可能有必要配置自定义的位置提供器：
 
-- Your server is located in mainland China
-- The connection between your server and Nominatim is blocked
+- 服务器位于中国大陆
+- 服务器与 Nominatim 之间的连接受阻
 
-Kid Growth Timeline supports two location providers. You can choose the appropriate one based on your needs.
+成长时光轴 支持两种位置提供器，您可以根据需求选择合适的提供器。
 
 ## Nominatim
 
-Nominatim is a free reverse geocoding service provided by OpenStreetMap. By default, Kid Growth Timeline uses Nominatim as the location provider.
+Nominatim 是 OpenStreetMap 提供的免费逆向地理编码服务。默认情况下，成长时光轴 会使用 Nominatim 作为位置提供器。
 
-If your server cannot connect to the official Nominatim service, you can set up your own reverse proxy and use it through the following configuration:
+如果您的服务器无法连接到 Nominatim 官方的服务，您可以自行搭建反向代理，然后通过下面的配置使用自己的地址：
 
 ```bash
 NUXT_NOMINATIM_BASE_URL=http://your-nominatim-proxy-url/
@@ -23,10 +23,10 @@ NUXT_NOMINATIM_BASE_URL=http://your-nominatim-proxy-url/
 
 ## Mapbox Search API
 
-Mapbox Search API provides powerful reverse geocoding capabilities. To use Mapbox as your location provider, you need a [Mapbox access token](https://console.mapbox.com/account/access-tokens/).
+Mapbox Search API 提供强大的逆向地理编码功能，能够在中国大陆境内访问。要使用 Mapbox 作为位置提供器，您需要一个 [Mapbox 访问令牌](https://console.mapbox.com/account/access-tokens/)。
 
 ```bash
 NUXT_MAPBOX_ACCESS_TOKEN=your-mapbox-access-token
 ```
 
-When you configure the `NUXT_MAPBOX_ACCESS_TOKEN` environment variable, Kid Growth Timeline will automatically use Mapbox Search API as the location provider.
+当您配置了 `NUXT_MAPBOX_ACCESS_TOKEN` 环境变量后，成长时光轴 会自动使用 Mapbox Search API 作为位置提供器。

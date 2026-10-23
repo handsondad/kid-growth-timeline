@@ -1,64 +1,63 @@
 <script lang="ts" setup>
-import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
+import type { NavigationMenuItem } from '@nuxt/ui'
 
 const route = useRoute()
 const settingsStore = useSettingsStore()
-const { menuItems: localeMenuItems } = useLocalePreference()
 
 const appTitle = computed(() => {
   const value = settingsStore.getSetting('app:title')
-  return value ? String(value) : $t('title.dashboard')
+  return value ? String(value) : '仪表板'
 })
 
 const navItems = computed<NavigationMenuItem[][]>(() => [
   [
     {
-      label: $t('title.dashboard'),
+      label: '仪表板',
       icon: 'tabler:dashboard',
       to: '/dashboard',
     },
     {
-      label: $t('title.photos'),
+      label: '照片库',
       icon: 'tabler:photo-cog',
       to: '/dashboard/photos',
     },
     {
-      label: $t('title.albums'),
+      label: '相簿',
       icon: 'tabler:album',
       to: '/dashboard/albums',
     },
     {
-      label: $t('title.queue'),
+      label: '队列管理',
       icon: 'tabler:list-check',
       to: '/dashboard/queue',
     },
     {
-      label: $t('title.logs'),
+      label: '系统日志',
       icon: 'tabler:file-text',
       to: '/dashboard/logs',
     },
     {
-      label: $t('title.siteAdministration'),
+      label: '站点设置',
       icon: 'tabler:settings',
       defaultOpen: route.path.startsWith('/dashboard/settings'),
       children: [
         {
-          label: $t('title.generalSettings'),
+          label: '基本设置',
           icon: 'tabler:settings-2',
           to: '/dashboard/settings/general',
         },
         {
-          label: $t('title.storageSettings'),
+          label: '存储设置',
           icon: 'tabler:database',
           to: '/dashboard/settings/storage',
         },
         {
-          label: $t('title.mapAndLocation'),
+          label: '地图和位置',
           icon: 'tabler:map-pin',
           to: '/dashboard/settings/map',
         },
         {
-          label: $t('title.analyticsSettings'),
+          label: '分析与追踪',
           icon: 'tabler:chart-bar',
           to: '/dashboard/settings/analytics',
         },
@@ -73,7 +72,7 @@ const navItems = computed<NavigationMenuItem[][]>(() => [
       target: '_blank',
     },
     {
-      label: $t('dashboard.nav.documentation'),
+      label: '文档',
       icon: 'tabler:book',
       to: 'https://github.com/handsondad/kid-growth-timeline',
       target: '_blank',
@@ -81,25 +80,8 @@ const navItems = computed<NavigationMenuItem[][]>(() => [
   ],
 ])
 
-const footerMenuItems = computed<DropdownMenuItem[][]>(() => [
-  [
-    {
-      label: $t('ui.locale.label'),
-      icon: 'tabler:language',
-      children: localeMenuItems.value,
-    },
-  ],
-  [
-    {
-      label: $t('dashboard.nav.viewGallery'),
-      icon: 'tabler:photo',
-      to: '/',
-    },
-  ],
-])
-
 useHead({
-  title: () => $t('title.dashboard'),
+  title: () => '仪表板',
   titleTemplate: (title) => `${title ? `${title} | ` : ''}${appTitle.value}`,
 })
 </script>
@@ -164,27 +146,17 @@ useHead({
       </template>
 
       <template #footer="{ collapsed }">
-        <UDropdownMenu
-          :items="footerMenuItems"
-          :content="{ align: 'center', collisionPadding: 12 }"
-          :ui="{
-            content: collapsed
-              ? 'min-w-48'
-              : 'min-w-(--reka-dropdown-menu-trigger-width)',
-          }"
-        >
-          <UButton
-            icon="tabler:language"
-            :label="collapsed ? undefined : $t('ui.locale.label')"
-            :trailing-icon="collapsed ? undefined : 'tabler:selector'"
-            size="lg"
-            color="neutral"
-            variant="ghost"
-            class="w-full data-[state=open]:bg-elevated"
-            :block="collapsed"
-            :ui="{ trailingIcon: 'text-dimmed ms-auto' }"
-          />
-        </UDropdownMenu>
+        <UButton
+          to="/"
+          icon="tabler:photo"
+          :label="collapsed ? undefined : '查看画廊'"
+          aria-label="查看画廊"
+          size="lg"
+          color="neutral"
+          variant="ghost"
+          class="w-full"
+          :block="collapsed"
+        />
       </template>
     </UDashboardSidebar>
 

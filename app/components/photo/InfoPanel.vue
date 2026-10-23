@@ -4,6 +4,8 @@ import { motion } from 'motion-v'
 import type { NeededExif } from '../../../shared/types/photo'
 import type { KVData } from './KVRenderer.vue'
 import { formatCameraInfo, formatLensInfo } from '~/utils/camera'
+import { hasCoordinates } from '~~/shared/utils'
+import { formatVideoTime } from '~~/shared/utils/video'
 
 interface Props {
   currentPhoto: Photo
@@ -22,7 +24,6 @@ interface Album {
 
 const dayjs = useDayjs()
 const router = useRouter()
-const { localizeExif } = useExifLocalization()
 
 const props = defineProps<Props>()
 
@@ -100,12 +101,7 @@ const formatGPSCoordinatesMultiLine = (
 
 const gpsCoordinates = computed(() => {
   // 优先使用数据库中存储的坐标
-  if (
-    typeof props.currentPhoto.latitude === 'number' &&
-    Number.isFinite(props.currentPhoto.latitude) &&
-    typeof props.currentPhoto.longitude === 'number' &&
-    Number.isFinite(props.currentPhoto.longitude)
-  ) {
+  if (hasCoordinates(props.currentPhoto)) {
     return {
       latitude: props.currentPhoto.latitude,
       longitude: props.currentPhoto.longitude,
@@ -140,11 +136,11 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
   // 基本信息
   sections.basicInfo = [
     {
-      title: $t('exif.sections.basic'),
+      title: '基本信息',
       items: [
         props.currentPhoto.fileName || props.currentPhoto.storageKey
           ? {
-              label: $t('exif.filename'),
+              label: '文件名',
               value:
                 props.currentPhoto.fileName ||
                 props.currentPhoto.storageKey?.split('/').pop() ||
@@ -154,80 +150,80 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
           : null,
         props.currentPhoto.fileSize
           ? {
-              label: $t('exif.fileSize'),
+              label: '文件大小',
               value: formatBytes(props.currentPhoto.fileSize),
               icon: 'tabler:database',
             }
           : null,
         props.currentPhoto.width && props.currentPhoto.height
           ? {
-              label: $t('exif.resolution'),
+              label: '分辨率',
               value: `${props.currentPhoto.width} × ${props.currentPhoto.height}`,
               icon: 'tabler:dimensions',
             }
           : null,
         props.currentPhoto.width && props.currentPhoto.height
           ? {
-              label: $t('exif.pixels'),
+              label: '像素',
               value: `${((props.currentPhoto.width * props.currentPhoto.height) / 1000000).toFixed(2)} MP`,
               icon: 'tabler:grid-dots',
             }
           : null,
         props.exifData?.DateTimeOriginal
           ? {
-              label: $t('exif.dateTaken.title'),
+              label: '拍摄时间',
               value: dayjs(props.exifData.DateTimeOriginal).format('L LT'),
               icon: 'tabler:calendar',
             }
           : null,
         props.exifData?.ColorSpace
           ? {
-              label: $t('exif.colorSpace.title'),
-              value: localizeExif('colorSpace', props.exifData.ColorSpace),
+              label: '色彩空间',
+              value: formatExifValue('colorSpace', props.exifData.ColorSpace),
               icon: 'tabler:palette',
             }
           : null,
         props.exifData?.Artist
           ? {
-              label: $t('exif.artist'),
+              label: '艺术家',
               value: props.exifData.Artist,
               icon: 'tabler:user',
             }
           : null,
         props.exifData?.Software
           ? {
-              label: $t('exif.software'),
+              label: '软件',
               value: props.exifData.Software,
               icon: 'tabler:app-window',
             }
           : null,
         props.exifData?.tz
           ? {
-              label: $t('exif.tz'),
+              label: '时区',
               value: props.exifData.tz,
               icon: 'tabler:world',
             }
           : null,
         props.currentPhoto.country
           ? {
-              label: $t('exif.country'),
+              label: '国家',
               value: props.currentPhoto.country,
               icon: 'tabler:map-pin',
             }
           : null,
         props.currentPhoto.city
           ? {
-              label: $t('exif.city'),
+              label: '城市',
               value: props.currentPhoto.city,
               icon: 'tabler:building',
             }
           : null,
-        props.currentPhoto.latitude && props.currentPhoto.longitude
+        gpsCoordinates.value
           ? {
-              label: $t('exif.gps.title'),
+              label: '坐标',
               value: formatGPSCoordinatesMultiLine(
-                props.currentPhoto.latitude,
-                props.currentPhoto.longitude,
+                gpsCoordinates.value.latitude,
+                gpsCoordinates.value.longitude,
               ),
               icon: 'tabler:gps',
             }
@@ -239,32 +235,32 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
   // 拍摄参数
   sections.captureParams = [
     {
-      title: $t('exif.sections.shooting.parameters'),
+      title: '拍摄参数',
       items: [
         props.exifData?.FocalLengthIn35mmFormat
           ? {
-              label: $t('exif.focal.length.actual'),
+              label: '焦距',
               value: `${props.exifData.FocalLengthIn35mmFormat}`,
               icon: 'tabler:telescope',
             }
           : null,
         props.exifData?.FNumber
           ? {
-              label: $t('exif.aperture'),
+              label: '光圈',
               value: `f/${props.exifData.FNumber}`,
               icon: 'tabler:aperture',
             }
           : null,
         props.exifData?.ExposureTime
           ? {
-              label: $t('exif.exposure.time'),
+              label: '曝光时间',
               value: formatExposureTime(props.exifData.ExposureTime),
               icon: 'tabler:clock',
             }
           : null,
         props.exifData?.ISO
           ? {
-              label: $t('exif.iso'),
+              label: 'ISO',
               value: props.exifData.ISO.toString(),
               icon: 'tabler:sun-electricity',
             }
@@ -276,11 +272,11 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
   // 设备信息
   sections.deviceInfo = [
     {
-      title: $t('exif.sections.deviceInfomation'),
+      title: '设备信息',
       items: [
         props.exifData?.Make && props.exifData?.Model
           ? {
-              label: $t('exif.camera'),
+              label: '相机',
               value: formatCameraInfo(
                 props.exifData.Make,
                 props.exifData.Model,
@@ -290,7 +286,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
           : null,
         props.exifData?.LensModel
           ? {
-              label: $t('exif.lens'),
+              label: '镜头',
               value: formatLensInfo(
                 props.exifData.LensMake,
                 props.exifData.LensModel,
@@ -300,21 +296,21 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
           : null,
         props.exifData?.MaxApertureValue
           ? {
-              label: $t('exif.maxAperture'),
+              label: '最大光圈',
               value: `f/${props.exifData.MaxApertureValue}`,
               icon: 'tabler:aperture',
             }
           : null,
         props.exifData?.FocalLength
           ? {
-              label: $t('exif.focal.length.actual'),
+              label: '焦距',
               value: props.exifData.FocalLength,
               icon: 'tabler:telescope',
             }
           : null,
         props.exifData?.FocalLengthIn35mmFormat
           ? {
-              label: $t('exif.focal.length.equivalent'),
+              label: '35mm 等效',
               value: props.exifData.FocalLengthIn35mmFormat,
               icon: 'tabler:zoom-in-area',
             }
@@ -326,47 +322,50 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
   // 拍摄模式
   sections.captureMode = [
     {
-      title: $t('exif.sections.shooting.mode'),
+      title: '拍摄模式',
       items: [
         props.exifData?.WhiteBalance
           ? {
-              label: $t('exif.wb.title'),
-              value: localizeExif('whiteBalance', props.exifData.WhiteBalance),
+              label: '白平衡',
+              value: formatExifValue(
+                'whiteBalance',
+                props.exifData.WhiteBalance,
+              ),
               icon: 'mdi:white-balance-auto',
             }
           : null,
         props.exifData?.WBShiftAB
           ? {
-              label: $t('exif.wb.shiftAB'),
+              label: '白平衡偏移(琥珀-蓝)',
               value: `${props.exifData.WBShiftAB}`,
               icon: 'mdi:white-balance-auto',
             }
           : null,
         props.exifData?.WBShiftGM
           ? {
-              label: $t('exif.wb.shiftGM'),
+              label: '白平衡偏移(绿-品红)',
               value: `${props.exifData.WBShiftGM}`,
               icon: 'mdi:white-balance-auto',
             }
           : null,
         props.exifData?.WhiteBalanceBias
           ? {
-              label: $t('exif.wb.bias'),
+              label: '白平衡偏移',
               value: `${props.exifData.WhiteBalanceBias}`,
               icon: 'mdi:white-balance-auto',
             }
           : null,
         props.exifData?.WhiteBalanceFineTune
           ? {
-              label: $t('exif.wb.fineTune'),
+              label: '白平衡微调',
               value: `${props.exifData.WhiteBalanceFineTune}`,
               icon: 'mdi:white-balance-auto',
             }
           : null,
         props.exifData?.ExposureProgram
           ? {
-              label: $t('exif.exposure.program'),
-              value: localizeExif(
+              label: '曝光程序',
+              value: formatExifValue(
                 'exposureProgram',
                 props.exifData.ExposureProgram,
               ),
@@ -375,29 +374,35 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
           : null,
         props.exifData?.ExposureMode
           ? {
-              label: $t('exif.exposure.mode'),
-              value: localizeExif('exposureMode', props.exifData.ExposureMode),
+              label: '曝光模式',
+              value: formatExifValue(
+                'exposureMode',
+                props.exifData.ExposureMode,
+              ),
               icon: 'tabler:exposure-filled',
             }
           : null,
         props.exifData?.MeteringMode
           ? {
-              label: $t('exif.metering.title'),
-              value: localizeExif('meteringMode', props.exifData.MeteringMode),
+              label: '测光模式',
+              value: formatExifValue(
+                'meteringMode',
+                props.exifData.MeteringMode,
+              ),
               icon: 'tabler:focus-auto',
             }
           : null,
         props.exifData?.Flash
           ? {
-              label: $t('exif.flash.title'),
-              value: localizeExif('flash', props.exifData.Flash),
+              label: '闪光灯',
+              value: formatExifValue('flash', props.exifData.Flash),
               icon: 'material-symbols:flash-on-rounded',
             }
           : null,
         props.exifData?.FlashMeteringMode
           ? {
-              label: $t('exif.flash.meteringMode'),
-              value: localizeExif(
+              label: '闪光灯测光模式',
+              value: formatExifValue(
                 'meteringMode',
                 props.exifData.FlashMeteringMode,
               ),
@@ -406,8 +411,8 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
           : null,
         props.exifData?.SceneCaptureType
           ? {
-              label: $t('exif.scene.captureType'),
-              value: localizeExif(
+              label: '场景捕捉类型',
+              value: formatExifValue(
                 'sceneCaptureType',
                 props.exifData.SceneCaptureType,
               ),
@@ -421,19 +426,19 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
   // 技术参数
   sections.technicalParams = [
     {
-      title: $t('exif.sections.specification'),
+      title: '技术参数',
       items: [
         props.exifData?.BrightnessValue
           ? {
-              label: $t('exif.brightness.value'),
+              label: '亮度',
               value: `${props.exifData.BrightnessValue.toFixed(1)} EV`,
               icon: 'tabler:sun',
             }
           : null,
         props.exifData?.SensingMethod
           ? {
-              label: $t('exif.sensing.method'),
-              value: localizeExif(
+              label: '感光方式',
+              value: formatExifValue(
                 'sensingMethod',
                 props.exifData.SensingMethod,
               ),
@@ -443,7 +448,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.FocalPlaneXResolution &&
         props.exifData?.FocalPlaneYResolution
           ? {
-              label: $t('exif.focal.plane.resolution'),
+              label: '焦平面分辨率',
               value: `${props.exifData.FocalPlaneXResolution.toFixed(2)} x ${props.exifData.FocalPlaneYResolution.toFixed(2)}`,
               icon: 'tabler:photo-sensor',
             }
@@ -525,6 +530,28 @@ const onAlbumClick = (albumId: number) => {
     >
       <!-- 照片描述 -->
       <div
+        v-if="currentPhoto.mediaType === 'video'"
+        class="space-y-2 text-sm text-white"
+      >
+        <p>
+          视频 · 片长:
+          {{ formatVideoTime(currentPhoto.durationMs || 0, true) }}
+        </p>
+        <template v-if="currentPhoto.sourceMediaId">
+          <p>
+            裁剪版:
+            {{ formatVideoTime(currentPhoto.trimStartMs || 0, true) }} –
+            {{ formatVideoTime(currentPhoto.trimEndMs || 0, true) }}
+          </p>
+          <NuxtLink
+            :to="`/${currentPhoto.sourceMediaId}`"
+            target="_blank"
+            class="underline break-all"
+            >来源视频: {{ currentPhoto.sourceMediaId }}</NuxtLink
+          >
+        </template>
+      </div>
+      <div
         v-if="currentPhoto.description"
         class="text-sm text-white text-justify"
       >
@@ -550,7 +577,7 @@ const onAlbumClick = (albumId: number) => {
         class="flex items-center gap-2 justify-between"
       >
         <h4 class="text-sm font-medium text-white uppercase tracking-wide">
-          {{ $t('exif.sections.rating') }}
+          评分
         </h4>
 
         <Rating
@@ -568,7 +595,7 @@ const onAlbumClick = (albumId: number) => {
         <h4
           class="text-sm font-medium text-white/90 uppercase tracking-wide mb-2"
         >
-          {{ $t('exif.sections.albums') }}
+          包含的相册
         </h4>
         <div class="space-y-2">
           <div
@@ -598,7 +625,7 @@ const onAlbumClick = (albumId: number) => {
         <h4
           class="text-sm font-medium text-white/90 uppercase tracking-wide mb-2"
         >
-          {{ $t('exif.sections.tags') }}
+          标签
         </h4>
         <div class="flex flex-wrap gap-1">
           <UBadge
@@ -614,13 +641,18 @@ const onAlbumClick = (albumId: number) => {
         </div>
       </div>
       <PhotoKVRenderer
-        v-if="formatedExifData.captureParams"
+        v-if="
+          currentPhoto.mediaType !== 'video' && formatedExifData.captureParams
+        "
         :data="formatedExifData.captureParams"
       />
 
-      <div class="space-y-2">
+      <div
+        v-if="currentPhoto.mediaType !== 'video'"
+        class="space-y-2"
+      >
         <h4 class="text-sm font-medium text-white uppercase tracking-wide">
-          {{ $t('exif.sections.histogram') }}
+          直方图
         </h4>
 
         <Histogram
@@ -630,17 +662,21 @@ const onAlbumClick = (albumId: number) => {
       </div>
 
       <PhotoKVRenderer
-        v-if="formatedExifData.deviceInfo"
+        v-if="currentPhoto.mediaType !== 'video' && formatedExifData.deviceInfo"
         :data="formatedExifData.deviceInfo"
       />
 
       <PhotoKVRenderer
-        v-if="formatedExifData.captureMode"
+        v-if="
+          currentPhoto.mediaType !== 'video' && formatedExifData.captureMode
+        "
         :data="formatedExifData.captureMode"
       />
 
       <PhotoKVRenderer
-        v-if="formatedExifData.technicalParams"
+        v-if="
+          currentPhoto.mediaType !== 'video' && formatedExifData.technicalParams
+        "
         :data="formatedExifData.technicalParams"
       />
     </div>

@@ -153,9 +153,7 @@ const hoveredAlbum = ref<number | null>(null)
                     :lazy="false"
                     :src="photo.thumbnailUrl!"
                     :thumbhash="photo.thumbnailHash"
-                    :alt="
-                      photo.exif?.ImageDescription || $t('ui.photo.altFallback')
-                    "
+                    :alt="photo.exif?.ImageDescription || '照片'"
                     :style="{
                       aspectRatio: photo.aspectRatio || 1,
                     }"
@@ -174,12 +172,12 @@ const hoveredAlbum = ref<number | null>(null)
 
     <div class="absolute p-4">
       <!-- Back to home -->
-      <UTooltip :text="$t('ui.action.home.tooltip')">
+      <UTooltip text="返回首页">
         <UButton
           variant="ghost"
           color="neutral"
           icon="tabler:arrow-left"
-          :label="$t('ui.action.home.tooltip')"
+          label="返回首页"
           size="sm"
           to="/"
         />
@@ -191,7 +189,7 @@ const hoveredAlbum = ref<number | null>(null)
       <h1
         class="font-black text-6xl sm:text-7xl drop-shadow-2xl bg-clip-text bg-linear-to-br from-neutral-800 to-neutral-400 dark:from-white dark:to-neutral-500 text-transparent"
       >
-        {{ $t('title.albums').toUpperCase() }}
+        {{ '相簿'.toUpperCase() }}
       </h1>
       <p
         class="mt-2 text-lg text-neutral-600 dark:text-neutral-400 font-medium font-[Pacifico]"
@@ -275,10 +273,10 @@ const hoveredAlbum = ref<number | null>(null)
                 <p
                   class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
                 >
-                  {{ $t('ui.album.noImage') }}
+                  空相簿
                 </p>
                 <!-- <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                  {{ $t('ui.album.emptyAlbumTip') }}
+                  添加照片开始吧
                 </p> -->
               </div>
             </div>
@@ -311,7 +309,7 @@ const hoveredAlbum = ref<number | null>(null)
               <p
                 class="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2"
               >
-                {{ album.description || $t('ui.album.noDescription') }}
+                {{ album.description || '无描述' }}
               </p>
             </div>
           </div>

@@ -46,35 +46,35 @@ const dateTo = computed({
 
 const tabItems = computed<TabsItem[]>(() => [
   {
-    label: $t('ui.action.filter.tabs.tags'),
+    label: '标签',
     value: 'labels',
     badge: selectedCounts.value.tags || undefined,
     icon: 'tabler:tags',
     slot: 'tags',
   },
   {
-    label: $t('ui.action.filter.tabs.cameras'),
+    label: '相机',
     value: 'cameras',
     badge: selectedCounts.value.cameras || undefined,
     icon: 'tabler:camera',
     slot: 'cameras',
   },
   {
-    label: $t('ui.action.filter.tabs.lenses'),
+    label: '镜头',
     value: 'lenses',
     badge: selectedCounts.value.lenses || undefined,
     icon: 'tabler:aperture',
     slot: 'lenses',
   },
   {
-    label: $t('ui.action.filter.tabs.cities'),
+    label: '城市',
     value: 'cities',
     badge: selectedCounts.value.cities || undefined,
     icon: 'tabler:map-pin',
     slot: 'cities',
   },
   {
-    label: $t('ui.action.filter.tabs.ratings'),
+    label: '评分',
     value: 'ratings',
     badge: selectedCounts.value.ratings || undefined,
     icon: 'tabler:star',
@@ -95,7 +95,7 @@ const onShuffle = () => {
   <div class="space-y-1.5 w-[calc(100vw-34px)] sm:w-md">
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-bold text-neutral-900 dark:text-white p-2">
-        {{ $t('ui.action.filter.title') }}
+        筛选照片
       </h3>
       <div class="flex items-center gap-1">
         <UButton
@@ -112,7 +112,7 @@ const onShuffle = () => {
             }
           "
         >
-          {{ $t('ui.action.filter.clearAll') }}
+          清除全部
         </UButton>
         <!-- 搜索功能 -->
         <div
@@ -123,7 +123,7 @@ const onShuffle = () => {
             v-model="searchQuery"
             size="sm"
             icon="tabler:search"
-            :placeholder="$t('ui.action.filter.searchPlaceholder')"
+            placeholder="搜索文件名等..."
             class="w-32"
             @keydown.escape="isSearchMode = false"
           />
@@ -148,7 +148,7 @@ const onShuffle = () => {
           icon="tabler:search"
           @click="isSearchMode = true"
         />
-        <UTooltip :text="$t('ui.action.filter.shuffleTooltip')">
+        <UTooltip text="打乱列表">
           <UButton
             size="sm"
             variant="ghost"
@@ -164,7 +164,7 @@ const onShuffle = () => {
         <span
           class="text-xs font-medium text-neutral-600 dark:text-neutral-300"
         >
-          {{ $t('ui.action.filter.dateFrom') }}
+          开始日期
         </span>
         <UInput
           v-model="dateFrom"
@@ -178,7 +178,7 @@ const onShuffle = () => {
         <span
           class="text-xs font-medium text-neutral-600 dark:text-neutral-300"
         >
-          {{ $t('ui.action.filter.dateTo') }}
+          结束日期
         </span>
         <UInput
           v-model="dateTo"
@@ -227,7 +227,7 @@ const onShuffle = () => {
             v-if="availableFilters.tags.length === 0"
             class="text-center text-sm text-neutral-500 dark:text-neutral-400 py-4"
           >
-            {{ $t('ui.action.filter.empty.tags') }}
+            没有标签
           </div>
         </div>
       </template>
@@ -259,7 +259,7 @@ const onShuffle = () => {
             v-if="availableFilters.cameras.length === 0"
             class="text-center text-sm text-neutral-500 dark:text-neutral-400 py-4"
           >
-            {{ $t('ui.action.filter.empty.cameras') }}
+            没有相机信息
           </div>
         </div>
       </template>
@@ -291,7 +291,7 @@ const onShuffle = () => {
             v-if="availableFilters.lenses.length === 0"
             class="text-center text-sm text-neutral-500 dark:text-neutral-400 py-4"
           >
-            {{ $t('ui.action.filter.empty.lenses') }}
+            没有镜头信息
           </div>
         </div>
       </template>
@@ -323,7 +323,7 @@ const onShuffle = () => {
             v-if="availableFilters.cities.length === 0"
             class="text-center text-sm text-neutral-500 dark:text-neutral-400 py-4"
           >
-            {{ $t('ui.action.filter.empty.cities') }}
+            没有城市信息
           </div>
         </div>
       </template>
@@ -343,11 +343,8 @@ const onShuffle = () => {
           >
             {{
               selectedRating
-                ? $t(
-                    'ui.action.filter.rating.showStarsAndAbove',
-                    selectedRating,
-                  )
-                : $t('ui.action.filter.rating.showAll')
+                ? `展示 ${selectedRating} 星以上的照片`
+                : '展示所有照片'
             }}
           </div>
         </div>

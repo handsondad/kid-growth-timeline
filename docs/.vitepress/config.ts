@@ -3,7 +3,8 @@ import { defineConfig } from 'vitepress'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'Kid Growth Timeline',
-  description: 'A Self-hosted photo gallery',
+  description: '本机使用的家庭照片与视频时间轴',
+  lang: 'zh-CN',
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }],
     [
@@ -34,39 +35,40 @@ export default defineConfig({
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Guide', link: '/guide/getting-started' },
-      { text: 'Development', link: '/development/contributing' },
-      { text: 'Demo', link: 'https://lens.bh8.ga' },
+      { text: '使用指南', link: '/guide/getting-started' },
+      { text: '开发文档', link: '/development/contributing' },
+      { text: '演示', link: 'https://lens.bh8.ga' },
     ],
 
     sidebar: [
       {
-        text: 'Guide',
+        text: '使用指南',
         items: [
-          { text: 'Getting Started', link: '/guide/getting-started' },
-          { text: 'Configuration', link: '/guide/configuration' },
-          { text: 'Update Guide', link: '/guide/updates' },
+          { text: '快速开始', link: '/guide/getting-started' },
+          { text: '配置', link: '/guide/configuration' },
+          { text: '更新指南', link: '/guide/updates' },
         ],
       },
       {
-        text: 'Configuration',
+        text: '配置',
         items: [
           {
-            text: 'Storage Providers',
+            text: '存储服务',
             link: '/configuration/storage-providers',
           },
-          { text: 'Map Providers', link: '/configuration/map-providers' },
+          { text: '地图服务', link: '/configuration/map-providers' },
           {
-            text: 'Location Providers',
+            text: '地理编码服务',
             link: '/configuration/location-providers',
           },
         ],
       },
       {
-        text: 'Development',
+        text: '开发文档',
         items: [
-          { text: 'Contributing Guide', link: '/development/contributing' },
-          { text: 'API Documentation', link: '/development/api' },
+          { text: '贡献指南', link: '/development/contributing' },
+          { text: 'API 文档', link: '/development/api' },
+          { text: '添加设置项', link: '/development/how-to-add-setting' },
         ],
       },
     ],
@@ -81,7 +83,7 @@ export default defineConfig({
     editLink: {
       pattern:
         'https://github.com/handsondad/kid-growth-timeline/edit/main/docs/:path',
-      text: 'Edit this page on GitHub',
+      text: '在 GitHub 上编辑此页',
     },
 
     search: {
@@ -89,21 +91,9 @@ export default defineConfig({
     },
 
     footer: {
-      message: 'Released under the MIT License.',
+      message: '基于 MIT 许可证发布。',
       copyright: 'Copyright © 2025 Timothy Yin',
     },
   },
-  locales: {
-    root: {
-      label: 'English',
-      lang: 'en',
-    },
-    zh: {
-      label: '简体中文',
-      lang: 'zh',
-      link: '/zh/',
-    },
-  },
-
   ignoreDeadLinks: [/^http?:\/\/localhost/],
 })

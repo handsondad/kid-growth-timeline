@@ -16,7 +16,6 @@ const props = withDefaults(
     zoom?: number
     interactive?: boolean
     attributionControl?: false | AttributionControlOptions
-    language?: string
     setupNotice?: boolean
   }>(),
   {
@@ -26,7 +25,6 @@ const props = withDefaults(
     zoom: 2,
     interactive: true,
     attributionControl: false,
-    language: undefined,
     setupNotice: false,
   },
 )
@@ -131,7 +129,7 @@ const mapStyle = computed(() => {
           zoom: zoom,
           interactive: interactive,
           attributionControl: attributionControl,
-          language: language,
+          language: 'zh-Hans',
           config: {
             basemap: {
               lightPreset: $colorMode.value === 'dark' ? 'night' : 'day',

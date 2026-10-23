@@ -21,7 +21,7 @@ const { photos } = usePhotos()
             <LoaderAvatar />
             <span class="loading-scan-wrapper">
               <span class="text-base font-medium loading-scan-text">
-                {{ $t('ui.loading') }}
+                加载中
               </span>
             </span>
           </div>

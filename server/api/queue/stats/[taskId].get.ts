@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
 
     return taskStats
   } catch (error) {
+    if (error && typeof error === 'object' && 'statusCode' in error) throw error
     throw createError({
       statusCode: 500,
       statusMessage:

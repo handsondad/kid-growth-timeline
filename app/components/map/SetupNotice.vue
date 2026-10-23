@@ -12,7 +12,7 @@ async function openSettings() {
 <template>
   <UModal
     v-model:open="isOpen"
-    :title="$t('map.setupNotice.title')"
+    title="地图服务尚未配置"
     :ui="{
       overlay: 'z-[80]',
       content: 'z-[80]',
@@ -25,11 +25,13 @@ async function openSettings() {
         name="tabler:map-off"
         class="size-5 shrink-0 text-warning"
       />
-      <span>{{ $t('map.setupNotice.title') }}</span>
+      <span>地图服务尚未配置</span>
     </template>
     <template #body>
       <p class="text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-        {{ $t('map.setupNotice.description') }}
+        此地图需要 MapTiler 或 Mapbox
+        访问令牌才能加载。管理员可以在“地图和位置”设置中添加令牌。也可以使用自定义
+        MapLibre 样式 URL 代替 MapTiler 令牌。
       </p>
     </template>
     <template #footer>
@@ -38,13 +40,13 @@ async function openSettings() {
         variant="outline"
         @click="dismiss"
       >
-        {{ $t('map.setupNotice.dismiss') }}
+        关闭
       </UButton>
       <UButton
         icon="tabler:settings"
         @click="openSettings"
       >
-        {{ $t('map.setupNotice.openSettings') }}
+        打开地图设置
       </UButton>
     </template>
   </UModal>

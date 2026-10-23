@@ -13,6 +13,8 @@
   key: 'foo',
   type: 'string',
   defaultValue: 'bar',
+  label: '示例设置',
+  description: '示例设置的用途',
   isPublic: true,
 },
 ```
@@ -31,7 +33,7 @@
 - `isSecret`: 是否为机密字段（如密码）
 - `enum`: 枚举值数组
 
-> 💡 **注意**：不需要在 DEFAULT_SETTINGS 中添加 `label` 和 `description`。SettingField 组件会自动生成翻译键 `settings.${namespace}.${key}.label` 和 `settings.${namespace}.${key}.description`
+`label` 和 `description` 直接填写中文。项目仅使用简体中文，不维护语言包或翻译键。已有数据库中的旧文案键会由当前字段定义覆盖展示，无需修改用户设置值。
 
 ## 步骤 2：添加 UI 配置
 
@@ -42,32 +44,14 @@ export const APP_SETTINGS_UI: Record<string, FieldUIConfig> = {
   // ... 其他配置
   foo: {
     type: 'input', // 字段类型：input, password, url, textarea, select, radio, tabs, toggle, number
-    placeholder: 'Enter foo value',
-    help: 'settings.app.foo.help', // 翻译键，可选
+    placeholder: '请输入示例值',
+    help: '这里填写此设置的中文使用说明', // 可选
     required: true, // 是否必需，可选
   },
 }
 ```
 
-## 步骤 3：添加翻译
-
-编辑 `i18n/locales/` 中的翻译文件（例如 `en.json`）：
-
-```json
-{
-  "settings": {
-    "app": {
-      "foo": {
-        "label": "Foo",
-        "description": "The foo setting",
-        "help": "This is the help text for foo"
-      }
-    }
-  }
-}
-```
-
-## 步骤 4：在页面中使用
+## 步骤 3：在页面中使用
 
 编辑 `app/pages/dashboard/settings/general.vue`，直接在模板中使用：
 
@@ -97,7 +81,7 @@ export const APP_SETTINGS_UI: Record<string, FieldUIConfig> = {
 ```typescript
 foo: {
   type: 'input',
-  placeholder: 'Only show when bar = "baz"',
+  placeholder: '仅在 bar 为 baz 时显示',
   visibleIf: { fieldKey: 'bar', value: 'baz' },
 }
 ```

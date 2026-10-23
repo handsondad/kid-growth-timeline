@@ -22,7 +22,6 @@ const emit = defineEmits<{
 
 const mapInstance = ref<MapInstance | null>(null)
 const markerCoordinates = ref<[number, number] | null>(null)
-const { locale } = useI18n()
 
 let clickHandler: ((event: any) => void) | null = null
 
@@ -114,13 +113,12 @@ onBeforeUnmount(() => {
   >
     <MapProvider
       class="w-full h-full"
-      :map-id="'photo-location-picker'"
+      map-id="photo-location-picker"
       :center="markerCoordinates ?? undefined"
       :zoom="
         markerCoordinates ? Math.max($props.zoom ?? 4, 4) : ($props.zoom ?? 2)
       "
       :interactive="true"
-      :language="locale"
       @load="onMapLoad"
     >
       <MapProviderMarker

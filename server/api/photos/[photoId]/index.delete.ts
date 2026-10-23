@@ -24,6 +24,32 @@ export default eventHandler(async (event) => {
     })
   }
 
+  if (photo.mediaType === 'video') {
+    return withVideoMediaLock(photo.id, async () => {
+      const active = useDB()
+        .select({ id: tables.pipelineQueue.id })
+        .from(tables.pipelineQueue)
+        .where(sql`${tables.pipelineQueue.status} IN ('pending', 'in-stages') AND
+          (json_extract(${tables.pipelineQueue.payload}, '$.mediaId') = ${photo.id}
+          OR json_extract(${tables.pipelineQueue.payload}, '$.outputId') = ${photo.id})`)
+        .get()
+      if (active)
+        throw createError({
+          statusCode: 409,
+          statusMessage:
+            'Wait for video tasks to finish before deleting this media',
+        })
+      const keys = new Set(
+        [photo.storageKey, photo.videoPlaybackKey, photo.thumbnailKey].filter(
+          (key): key is string => !!key,
+        ),
+      )
+      for (const key of keys) await storageProvider.delete(key)
+      useDB().delete(tables.photos).where(eq(tables.photos.id, photo.id)).run()
+      return { statusCode: 200, statusMessage: 'Media deleted successfully' }
+    })
+  }
+
   logger.image.info(`Deleting photo ${photo.title || photo.id || photoId}`)
 
   if (photo.storageKey) {
@@ -72,3 +98,5 @@ export default eventHandler(async (event) => {
     statusMessage: 'Photo deleted successfully',
   }
 })
+import { withVideoMediaLock } from '../../../services/video/tasks'
+import { sql } from '../../../utils/db'

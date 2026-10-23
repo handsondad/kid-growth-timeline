@@ -3,6 +3,14 @@ definePageMeta({
   layout: 'dashboard',
 })
 
+const connectionLabels: Record<string, string> = {
+  idle: '未连接',
+  connecting: '正在连接...',
+  loadingHistory: '加载历史日志...',
+  live: '实时',
+  error: '连接错误',
+}
+
 interface LogEntry {
   date: string
   args: string[]
@@ -576,7 +584,7 @@ onUnmounted(() => {
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="$t('title.logs')" />
+      <UDashboardNavbar title="系统日志" />
     </template>
 
     <template #body>
@@ -604,35 +612,26 @@ onUnmounted(() => {
                   variant="soft"
                   :color="getConnectionStatusColor()"
                 >
-                  {{ $t('dashboard.logs.connectionStatus.' + connectionState) }}
+                  {{ connectionLabels[connectionState] }}
                 </UBadge>
               </div>
               <div
                 class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400"
               >
-                <span>{{
-                  $t('dashboard.logs.loadedCount', { count: logs.length })
-                }}</span>
+                <span>{{ `已载入 ${logs.length} 条` }}</span>
                 <span v-if="hasActiveFilters">{{
-                  $t('dashboard.logs.matchedCount', {
-                    count: filteredLogs.length,
-                  })
+                  `匹配 ${filteredLogs.length} 条`
                 }}</span>
                 <span :class="{ 'text-error': logSummary.errors > 0 }">{{
-                  $t('dashboard.logs.errorCount', { count: logSummary.errors })
+                  `错误 ${logSummary.errors}`
                 }}</span>
                 <span :class="{ 'text-warning': logSummary.warnings > 0 }">{{
-                  $t('dashboard.logs.warningCount', {
-                    count: logSummary.warnings,
-                  })
+                  `警告 ${logSummary.warnings}`
                 }}</span>
                 <span v-if="logSummary.hasTimeRange">{{
-                  $t('dashboard.logs.timeRange', {
-                    start: $dayjs(logSummary.first).format(
-                      'YYYY-MM-DD HH:mm:ss',
-                    ),
-                    end: $dayjs(logSummary.last).format('YYYY-MM-DD HH:mm:ss'),
-                  })
+                  `时间范围：${$dayjs(logSummary.first).format(
+                    'YYYY-MM-DD HH:mm:ss',
+                  )} ～ ${$dayjs(logSummary.last).format('YYYY-MM-DD HH:mm:ss')}`
                 }}</span>
               </div>
             </div>
@@ -643,7 +642,7 @@ onUnmounted(() => {
                 getConnectionStatusClass(),
               ]"
             >
-              {{ $t('dashboard.logs.connectionStatus.' + connectionState) }}
+              {{ connectionLabels[connectionState] }}
             </span>
           </div>
 
@@ -651,7 +650,7 @@ onUnmounted(() => {
             <!-- Search -->
             <UInput
               v-model="searchQuery"
-              :placeholder="$t('dashboard.logs.search.placeholder')"
+              placeholder="搜索日志内容..."
               size="sm"
               class="w-full sm:w-56 md:w-64"
               icon="tabler:search"
@@ -666,7 +665,7 @@ onUnmounted(() => {
                   variant="link"
                   size="sm"
                   icon="tabler:x"
-                  :aria-label="$t('dashboard.logs.search.clearAriaLabel')"
+                  aria-label="清除搜索内容"
                   @click="searchQuery = ''"
                 />
               </template>
@@ -682,7 +681,7 @@ onUnmounted(() => {
               "
               multiple
               size="sm"
-              :placeholder="$t('dashboard.logs.filter.levelPlaceholder')"
+              placeholder="过滤级别"
               class="w-28"
               :clearable="false"
             />
@@ -691,7 +690,7 @@ onUnmounted(() => {
               :items="availableTags"
               multiple
               size="sm"
-              :placeholder="$t('dashboard.logs.filter.tagPlaceholder')"
+              placeholder="筛选 Tag"
               class="w-40 sm:w-52"
               :clearable="false"
             />
@@ -722,7 +721,7 @@ onUnmounted(() => {
             name="tabler:loader-2"
             class="animate-spin mr-2"
           />
-          {{ $t('dashboard.logs.connectionStatus.loadingHistory') }}
+          加载历史日志...
         </div>
 
         <div
@@ -747,7 +746,7 @@ onUnmounted(() => {
             <UIcon
               name="tabler:loader-2"
               class="animate-spin mt-2 text-blue-500"
-              :aria-label="$t('dashboard.logs.connectionStatus.loadingHistory')"
+              aria-label="加载历史日志..."
             />
           </div>
           <div
@@ -820,10 +819,8 @@ onUnmounted(() => {
               v-if="filteredLogs.length === 0"
               class="text-center py-8 text-gray-500 dark:text-gray-400 absolute inset-0"
             >
-              <div v-if="logs.length === 0">
-                {{ $t('dashboard.logs.empty.waiting') }}
-              </div>
-              <div v-else>{{ $t('dashboard.logs.empty.noMatch') }}</div>
+              <div v-if="logs.length === 0">等待日志数据...</div>
+              <div v-else>没有匹配的日志条目</div>
             </div>
           </div>
         </div>

@@ -1,9 +1,16 @@
 import { createHash } from 'node:crypto'
-import { readdir, readFile, stat } from 'node:fs/promises'
+import { readdir, readFile, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { generateSafePhotoId } from '~~/server/utils/file-utils'
-import { tables, useDB } from '~~/server/utils/db'
+import { eq, tables, useDB } from '~~/server/utils/db'
 import { useStorageProvider } from '~~/server/utils/useStorageProvider'
+import { MAX_VIDEO_BYTES, VIDEO_EXTENSIONS } from '~~/shared/utils/video'
+import { checkVideoTools } from '~~/server/services/video/ffmpeg'
+import {
+  assertVideoQueueCapacity,
+  requireLocalVideoStorage,
+  videoMediaId,
+} from '~~/server/services/video/tasks'
 
 const IMAGE_EXTENSIONS = new Set([
   '.avif',
@@ -29,17 +36,18 @@ const isWithinDirectory = (parent: string, child: string) => {
   )
 }
 
-const listImageFiles = async (directory: string): Promise<string[]> => {
+const listMediaFiles = async (directory: string): Promise<string[]> => {
   const files: string[] = []
   const entries = await readdir(directory, { withFileTypes: true })
 
   for (const entry of entries) {
     const fullPath = path.join(directory, entry.name)
     if (entry.isDirectory()) {
-      files.push(...(await listImageFiles(fullPath)))
+      files.push(...(await listMediaFiles(fullPath)))
     } else if (
       entry.isFile() &&
-      IMAGE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())
+      (IMAGE_EXTENSIONS.has(path.extname(entry.name).toLowerCase()) ||
+        VIDEO_EXTENSIONS.includes(path.extname(entry.name).toLowerCase()))
     ) {
       files.push(fullPath)
     }
@@ -65,7 +73,7 @@ const getImportRelativeKey = (relativePath: string): string => {
     .join('/')
 }
 
-export default eventHandler(async (event) => {
+const importLocal = eventHandler(async (event) => {
   const configuredDirectory = useRuntimeConfig(event).localPhotoImportDir
   if (!configuredDirectory.trim()) {
     throw createError({
@@ -74,7 +82,7 @@ export default eventHandler(async (event) => {
     })
   }
 
-  const sourceDirectory = path.resolve(configuredDirectory)
+  let sourceDirectory = path.resolve(configuredDirectory)
   const sourceStat = await stat(sourceDirectory).catch(() => null)
   if (!sourceStat?.isDirectory()) {
     throw createError({
@@ -82,6 +90,7 @@ export default eventHandler(async (event) => {
       statusMessage: 'The configured photo import path is not a directory',
     })
   }
+  sourceDirectory = await realpath(sourceDirectory)
 
   const { storageProvider } = useStorageProvider(event)
   const storageConfig = storageProvider.config
@@ -92,7 +101,7 @@ export default eventHandler(async (event) => {
     })
   }
 
-  const storageDirectory = path.resolve(storageConfig.basePath)
+  const storageDirectory = await realpath(path.resolve(storageConfig.basePath))
   if (
     isWithinDirectory(sourceDirectory, storageDirectory) ||
     isWithinDirectory(storageDirectory, sourceDirectory)
@@ -112,7 +121,15 @@ export default eventHandler(async (event) => {
     })
   }
 
-  const files = (await listImageFiles(sourceDirectory)).sort()
+  const allFiles = (await listMediaFiles(sourceDirectory)).sort()
+  const files = allFiles.filter((file) =>
+    IMAGE_EXTENSIONS.has(path.extname(file).toLowerCase()),
+  )
+  const companionPaths = new Set<string>()
+  const pathIdentity = (file: string) =>
+    process.platform === 'win32'
+      ? path.resolve(file).toLowerCase()
+      : path.resolve(file)
   const db = useDB()
   const [photos, tasks] = await Promise.all([
     db
@@ -138,7 +155,9 @@ export default eventHandler(async (event) => {
         (task) => task.status === 'pending' || task.status === 'in-stages',
       )
       .flatMap((task) =>
-        task.payload.type === 'photo' ? [task.payload.storageKey] : [],
+        task.payload.type === 'photo' || task.payload.type === 'video'
+          ? [task.payload.storageKey]
+          : [],
       ),
   )
 
@@ -167,6 +186,7 @@ export default eventHandler(async (event) => {
       if (!videoStat?.isFile() || videoStat.size > 12 * 1024 * 1024) {
         continue
       }
+      companionPaths.add(pathIdentity(videoPath))
 
       const videoRelativePath = path.relative(sourceDirectory, videoPath)
       const videoRelativeKey = videoRelativePath.split(path.sep).join('/')
@@ -224,11 +244,92 @@ export default eventHandler(async (event) => {
     }
   }
 
+  const videos = allFiles.filter(
+    (file) =>
+      VIDEO_EXTENSIONS.includes(path.extname(file).toLowerCase()) &&
+      !companionPaths.has(pathIdentity(file)),
+  )
+  let toolsError: string | null = null
+  if (videos.length) {
+    try {
+      requireLocalVideoStorage(storageProvider)
+      await checkVideoTools(useRuntimeConfig(event))
+    } catch (error) {
+      toolsError =
+        error instanceof Error ? error.message : 'Video tools are unavailable'
+    }
+  }
+  for (const file of videos) {
+    const relative = path
+      .relative(sourceDirectory, file)
+      .split(path.sep)
+      .join('/')
+    const digest = createHash('sha256')
+      .update(relative)
+      .digest('hex')
+      .slice(0, 32)
+    const key = `videos/${digest}${path.extname(file).toLowerCase()}`
+    const storageKey = prefix ? `${prefix}/${key}` : key
+    const mediaId = videoMediaId(storageKey)
+    const dedupeKey = `video:${mediaId}`
+    if (
+      knownPhotoIds.has(mediaId) ||
+      knownStorageKeys.has(storageKey) ||
+      queuedStorageKeys.has(storageKey) ||
+      db
+        .select({ id: tables.pipelineQueue.id })
+        .from(tables.pipelineQueue)
+        .where(eq(tables.pipelineQueue.dedupeKey, dedupeKey))
+        .get()
+    ) {
+      skipped++
+      continue
+    }
+    try {
+      if (toolsError) throw new Error(toolsError)
+      requireLocalVideoStorage(storageProvider)
+      const info = await stat(file)
+      if (info.size === 0 || info.size > MAX_VIDEO_BYTES) {
+        throw new Error('Video must be non-empty and no larger than 8 GiB')
+      }
+      assertVideoQueueCapacity()
+      if (!(await storageProvider.getFileMeta(storageKey))) {
+        await storageProvider.createFromFile(key, file)
+      }
+      await workerPool.addTask(
+        { type: 'video', mediaId, storageKey },
+        { dedupeKey, priority: 1, maxAttempts: 3 },
+      )
+      queuedStorageKeys.add(storageKey)
+      queued++
+    } catch (error) {
+      errors.push(
+        `${relative}: ${error instanceof Error ? error.message : 'Video import failed'}`,
+      )
+    }
+  }
+
   return {
-    scanned: files.length,
+    scanned: files.length + videos.length,
     queued,
     skipped,
     failed: errors.length,
     errors: errors.slice(0, 10),
+  }
+})
+
+let scanning = false
+export default eventHandler(async (event) => {
+  if (scanning) {
+    throw createError({
+      statusCode: 409,
+      statusMessage: 'A local scan is already running',
+    })
+  }
+  scanning = true
+  try {
+    return await importLocal(event)
+  } finally {
+    scanning = false
   }
 })

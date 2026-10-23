@@ -91,18 +91,14 @@ const loadingVariants = {
         <div class="flex flex-col min-w-0 gap-0.5">
           <template v-if="loadingState.isError">
             <p class="text-xs font-medium text-red-400">
-              {{
-                loadingState.errorMessage || $t('viewer.photoload.loadError')
-              }}
+              {{ loadingState.errorMessage || '图片加载失败' }}
             </p>
-            <p class="text-xs text-white/70">
-              {{ $t('viewer.photoload.loading') }}
-            </p>
+            <p class="text-xs text-white/70">正在加载图片</p>
           </template>
 
           <template v-else-if="loadingState.isConverting">
             <p class="text-xs font-medium text-white tabular-nums">
-              {{ loadingState.message || $t('viewer.photoload.converting') }}
+              {{ loadingState.message || '正在转换中...' }}
             </p>
           </template>
 
@@ -110,9 +106,7 @@ const loadingVariants = {
             <div class="flex items-center gap-2">
               <p class="text-xs font-medium text-white">
                 {{
-                  loadingState.isHeic
-                    ? $t('viewer.photoload.loadingHEIC')
-                    : $t('viewer.photoload.loading')
+                  loadingState.isHeic ? 'HEIC 图片加载中...' : '正在加载图片'
                 }}
               </p>
               <span

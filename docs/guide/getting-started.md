@@ -1,32 +1,54 @@
-# Getting Started
+# 快速开始
 
-This local application stores its SQLite database and uploaded media under `data/`.
-Authentication is intentionally disabled and the development server only binds to
-the loopback interface. Do not expose it through a reverse proxy or bind it to a
-network interface.
+本地应用会将 SQLite 数据库和导入媒体保存在 `data/`。应用不启用身份验证，开发服务器仅监听本机回环接口；请勿通过反向代理公开，也不要绑定到网络接口。
 
-## Prerequisites
+## 前置条件
 
 - Node.js 22 LTS
 - pnpm 10.34.1
 
-## Run Locally
+## 本机运行
 
-From the project directory:
+在项目目录运行：
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000). The gallery opens directly;
-no environment file or account setup is required. Local storage is initialized
-under `data/storage` on first start.
+打开 [http://127.0.0.1:3000](http://127.0.0.1:3000)。应用会直接进入图库，无需环境文件或账号设置。首次启动时会在 `data/storage` 初始化本地存储。
 
-## Data and Backups
+## 导入本机照片和视频
 
-- SQLite database: `data/app.sqlite3`
-- Original photos and generated files: `data/storage/`
+在本机 `.env` 中设置 `NUXT_LOCAL_PHOTO_IMPORT_DIR` 为照片源目录的绝对路径，例如 `D:/FamilyPhotos`。保持启用本地存储提供器，重启应用后，在“照片管理”中选择“扫描本地目录”。不需要通过浏览器上传文件。
 
-Stop the development server before copying `data/` for a backup. Keep backups
-private because the application has no sign-in or album password protection.
+服务端会递归扫描支持的图片，以及 MP4、MOV、M4V、WebM、AVI、MKV 视频，将新文件复制到应用管理的本地存储并排队处理。与图片同名、不超过 12 MiB 的 MOV 仍按现有 Live Photo 伴侣规则处理，不会成为普通视频，也不提供裁剪。源文件保持不变。再次扫描会跳过已有媒体和已排队的视频（包括失败任务）；失败后请在处理队列中重试，不要重复扫描。
+
+照片源目录必须与 `data/storage` 分开，二者不能互相包含，以免再次导入生成的缩略图。地图和地理编码属于可选增强功能，不配置地图令牌也能导入和浏览照片。
+
+## FFmpeg 与视频裁剪
+
+服务端需要安装包含 **FFprobe、libx264 和 AAC 编码器**的原生 FFmpeg。Windows 可用 `winget install Gyan.FFmpeg`，macOS 可用 `brew install ffmpeg`，Debian/Ubuntu 可用 `sudo apt install ffmpeg`。在运行服务的账号下确认 `ffmpeg -version` 和 `ffprobe -version` 可执行。若未加入 PATH，可设置以下仅服务端使用的配置并重启：
+
+```dotenv
+NUXT_FFMPEG_PATH=C:/Tools/ffmpeg/bin/ffmpeg.exe
+NUXT_FFPROBE_PATH=C:/Tools/ffmpeg/bin/ffprobe.exe
+```
+
+浏览器不会执行 FFmpeg。缺少工具时仍可导入照片；视频导入会报告错误，裁剪弹窗会提示安装或配置。首版普通视频导入、裁剪仅支持本地存储，不支持远程 provider。
+
+在视频详情选择“裁剪视频”，使用原生播放器、进度条、起止滑块或精确到 0.001 秒的输入框设置区间。“生成片段”会创建持久化后台任务，弹窗及处理队列显示进度与状态。关闭弹窗不会取消任务，再次打开会恢复该原片的最近任务；失败可查看原因并重试，完成后可直接打开片段或在时间轴找到。
+
+裁剪结果是新的媒体条目，记录直接来源媒体 ID 和整数毫秒区间。删除片段不会删除原片；原片有关联的活跃任务时不能删除。之后删除原片不会级联删除已有片段，但历史来源链接可能无法再打开。
+
+普通视频保留原文件，并额外生成便于浏览器播放的 H.264/AAC MP4 和 WebP 封面。裁剪重新编码而非只按关键帧截断，输出快速起播 MP4，兼容无音轨输入。自动应用旋转方向，保持分辨率（奇数边长至多补一像素），不放大画面。派生 MP4 不复制原片的嵌入式元数据或章节，仅保留编码器和容器产生的技术标签；应用数据库中的拍摄时间、地点从来源条目继承，不写入输出文件。普通视频禁用仅适用于照片的 EXIF 编辑、重处理操作，避免改写保留的原片。
+
+限制为单个输入/输出 8 GiB、时长 4 小时、画面 1600 万像素且单边不超过 8192 像素，最短片段 250 毫秒；最多排队/处理 20 个视频任务，同时只运行一个转码，使用两个编解码线程，编码超时 30 分钟。请为原片、播放副本、封面和临时输出预留磁盘空间。工作文件放在应用隔离的操作系统临时目录，成功、失败或正常中断后清理；崩溃后重试会先清理同任务残留。未完成的编码不会进入时间轴。最终文件以独占硬链接发布以防覆盖，因此本地文件系统需支持硬链接（如 NTFS、APFS、ext4）。
+
+## 数据与备份
+
+- SQLite 数据库：`data/app.sqlite3`
+- 原始照片及生成文件：`data/storage/`
+
+备份 `data/` 前请先停止开发服务器。应用没有登录或相册密码保护，请妥善保管备份。
+如果还需保留尚未导入的文件，请单独备份照片源目录。恢复时需要同时恢复数据库和应用管理的媒体；不要只覆盖其中一部分，也不要把删除派生文件当作清理步骤。

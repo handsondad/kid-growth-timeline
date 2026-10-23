@@ -15,7 +15,6 @@ import type {
  * const { fields, state, submit, loading } = useSettingsForm('app')
  */
 export function useSettingsForm(namespace: string) {
-  const { t } = useI18n()
   const toast = useToast()
 
   const fields = ref<FieldDescriptor[]>([])
@@ -49,7 +48,7 @@ export function useSettingsForm(namespace: string) {
       const message = (err as Error).message
       error.value = message
       toast.add({
-        title: t('settings.form.loadFailed'),
+        title: '加载设置失败',
         description: message,
         color: 'error',
       })
@@ -90,14 +89,14 @@ export function useSettingsForm(namespace: string) {
       await fetchFields()
 
       toast.add({
-        title: t('settings.form.saveSuccess'),
+        title: '设置已保存',
         color: 'success',
       })
     } catch (err) {
       const message = (err as Error).message
       error.value = message
       toast.add({
-        title: t('settings.form.saveFailed'),
+        title: '保存设置失败',
         description: message,
         color: 'error',
       })

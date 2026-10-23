@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-  title: () => $t('title.mapAndLocation'),
+  title: () => '地图和位置',
 })
 
 const {
@@ -91,7 +91,7 @@ const handleLocationSettingsSubmit = async () => {
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="$t('title.mapAndLocation')" />
+      <UDashboardNavbar title="地图和位置" />
     </template>
 
     <template #body>
@@ -102,10 +102,10 @@ const handleLocationSettingsSubmit = async () => {
           <h2
             class="text-xl font-semibold text-neutral-900 dark:text-neutral-100"
           >
-            {{ $t('title.mapAndLocation') }}
+            地图和位置
           </h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            {{ $t('settings.map.sectionDescription') }}
+            配置地图展示与地理编码服务。地图服务商会影响地图样式与访问凭证。
           </p>
         </section>
 
@@ -118,7 +118,7 @@ const handleLocationSettingsSubmit = async () => {
             <h3
               class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
             >
-              {{ $t('title.mapAndLocation') }}
+              地图和位置
             </h3>
           </header>
 
@@ -154,7 +154,7 @@ const handleLocationSettingsSubmit = async () => {
               v-if="isMapDirty"
               class="mb-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-900/60 dark:bg-warning-950/30 dark:text-warning-200"
             >
-              {{ $t('common.unsavedChanges') }}
+              存在未保存的更改。
             </div>
 
             <div class="flex items-center justify-end gap-2">
@@ -164,7 +164,7 @@ const handleLocationSettingsSubmit = async () => {
                 :disabled="!isMapDirty"
                 @click="resetMapSettings"
               >
-                {{ $t('common.actions.reset') }}
+                重置
               </UButton>
               <UButton
                 :loading="mapLoading"
@@ -173,7 +173,7 @@ const handleLocationSettingsSubmit = async () => {
                 :disabled="!isMapDirty"
                 icon="tabler:device-floppy"
               >
-                {{ $t('common.actions.saveSettings') }}
+                保存设置
               </UButton>
             </div>
           </footer>
@@ -188,7 +188,7 @@ const handleLocationSettingsSubmit = async () => {
             <h3
               class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
             >
-              {{ $t('title.location') }}
+              位置服务
             </h3>
           </header>
 
@@ -224,7 +224,7 @@ const handleLocationSettingsSubmit = async () => {
               v-if="isLocationDirty"
               class="mb-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-900/60 dark:bg-warning-950/30 dark:text-warning-200"
             >
-              {{ $t('common.unsavedChanges') }}
+              存在未保存的更改。
             </div>
 
             <div class="flex items-center justify-end gap-2">
@@ -234,7 +234,7 @@ const handleLocationSettingsSubmit = async () => {
                 :disabled="!isLocationDirty"
                 @click="resetLocationSettings"
               >
-                {{ $t('common.actions.reset') }}
+                重置
               </UButton>
               <UButton
                 :loading="locationLoading"
@@ -243,7 +243,7 @@ const handleLocationSettingsSubmit = async () => {
                 :disabled="!isLocationDirty"
                 icon="tabler:device-floppy"
               >
-                {{ $t('common.actions.saveSettings') }}
+                保存设置
               </UButton>
             </div>
           </footer>

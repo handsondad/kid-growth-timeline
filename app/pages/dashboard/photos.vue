@@ -4,25 +4,26 @@ import type { Photo } from '~~/server/utils/db'
 import { h, resolveComponent } from 'vue'
 import { Icon, UBadge } from '#components'
 import ThumbImage from '~/components/ui/ThumbImage.vue'
+import { hasCoordinates } from '~~/shared/utils'
 
 const UCheckbox = resolveComponent('UCheckbox')
 const Rating = resolveComponent('Rating')
 
 // 列名显示映射
 const columnNameMap = computed<Record<string, string>>(() => ({
-  thumbnailUrl: $t('dashboard.photos.table.columns.thumbnail.title'),
-  id: $t('dashboard.photos.table.columns.id'),
-  title: $t('dashboard.photos.table.columns.title'),
-  tags: $t('dashboard.photos.table.columns.tags'),
-  rating: $t('dashboard.photos.table.columns.rating'),
-  isLivePhoto: $t('dashboard.photos.table.columns.isLivePhoto'),
-  location: $t('dashboard.photos.table.columns.location'),
-  dateTaken: $t('dashboard.photos.table.columns.dateTaken'),
-  lastModified: $t('dashboard.photos.table.columns.lastModified'),
-  fileSize: $t('dashboard.photos.table.columns.fileSize'),
-  colorSpace: $t('dashboard.photos.table.columns.colorSpace'),
-  reactions: $t('dashboard.photos.table.columns.reactions'),
-  actions: $t('dashboard.photos.table.columns.actions'),
+  thumbnailUrl: '缩略图',
+  id: '照片ID',
+  title: '照片标题',
+  tags: '关键词',
+  rating: '评分',
+  isLivePhoto: 'Live Photo',
+  location: '位置',
+  dateTaken: '拍摄日期',
+  lastModified: '最后更新',
+  fileSize: '文件大小',
+  colorSpace: '颜色空间',
+  reactions: '表态',
+  actions: '操作',
 }))
 
 definePageMeta({
@@ -30,7 +31,7 @@ definePageMeta({
 })
 
 useHead({
-  title: () => $t('title.photos'),
+  title: () => '照片库',
 })
 
 const dayjs = useDayjs()
@@ -229,13 +230,13 @@ const importLocalPhotos = async () => {
       method: 'POST',
     })
     toast.add({
-      title: $t('dashboard.photos.localImport.completed'),
-      description: $t('dashboard.photos.localImport.summary', result),
+      title: '本地目录扫描完成',
+      description: `扫描 ${result.scanned} 张，已加入队列 ${result.queued} 张，跳过 ${result.skipped} 张，失败 ${result.failed} 张。`,
       color: result.failed > 0 ? 'warning' : 'success',
     })
   } catch (error) {
     toast.add({
-      title: $t('dashboard.photos.messages.error'),
+      title: '发生错误',
       description: error instanceof Error ? error.message : String(error),
       color: 'error',
     })
@@ -288,18 +289,22 @@ const totalRowsCount = computed((): number => {
 })
 
 const livePhotoStats = computed(() => {
-  if (!filteredPhotos.value) return { total: 0, livePhotos: 0, staticPhotos: 0 }
+  if (!filteredPhotos.value)
+    return { total: 0, livePhotos: 0, staticPhotos: 0, videos: 0 }
 
   const total = filteredPhotos.value.length
   const livePhotos = filteredPhotos.value.filter(
     (photo: Photo) => photo.isLivePhoto,
   ).length
-  const staticPhotos = total - livePhotos
+  const videos = filteredPhotos.value.filter(
+    (photo: Photo) => photo.mediaType === 'video',
+  ).length
+  const staticPhotos = total - livePhotos - videos
 
-  return { total, livePhotos, staticPhotos }
+  return { total, livePhotos, staticPhotos, videos }
 })
 
-const photoFilter = ref<'all' | 'livephoto' | 'static'>('all')
+const photoFilter = ref<'all' | 'livephoto' | 'static' | 'video'>('all')
 
 const filteredData = computed(() => {
   if (!filteredPhotos.value) return []
@@ -308,7 +313,13 @@ const filteredData = computed(() => {
     case 'livephoto':
       return filteredPhotos.value.filter((photo: Photo) => photo.isLivePhoto)
     case 'static':
-      return filteredPhotos.value.filter((photo: Photo) => !photo.isLivePhoto)
+      return filteredPhotos.value.filter(
+        (photo: Photo) => !photo.isLivePhoto && photo.mediaType !== 'video',
+      )
+    case 'video':
+      return filteredPhotos.value.filter(
+        (photo: Photo) => photo.mediaType === 'video',
+      )
     default:
       return filteredPhotos.value
   }
@@ -336,7 +347,7 @@ const columns = computed<TableColumn<Photo>[]>(() => [
           : table.getIsAllPageRowsSelected(),
         'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
           table.toggleAllPageRowsSelected(!!value),
-        'aria-label': $t('dashboard.photos.table.selectAllAria'),
+        'aria-label': '全选',
       }),
     cell: ({ row, table }) =>
       h(
@@ -350,7 +361,7 @@ const columns = computed<TableColumn<Photo>[]>(() => [
           modelValue: row.getIsSelected(),
           'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
             rowRangeSelection.toggleTableRow(table, row, !!value),
-          'aria-label': $t('dashboard.photos.table.selectRowAria'),
+          'aria-label': '选择行',
         }),
       ),
     enableHiding: false,
@@ -358,12 +369,12 @@ const columns = computed<TableColumn<Photo>[]>(() => [
   {
     id: 'thumbnailUrl',
     accessorKey: 'thumbnailUrl',
-    header: $t('dashboard.photos.table.columns.thumbnail.title'),
+    header: '缩略图',
     cell: ({ row }) => {
       const url = row.original.thumbnailUrl
       return h(ThumbImage, {
         src: url || row.original.originalUrl || '',
-        alt: row.original.title || $t('dashboard.photos.table.thumbnailAlt'),
+        alt: row.original.title || '照片缩略图',
         key: row.original.id,
         thumbhash: row.original.thumbnailHash || '',
         class: 'size-16 min-w-[100px] object-cover rounded-md shadow',
@@ -376,16 +387,16 @@ const columns = computed<TableColumn<Photo>[]>(() => [
   {
     id: 'id',
     accessorKey: 'id',
-    header: $t('dashboard.photos.table.columns.id'),
+    header: '照片ID',
     enableHiding: false,
   },
   {
     accessorKey: 'title',
-    header: $t('dashboard.photos.table.columns.title'),
+    header: '照片标题',
   },
   {
     accessorKey: 'tags',
-    header: $t('dashboard.photos.table.columns.tags'),
+    header: '关键词',
     cell: ({ row }) => {
       const tags = row.original.tags
       return h('div', { class: 'flex items-center gap-1' }, [
@@ -401,17 +412,13 @@ const columns = computed<TableColumn<Photo>[]>(() => [
                 () => tag,
               ),
             )
-          : h(
-              'span',
-              { class: 'text-neutral-400 text-xs' },
-              $t('dashboard.photos.table.cells.noTags'),
-            ),
+          : h('span', { class: 'text-neutral-400 text-xs' }, '无标签'),
       ])
     },
   },
   {
     accessorKey: 'rating',
-    header: $t('dashboard.photos.table.columns.rating'),
+    header: '评分',
     cell: ({ row }) => {
       const rating = row.original.exif?.Rating
       return h('div', { class: 'flex items-center' }, [
@@ -421,17 +428,13 @@ const columns = computed<TableColumn<Photo>[]>(() => [
               readonly: true,
               size: 'xs',
             })
-          : h(
-              'span',
-              { class: 'text-neutral-400 text-xs' },
-              $t('dashboard.photos.table.cells.noRating'),
-            ),
+          : h('span', { class: 'text-neutral-400 text-xs' }, '未评分'),
       ])
     },
   },
   {
     accessorKey: 'isLivePhoto',
-    header: $t('dashboard.photos.table.columns.isLivePhoto'),
+    header: 'Live Photo',
     cell: ({ row }) => {
       const isLivePhoto = row.original.isLivePhoto
       return h('div', { class: 'flex items-center gap-2' }, [
@@ -447,7 +450,7 @@ const columns = computed<TableColumn<Photo>[]>(() => [
                   class:
                     'text-yellow-600 dark:text-yellow-400 text-xs font-medium',
                 },
-                $t('ui.livePhoto'),
+                '实况',
               ),
             ])
           : h(
@@ -455,7 +458,7 @@ const columns = computed<TableColumn<Photo>[]>(() => [
               {
                 class: 'text-neutral-400 text-xs',
               },
-              $t('dashboard.photos.table.cells.staticPhoto'),
+              '一般照片',
             ),
       ])
     },
@@ -467,16 +470,15 @@ const columns = computed<TableColumn<Photo>[]>(() => [
   },
   {
     accessorKey: 'location',
-    header: $t('dashboard.photos.table.columns.location'),
+    header: '位置',
     cell: ({ row }) => {
       const { exif, city, country } = row.original
 
-      if (!exif?.GPSLongitude && !exif?.GPSLatitude) {
-        return h(
-          'span',
-          { class: 'text-neutral-400 text-xs' },
-          $t('dashboard.photos.table.cells.noGps'),
-        )
+      if (
+        !hasCoordinates(row.original) &&
+        (exif?.GPSLongitude == null || exif?.GPSLatitude == null)
+      ) {
+        return h('span', { class: 'text-neutral-400 text-xs' }, '无 GPS 信息')
       }
 
       const location = [city, country].filter(Boolean).join(', ')
@@ -485,51 +487,47 @@ const columns = computed<TableColumn<Photo>[]>(() => [
         {
           class: location ? 'text-xs' : 'text-neutral-400 text-xs',
         },
-        location || $t('dashboard.photos.table.cells.unknown'),
+        location || '未知',
       )
     },
   },
   {
     accessorKey: 'dateTaken',
-    header: $t('dashboard.photos.table.columns.dateTaken'),
+    header: '拍摄日期',
     cell: (info) => {
       const date = info.getValue() as string
       return h(
         'span',
         { class: 'font-mono text-xs' },
-        date
-          ? dayjs(date).format('YYYY-MM-DD HH:mm:ss')
-          : $t('dashboard.photos.table.cells.unknown'),
+        date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '未知',
       )
     },
   },
   {
     accessorKey: 'lastModified',
-    header: $t('dashboard.photos.table.columns.lastModified'),
+    header: '最后更新',
     cell: (info) => {
       const date = info.getValue() as string
       return h(
         'span',
         { class: 'font-mono text-xs' },
-        date
-          ? dayjs(date).format('YYYY-MM-DD HH:mm:ss')
-          : $t('dashboard.photos.table.cells.unknown'),
+        date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '未知',
       )
     },
   },
   {
     accessorKey: 'fileSize',
-    header: $t('dashboard.photos.table.columns.fileSize'),
+    header: '文件大小',
     cell: (info) => formatBytes(info.getValue() as number),
   },
   {
     id: 'colorSpace',
     accessorFn: (row) => row.exif?.ColorSpace,
-    header: $t('dashboard.photos.table.columns.colorSpace'),
+    header: '颜色空间',
   },
   {
     accessorKey: 'reactions',
-    header: $t('dashboard.photos.table.columns.reactions'),
+    header: '表态',
     cell: ({ row }) => {
       const photoId = row.original.id
       const reactions = reactionsData.value[photoId] || {}
@@ -539,11 +537,7 @@ const columns = computed<TableColumn<Photo>[]>(() => [
       )
 
       if (totalReactions === 0) {
-        return h(
-          'span',
-          { class: 'text-neutral-400 text-xs' },
-          $t('dashboard.photos.table.cells.noReactions'),
-        )
+        return h('span', { class: 'text-neutral-400 text-xs' }, '无表态')
       }
 
       const reactionIcons: Record<string, string> = {
@@ -600,7 +594,7 @@ const columns = computed<TableColumn<Photo>[]>(() => [
   {
     id: 'actions',
     accessorKey: 'actions',
-    header: $t('dashboard.photos.table.columns.actions'),
+    header: '操作',
     enableHiding: false,
   },
 ])
@@ -609,9 +603,6 @@ const openMetadataEditor = (photo: Photo) => {
   const initialTitle = photo.title?.trim() ?? ''
   const initialDescription = photo.description?.trim() ?? ''
   const initialTags = normalizeTagList(photo.tags ?? [])
-  const hasCoordinates =
-    typeof photo.latitude === 'number' && typeof photo.longitude === 'number'
-
   editingPhoto.value = photo
   editFormState.title = initialTitle
   editFormState.description = initialDescription
@@ -619,10 +610,10 @@ const openMetadataEditor = (photo: Photo) => {
   editFormState.rating =
     typeof photo.exif?.Rating === 'number' ? photo.exif.Rating : null
 
-  const initialLocation = hasCoordinates
+  const initialLocation = hasCoordinates(photo)
     ? {
-        latitude: photo.latitude as number,
-        longitude: photo.longitude as number,
+        latitude: photo.latitude,
+        longitude: photo.longitude,
       }
     : null
 
@@ -651,7 +642,7 @@ const clearSelectedLocation = () => {
 
 const enqueueEraseLocationTask = async (photo: Photo) => {
   if (!photo?.id) {
-    throw new Error($t('dashboard.photos.messages.photoNotFound'))
+    throw new Error('找不到照片')
   }
 
   const result = await $fetch('/api/queue/add-task', {
@@ -667,9 +658,7 @@ const enqueueEraseLocationTask = async (photo: Photo) => {
   })
 
   if (!result.success) {
-    throw new Error(
-      result?.message || $t('dashboard.photos.messages.eraseLocationFailed'),
-    )
+    throw new Error(result?.message || '抹除位置信息任务添加失败')
   }
 
   return result.taskId
@@ -725,7 +714,7 @@ const saveMetadataChanges = async () => {
       })
 
       toast.add({
-        title: $t('dashboard.photos.messages.metadataUpdateSuccess'),
+        title: '照片信息已更新',
         description: '',
         color: 'success',
       })
@@ -735,11 +724,8 @@ const saveMetadataChanges = async () => {
     if (shouldQueueLocationErase) {
       const taskId = await enqueueEraseLocationTask(editingPhoto.value)
       toast.add({
-        title: $t('dashboard.photos.messages.eraseLocationQueued'),
-        description:
-          typeof taskId === 'number'
-            ? $t('dashboard.photos.messages.reprocessTaskId', { taskId })
-            : '',
+        title: '已加入抹除位置信息任务',
+        description: typeof taskId === 'number' ? `任务ID: ${taskId}` : '',
         color: 'success',
       })
       hasAnySuccessfulAction = true
@@ -758,10 +744,10 @@ const saveMetadataChanges = async () => {
       error?.data?.statusMessage ||
       error?.statusMessage ||
       error?.message ||
-      $t('dashboard.photos.messages.metadataUpdateFailed')
+      '更新照片信息失败'
 
     toast.add({
-      title: $t('dashboard.photos.messages.metadataUpdateFailed'),
+      title: '更新照片信息失败',
       description: message,
       color: 'error',
     })
@@ -804,21 +790,15 @@ const handleReverseGeocodeRequest = async (photo: Photo) => {
 
     if (result.success) {
       toast.add({
-        title: $t('dashboard.photos.messages.reverseGeocodeQueued'),
+        title: '已加入重新获取城市任务',
         description:
-          typeof result.taskId === 'number'
-            ? $t('dashboard.photos.messages.reprocessTaskId', {
-                taskId: result.taskId,
-              })
-            : '',
+          typeof result.taskId === 'number' ? `任务ID: ${result.taskId}` : '',
         color: 'success',
       })
     } else {
       toast.add({
-        title: $t('dashboard.photos.messages.reverseGeocodeFailed'),
-        description:
-          result?.message ||
-          $t('dashboard.photos.messages.reverseGeocodeFailed'),
+        title: '重新获取城市任务添加失败',
+        description: result?.message || '重新获取城市任务添加失败',
         color: 'error',
       })
     }
@@ -828,10 +808,10 @@ const handleReverseGeocodeRequest = async (photo: Photo) => {
       error?.data?.statusMessage ||
       error?.statusMessage ||
       error?.message ||
-      $t('dashboard.photos.messages.reverseGeocodeFailed')
+      '重新获取城市任务添加失败'
 
     toast.add({
-      title: $t('dashboard.photos.messages.reverseGeocodeFailed'),
+      title: '重新获取城市任务添加失败',
       description: message,
       color: 'error',
     })
@@ -850,11 +830,8 @@ const handleEraseLocationRequest = async (photo: Photo) => {
   try {
     const taskId = await enqueueEraseLocationTask(photo)
     toast.add({
-      title: $t('dashboard.photos.messages.eraseLocationQueued'),
-      description:
-        typeof taskId === 'number'
-          ? $t('dashboard.photos.messages.reprocessTaskId', { taskId })
-          : '',
+      title: '已加入抹除位置信息任务',
+      description: typeof taskId === 'number' ? `任务ID: ${taskId}` : '',
       color: 'success',
     })
   } catch (error: any) {
@@ -863,10 +840,10 @@ const handleEraseLocationRequest = async (photo: Photo) => {
       error?.data?.statusMessage ||
       error?.statusMessage ||
       error?.message ||
-      $t('dashboard.photos.messages.eraseLocationFailed')
+      '抹除位置信息任务添加失败'
 
     toast.add({
-      title: $t('dashboard.photos.messages.eraseLocationFailed'),
+      title: '抹除位置信息任务添加失败',
       description: message,
       color: 'error',
     })
@@ -880,15 +857,15 @@ const handleReprocessSingle = async (photo: Photo) => {
   try {
     if (!photo || !photo.storageKey) {
       toast.add({
-        title: $t('dashboard.photos.messages.error'),
-        description: $t('dashboard.photos.messages.noStorageKey'),
+        title: '发生错误',
+        description: '无法处理：缺少存储信息',
         color: 'error',
       })
       return
     }
 
     const reprocessToast = toast.add({
-      title: $t('dashboard.photos.messages.reprocessSuccess'),
+      title: '已添加重新处理任务',
       description: '',
       color: 'info',
     })
@@ -907,24 +884,22 @@ const handleReprocessSingle = async (photo: Photo) => {
 
     if (result.success) {
       toast.update(reprocessToast.id, {
-        title: $t('dashboard.photos.messages.reprocessSuccess'),
-        description: $t('dashboard.photos.messages.reprocessTaskId', {
-          taskId: result.taskId,
-        }),
+        title: '已添加重新处理任务',
+        description: `任务ID: ${result.taskId}`,
         color: 'success',
       })
     } else {
       toast.update(reprocessToast.id, {
-        title: $t('dashboard.photos.messages.error'),
-        description: $t('dashboard.photos.messages.taskSubmitFailed'),
+        title: '发生错误',
+        description: '提交任务失败',
         color: 'error',
       })
     }
   } catch (error: any) {
     console.error('处理照片失败:', error)
     toast.add({
-      title: $t('dashboard.photos.messages.reprocessFailed'),
-      description: error.message || $t('dashboard.photos.messages.error'),
+      title: '重新处理失败',
+      description: error.message || '发生错误',
       color: 'error',
     })
   }
@@ -937,21 +912,23 @@ const getRowActions = (photo: Photo) => {
   return [
     [
       {
-        label: $t('dashboard.photos.actions.editMetadata'),
+        label: '编辑信息',
+        disabled: photo.mediaType === 'video',
         icon: 'tabler:pencil',
         onSelect() {
           openMetadataEditor(photo)
         },
       },
       {
-        label: $t('dashboard.photos.actions.reprocess'),
+        label: '重新处理',
+        disabled: photo.mediaType === 'video',
         icon: 'tabler:refresh',
         onSelect() {
           handleReprocessSingle(photo)
         },
       },
       {
-        label: $t('dashboard.photos.actions.refreshLocation'),
+        label: '重新获取城市',
         icon: isReverseLoading ? 'tabler:loader-2' : 'tabler:map-pin',
         disabled: isReverseLoading,
         onSelect() {
@@ -959,25 +936,34 @@ const getRowActions = (photo: Photo) => {
         },
       },
       {
-        label: $t('dashboard.photos.actions.eraseLocationInfo'),
+        label: '抹除位置信息',
         icon: isEraseLocationLoading ? 'tabler:loader-2' : 'tabler:map-off',
-        disabled: isEraseLocationLoading,
+        disabled: isEraseLocationLoading || photo.mediaType === 'video',
         onSelect() {
           handleEraseLocationRequest(photo)
         },
       },
       {
-        label: $t('dashboard.photos.actions.previewPhoto'),
+        label: '预览照片',
         icon: 'tabler:photo',
         onSelect() {
           openImagePreview(photo)
         },
+        ...(photo.mediaType === 'video' && !photo.isLivePhoto
+          ? [
+              {
+                label: '裁剪视频',
+                icon: 'tabler:cut',
+                onSelect: () => openVideoTrim(photo),
+              },
+            ]
+          : []),
       },
     ],
     [
       {
         color: 'error',
-        label: $t('dashboard.photos.actions.delete'),
+        label: '删除',
         icon: 'tabler:trash',
         onSelect: () => handleSingleDeleteRequest(photo),
       },
@@ -988,6 +974,13 @@ const getRowActions = (photo: Photo) => {
 // 图片预览弹窗
 const isImagePreviewOpen = ref(false)
 const previewingPhoto = ref<Photo | null>(null)
+const trimTarget = ref<Photo | null>(null)
+const showTrimEditor = ref(false)
+const openVideoTrim = (photo: Photo) => {
+  trimTarget.value = photo
+  isImagePreviewOpen.value = false
+  showTrimEditor.value = true
+}
 
 const openImagePreview = (photo: Photo) => {
   if (photo) {
@@ -1025,8 +1018,8 @@ const handleBatchDelete = () => {
 
   if (selectedPhotos.length === 0) {
     toast.add({
-      title: $t('dashboard.photos.selection.selected', { count: 0, total: 0 }),
-      description: $t('dashboard.photos.messages.batchSelectRequired'),
+      title: `${0} / ${0} 行已选择`,
+      description: '请至少选择一张照片进行此操作',
       color: 'warning',
     })
     return
@@ -1051,8 +1044,8 @@ const confirmDelete = async () => {
   try {
     if (mode === 'batch') {
       deleteToast = toast.add({
-        title: $t('dashboard.photos.delete.batch.title'),
-        description: $t('dashboard.photos.messages.deleteSuccess'),
+        title: '批量删除照片',
+        description: '照片删除成功',
         color: 'info',
       })
       await Promise.all(
@@ -1064,9 +1057,7 @@ const confirmDelete = async () => {
       )
 
       toast.update(deleteToast.id, {
-        title: $t('dashboard.photos.messages.batchDeleteSuccess', {
-          count: targetPhotos.length,
-        }),
+        title: `已成功删除 ${targetPhotos.length} 张照片`,
         description: '',
         color: 'success',
       })
@@ -1075,7 +1066,7 @@ const confirmDelete = async () => {
     } else {
       const photo = targetPhotos[0]
       if (!photo) {
-        throw new Error($t('dashboard.photos.messages.error'))
+        throw new Error('发生错误')
       }
 
       await $fetch(`/api/photos/${photo.id}`, {
@@ -1083,7 +1074,7 @@ const confirmDelete = async () => {
       })
 
       toast.add({
-        title: $t('dashboard.photos.messages.deleteSuccess'),
+        title: '照片删除成功',
         description: '',
         color: 'success',
       })
@@ -1094,17 +1085,17 @@ const confirmDelete = async () => {
     deleteTargetPhotos.value = []
   } catch (error: any) {
     console.error('删除照片失败:', error)
-    const message = error?.message || $t('dashboard.photos.messages.error')
+    const message = error?.message || '发生错误'
 
     if (mode === 'batch' && deleteToast) {
       toast.update(deleteToast.id, {
-        title: $t('dashboard.photos.messages.batchDeleteFailed'),
+        title: '批量删除失败',
         description: message,
         color: 'error',
       })
     } else {
       toast.add({
-        title: $t('dashboard.photos.messages.deleteFailed'),
+        title: '删除照片失败',
         description: message,
         color: 'error',
       })
@@ -1119,10 +1110,17 @@ const handleBatchReprocess = async () => {
   const selectedRowModel = table.value?.tableApi?.getFilteredSelectedRowModel()
   const selectedPhotos =
     selectedRowModel?.rows.map((row: any) => row.original) || []
+  if (selectedPhotos.some((photo: Photo) => photo.mediaType === 'video')) {
+    toast.add({
+      title: '此操作仅支持照片，请先取消选择视频。',
+      color: 'warning',
+    })
+    return
+  }
 
   if (selectedPhotos.length === 0) {
     toast.add({
-      title: $t('dashboard.photos.messages.batchSelectRequired'),
+      title: '请至少选择一张照片进行此操作',
       description: '',
       color: 'warning',
     })
@@ -1135,10 +1133,8 @@ const handleBatchReprocess = async () => {
   )
   if (photosWithStorageKey.length !== selectedPhotos.length) {
     toast.add({
-      title: $t('dashboard.photos.messages.error'),
-      description: $t('dashboard.photos.messages.batchNoStorageKey', {
-        count: selectedPhotos.length - photosWithStorageKey.length,
-      }),
+      title: '发生错误',
+      description: `${selectedPhotos.length - photosWithStorageKey.length} 张照片缺少存储信息，无法处理`,
       color: 'error',
     })
     return
@@ -1146,7 +1142,7 @@ const handleBatchReprocess = async () => {
 
   try {
     const reprocessToast = toast.add({
-      title: $t('dashboard.photos.messages.batchReprocessing'),
+      title: '正在提交重新处理任务...',
       description: '',
       color: 'info',
     })
@@ -1167,16 +1163,14 @@ const handleBatchReprocess = async () => {
 
     if (result.success) {
       toast.update(reprocessToast.id, {
-        title: $t('dashboard.photos.messages.reprocessSuccess'),
-        description: $t('dashboard.photos.messages.batchReprocessSuccess', {
-          count: photosWithStorageKey.length,
-        }),
+        title: '已添加重新处理任务',
+        description: `已成功提交 ${photosWithStorageKey.length} 张照片至重新处理队列`,
         color: 'success',
       })
     } else {
       toast.update(reprocessToast.id, {
-        title: $t('dashboard.photos.messages.error'),
-        description: $t('dashboard.photos.messages.batchReprocessFailed'),
+        title: '发生错误',
+        description: '批量重新处理失败',
         color: 'error',
       })
     }
@@ -1186,8 +1180,8 @@ const handleBatchReprocess = async () => {
   } catch (error: any) {
     console.error('批量处理失败:', error)
     toast.add({
-      title: $t('dashboard.photos.messages.batchReprocessFailed'),
-      description: error.message || $t('dashboard.photos.messages.error'),
+      title: '批量重新处理失败',
+      description: error.message || '发生错误',
       color: 'error',
     })
   }
@@ -1198,10 +1192,17 @@ const handleBatchEraseLocation = async () => {
   const selectedRowModel = table.value?.tableApi?.getFilteredSelectedRowModel()
   const selectedPhotos =
     selectedRowModel?.rows.map((row: any) => row.original) || []
+  if (selectedPhotos.some((photo: Photo) => photo.mediaType === 'video')) {
+    toast.add({
+      title: '此操作仅支持照片，请先取消选择视频。',
+      color: 'warning',
+    })
+    return
+  }
 
   if (selectedPhotos.length === 0) {
     toast.add({
-      title: $t('dashboard.photos.messages.batchSelectRequired'),
+      title: '请至少选择一张照片进行此操作',
       description: '',
       color: 'warning',
     })
@@ -1214,7 +1215,7 @@ const handleBatchEraseLocation = async () => {
 
   if (targetPhotoIds.length === 0) {
     toast.add({
-      title: $t('dashboard.photos.messages.photoNotFound'),
+      title: '找不到照片',
       description: '',
       color: 'error',
     })
@@ -1242,19 +1243,15 @@ const handleBatchEraseLocation = async () => {
 
     if (result.success) {
       toast.add({
-        title: $t('dashboard.photos.messages.batchEraseLocationQueued', {
-          count: targetPhotoIds.length,
-        }),
+        title: `已加入 ${targetPhotoIds.length} 条抹除位置信息任务`,
         description: '',
         color: 'success',
       })
       rowSelection.value = {}
     } else {
       toast.add({
-        title: $t('dashboard.photos.messages.batchEraseLocationFailed'),
-        description:
-          result?.message ||
-          $t('dashboard.photos.messages.batchEraseLocationFailed'),
+        title: '批量抹除位置信息任务添加失败',
+        description: result?.message || '批量抹除位置信息任务添加失败',
         color: 'error',
       })
     }
@@ -1264,10 +1261,10 @@ const handleBatchEraseLocation = async () => {
       error?.data?.statusMessage ||
       error?.statusMessage ||
       error?.message ||
-      $t('dashboard.photos.messages.batchEraseLocationFailed')
+      '批量抹除位置信息任务添加失败'
 
     toast.add({
-      title: $t('dashboard.photos.messages.batchEraseLocationFailed'),
+      title: '批量抹除位置信息任务添加失败',
       description: message,
       color: 'error',
     })
@@ -1286,7 +1283,7 @@ const handleBatchDownload = async () => {
 
   if (selectedPhotos.length === 0) {
     toast.add({
-      title: $t('dashboard.photos.messages.batchSelectRequired'),
+      title: '请至少选择一张照片进行此操作',
       description: '',
       color: 'warning',
     })
@@ -1299,8 +1296,8 @@ const handleBatchDownload = async () => {
   )
   if (photosWithUrl.length === 0) {
     toast.add({
-      title: $t('dashboard.photos.messages.error'),
-      description: $t('dashboard.photos.messages.batchNoUrl'),
+      title: '发生错误',
+      description: '没有可用的下载链接照片',
       color: 'error',
     })
     return
@@ -1308,20 +1305,15 @@ const handleBatchDownload = async () => {
 
   if (photosWithUrl.length !== selectedPhotos.length) {
     toast.add({
-      title: $t('dashboard.photos.messages.warning'),
-      description: $t('dashboard.photos.messages.batchPartialUrl', {
-        count: photosWithUrl.length,
-        total: selectedPhotos.length,
-      }),
+      title: '警告',
+      description: `仅有 ${photosWithUrl.length} 张照片（共 ${selectedPhotos.length} 张）具有可用的下载链接`,
       color: 'warning',
     })
   }
 
   const downloadToast = toast.add({
-    title: $t('dashboard.photos.messages.downloadStarted'),
-    description: $t('dashboard.photos.messages.downloadingCount', {
-      count: photosWithUrl.length,
-    }),
+    title: '开始下载',
+    description: `正在下载 ${photosWithUrl.length} 张照片...`,
     color: 'info',
   })
 
@@ -1360,35 +1352,28 @@ const handleBatchDownload = async () => {
     // 更新提示信息
     if (successCount === photosWithUrl.length) {
       toast.update(downloadToast.id, {
-        title: $t('dashboard.photos.messages.batchDownloadSuccess'),
-        description: $t('dashboard.photos.messages.downloadedCount', {
-          count: successCount,
-        }),
+        title: '批量下载完成',
+        description: `已下载 ${successCount} 张照片`,
         color: 'success',
       })
     } else if (failureCount === photosWithUrl.length) {
       toast.update(downloadToast.id, {
-        title: $t('dashboard.photos.messages.batchDownloadFailed'),
-        description: $t('dashboard.photos.messages.downloadFailedCount', {
-          count: failureCount,
-        }),
+        title: '批量下载失败',
+        description: `下载失败 ${failureCount} 张照片`,
         color: 'error',
       })
     } else {
       toast.update(downloadToast.id, {
-        title: $t('dashboard.photos.messages.batchDownloadPartial'),
-        description: $t('dashboard.photos.messages.downloadPartialCount', {
-          success: successCount,
-          failed: failureCount,
-        }),
+        title: '批量下载已完成，部分失败',
+        description: `已下载 ${successCount} 张照片，${failureCount} 张失败`,
         color: 'warning',
       })
     }
   } catch (error: any) {
     console.error('批量下载出错:', error)
     toast.update(downloadToast.id, {
-      title: $t('dashboard.photos.messages.error'),
-      description: error.message || $t('dashboard.photos.messages.error'),
+      title: '发生错误',
+      description: error.message || '发生错误',
       color: 'error',
     })
   }
@@ -1404,7 +1389,7 @@ watch(isImagePreviewOpen, (open) => {
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="$t('dashboard.photos.toolbar.title')">
+      <UDashboardNavbar title="照片管理">
         <template #right>
           <div class="flex gap-2 items-center">
             <UButton
@@ -1413,9 +1398,7 @@ watch(isImagePreviewOpen, (open) => {
               icon="tabler:list-check"
               @click="$router.push('/dashboard/queue')"
             >
-              <span class="hidden sm:inline">{{
-                $t('dashboard.photos.buttons.queue')
-              }}</span>
+              <span class="hidden sm:inline">任务队列</span>
             </UButton>
             <UButton
               icon="tabler:folder-scan"
@@ -1423,9 +1406,7 @@ watch(isImagePreviewOpen, (open) => {
               :disabled="isImportingLocalPhotos"
               @click="importLocalPhotos"
             >
-              <span class="hidden sm:inline">{{
-                $t('dashboard.photos.buttons.importFolder')
-              }}</span>
+              <span class="hidden sm:inline">扫描本地目录</span>
             </UButton>
           </div>
         </template>
@@ -1435,7 +1416,8 @@ watch(isImagePreviewOpen, (open) => {
     <template #body>
       <div class="flex flex-col gap-4 h-full flex-1 min-h-0">
         <p class="text-sm text-neutral-500 dark:text-neutral-400">
-          {{ $t('dashboard.photos.localImport.hint') }}
+          服务端会扫描 NUXT_LOCAL_PHOTO_IMPORT_DIR
+          配置的目录，不会从浏览器上传照片。
         </p>
 
         <!-- 统合容器：工具栏 + 照片列表 -->
@@ -1458,9 +1440,17 @@ watch(isImagePreviewOpen, (open) => {
               <span
                 class="font-semibold text-sm text-neutral-700 dark:text-neutral-300 hidden sm:inline"
               >
-                {{ $t('dashboard.photos.toolbar.title') }}
+                照片管理
               </span>
               <div class="flex items-center gap-1 sm:gap-2 sm:ml-1">
+                <UBadge
+                  v-if="livePhotoStats.videos > 0"
+                  variant="soft"
+                  color="info"
+                  size="sm"
+                >
+                  {{ livePhotoStats.videos }} 视频
+                </UBadge>
                 <UBadge
                   v-if="livePhotoStats.staticPhotos > 0"
                   variant="soft"
@@ -1468,8 +1458,7 @@ watch(isImagePreviewOpen, (open) => {
                   size="sm"
                 >
                   <span class="hidden sm:inline"
-                    >{{ livePhotoStats.staticPhotos }}
-                    {{ $t('dashboard.photos.stats.photos') }}</span
+                    >{{ livePhotoStats.staticPhotos }} 照片</span
                   >
                   <span class="sm:hidden"
                     >{{ livePhotoStats.staticPhotos }}P</span
@@ -1482,8 +1471,7 @@ watch(isImagePreviewOpen, (open) => {
                   size="sm"
                 >
                   <span class="hidden sm:inline"
-                    >{{ livePhotoStats.livePhotos }}
-                    {{ $t('dashboard.photos.stats.livePhotos') }}</span
+                    >{{ livePhotoStats.livePhotos }} Live Photo</span
                   >
                   <span class="sm:hidden"
                     >{{ livePhotoStats.livePhotos }}LP</span
@@ -1494,7 +1482,7 @@ watch(isImagePreviewOpen, (open) => {
 
             <div class="flex items-center gap-2">
               <UPopover>
-                <UTooltip :text="$t('ui.action.filter.tooltip')">
+                <UTooltip text="筛选照片">
                   <UChip
                     inset
                     size="sm"
@@ -1518,7 +1506,7 @@ watch(isImagePreviewOpen, (open) => {
                 </template>
               </UPopover>
               <UPopover>
-                <UTooltip :text="$t('ui.action.sort.tooltip')">
+                <UTooltip text="照片排序">
                   <UButton
                     variant="soft"
                     :color="
@@ -1542,17 +1530,22 @@ watch(isImagePreviewOpen, (open) => {
                 class="w-full sm:w-48"
                 :items="[
                   {
-                    label: $t('dashboard.photos.photoFilter.all'),
+                    label: '视频',
+                    value: 'video',
+                    icon: 'tabler:video',
+                  },
+                  {
+                    label: '全部照片',
                     value: 'all',
                     icon: 'tabler:photo-scan',
                   },
                   {
-                    label: $t('dashboard.photos.photoFilter.livephoto'),
+                    label: 'Live Photo',
                     value: 'livephoto',
                     icon: 'tabler:live-photo',
                   },
                   {
-                    label: $t('dashboard.photos.photoFilter.static'),
+                    label: '静态照片',
                     value: 'static',
                     icon: 'tabler:photo',
                   },
@@ -1579,9 +1572,7 @@ watch(isImagePreviewOpen, (open) => {
                   }
                 "
               >
-                <span class="hidden sm:inline">{{
-                  $t('dashboard.photos.toolbar.refresh')
-                }}</span>
+                <span class="hidden sm:inline">刷新</span>
               </UButton>
 
               <!-- 列可见性按钮 -->
@@ -1617,13 +1608,9 @@ watch(isImagePreviewOpen, (open) => {
                   variant="outline"
                   size="sm"
                   icon="tabler:columns-3"
-                  :title="
-                    $t('dashboard.photos.table.columnVisibility.description')
-                  "
+                  title="切换列的显示/隐藏"
                 >
-                  <span class="hidden sm:inline">{{
-                    $t('dashboard.photos.table.columnVisibility.button')
-                  }}</span>
+                  <span class="hidden sm:inline">列设置</span>
                 </UButton>
               </UDropdownMenu>
             </div>
@@ -1710,7 +1697,7 @@ watch(isImagePreviewOpen, (open) => {
                     name="tabler:info-circle"
                     class="size-3.5 shrink-0"
                   />
-                  {{ $t('ui.action.select.rangeTip') }}
+                  提示：按住 Shift 键并点击，即可选择一个范围内的照片
                 </p>
 
                 <div
@@ -1722,12 +1709,7 @@ watch(isImagePreviewOpen, (open) => {
                     <p
                       class="text-sm font-medium tracking-wide text-neutral-700 dark:text-neutral-200"
                     >
-                      {{
-                        $t('dashboard.photos.selection.selected', {
-                          count: selectedRowsCount,
-                          total: totalRowsCount,
-                        })
-                      }}
+                      {{ `${selectedRowsCount} / ${totalRowsCount} 行已选择` }}
                     </p>
                   </div>
 
@@ -1740,9 +1722,7 @@ watch(isImagePreviewOpen, (open) => {
                       icon="tabler:refresh"
                       @click="handleBatchReprocess"
                     >
-                      <span class="hidden sm:inline">{{
-                        $t('dashboard.photos.selection.batchReprocess')
-                      }}</span>
+                      <span class="hidden sm:inline">重新处理</span>
                     </UButton>
 
                     <UButton
@@ -1753,9 +1733,7 @@ watch(isImagePreviewOpen, (open) => {
                       icon="tabler:map-off"
                       @click="handleBatchEraseLocation"
                     >
-                      <span class="hidden sm:inline">{{
-                        $t('dashboard.photos.selection.batchEraseLocation')
-                      }}</span>
+                      <span class="hidden sm:inline">抹除位置信息</span>
                     </UButton>
 
                     <UButton
@@ -1766,9 +1744,7 @@ watch(isImagePreviewOpen, (open) => {
                       icon="tabler:download"
                       @click="handleBatchDownload"
                     >
-                      <span class="hidden sm:inline">{{
-                        $t('dashboard.photos.selection.batchDownload')
-                      }}</span>
+                      <span class="hidden sm:inline">批量下载</span>
                     </UButton>
 
                     <UButton
@@ -1779,9 +1755,7 @@ watch(isImagePreviewOpen, (open) => {
                       icon="tabler:trash"
                       @click="handleBatchDelete"
                     >
-                      <span class="hidden sm:inline">{{
-                        $t('dashboard.photos.selection.batchDelete')
-                      }}</span>
+                      <span class="hidden sm:inline">批量删除</span>
                     </UButton>
                   </div>
                 </div>
@@ -1792,8 +1766,8 @@ watch(isImagePreviewOpen, (open) => {
 
         <USlideover
           v-model:open="isEditModalOpen"
-          :title="$t('dashboard.photos.editModal.title')"
-          :description="$t('dashboard.photos.editModal.description')"
+          title="编辑照片信息"
+          description="更新标题、描述、标签和拍摄位置。"
           :ui="{
             content: 'sm:max-w-xl',
             body: 'p-2',
@@ -1821,7 +1795,7 @@ watch(isImagePreviewOpen, (open) => {
                 @submit="handleEditSubmit"
               >
                 <UFormField
-                  :label="$t('dashboard.photos.editModal.fields.title')"
+                  label="标题"
                   name="title"
                 >
                   <UInput
@@ -1831,7 +1805,7 @@ watch(isImagePreviewOpen, (open) => {
                 </UFormField>
 
                 <UFormField
-                  :label="$t('dashboard.photos.editModal.fields.description')"
+                  label="描述"
                   name="description"
                 >
                   <UTextarea
@@ -1843,7 +1817,7 @@ watch(isImagePreviewOpen, (open) => {
 
                 <div class="space-y-2">
                   <UFormField
-                    :label="$t('dashboard.photos.editModal.fields.tags')"
+                    label="标签"
                     name="tags"
                   >
                     <UInputTags
@@ -1852,7 +1826,7 @@ watch(isImagePreviewOpen, (open) => {
                     />
                   </UFormField>
                   <p class="text-xs text-neutral-500 dark:text-neutral-400">
-                    {{ $t('dashboard.photos.editModal.fields.tagsHint') }}
+                    按下 Enter 键添加每个标签。
                   </p>
                 </div>
 
@@ -1860,7 +1834,7 @@ watch(isImagePreviewOpen, (open) => {
                   <label
                     class="text-sm font-medium text-neutral-700 dark:text-neutral-200"
                   >
-                    {{ $t('dashboard.photos.editModal.fields.rating') }}
+                    评分
                   </label>
                   <div class="flex items-center gap-3">
                     <span
@@ -1873,7 +1847,7 @@ watch(isImagePreviewOpen, (open) => {
                       v-else
                       class="text-sm text-neutral-500 dark:text-neutral-500"
                     >
-                      {{ $t('dashboard.photos.editModal.fields.noRating') }}
+                      未评分
                     </span>
                     <Rating
                       :model-value="editFormState.rating || 0"
@@ -1891,7 +1865,7 @@ watch(isImagePreviewOpen, (open) => {
                     <label
                       class="text-sm font-medium text-neutral-700 dark:text-neutral-200"
                     >
-                      {{ $t('dashboard.photos.editModal.fields.location') }}
+                      拍摄位置
                     </label>
                     <UButton
                       v-if="locationSelection"
@@ -1901,9 +1875,7 @@ watch(isImagePreviewOpen, (open) => {
                       icon="tabler:map-off"
                       @click.prevent="clearSelectedLocation"
                     >
-                      {{
-                        $t('dashboard.photos.editModal.fields.clearLocation')
-                      }}
+                      抹除位置信息
                     </UButton>
                   </div>
 
@@ -1916,9 +1888,7 @@ watch(isImagePreviewOpen, (open) => {
                       <span
                         class="px-3 py-2 rounded-full bg-white/80 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-200 shadow"
                       >
-                        {{
-                          $t('dashboard.photos.editModal.fields.locationHint')
-                        }}
+                        点击地图选择或更新拍摄位置。
                       </span>
                     </template>
                   </MapLocationPicker>
@@ -1926,18 +1896,12 @@ watch(isImagePreviewOpen, (open) => {
                   <div
                     class="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2"
                   >
-                    <span
-                      >{{
-                        $t('dashboard.photos.editModal.fields.coordinates')
-                      }}:</span
-                    >
+                    <span>坐标:</span>
                     <span v-if="formattedCoordinates">
                       {{ formattedCoordinates.latitude }},
                       {{ formattedCoordinates.longitude }}
                     </span>
-                    <span v-else>
-                      {{ $t('dashboard.photos.editModal.fields.noLocation') }}
-                    </span>
+                    <span v-else> 未选择位置 </span>
                   </div>
                 </div>
               </UForm>
@@ -1951,7 +1915,7 @@ watch(isImagePreviewOpen, (open) => {
                 color="neutral"
                 @click.prevent="isEditModalOpen = false"
               >
-                {{ $t('dashboard.photos.editModal.actions.cancel') }}
+                取消
               </UButton>
               <UButton
                 type="submit"
@@ -1960,7 +1924,7 @@ watch(isImagePreviewOpen, (open) => {
                 :disabled="!isMetadataDirty || isSavingMetadata"
                 icon="tabler:device-floppy"
               >
-                {{ $t('dashboard.photos.editModal.actions.save') }}
+                保存更改
               </UButton>
             </div>
           </template>
@@ -1982,21 +1946,15 @@ watch(isImagePreviewOpen, (open) => {
                   <h3
                     class="text-lg font-semibold text-neutral-900 dark:text-white leading-5"
                   >
-                    {{
-                      deleteMode === 'single'
-                        ? $t('dashboard.photos.delete.single.title')
-                        : $t('dashboard.photos.delete.batch.title')
-                    }}
+                    {{ deleteMode === 'single' ? '删除照片' : '批量删除照片' }}
                   </h3>
                   <p
                     class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed"
                   >
                     {{
                       deleteMode === 'single'
-                        ? $t('dashboard.photos.delete.single.message')
-                        : $t('dashboard.photos.delete.batch.message', {
-                            count: deleteTargetPhotos.length,
-                          })
+                        ? '确定要删除这张照片吗？'
+                        : `确定要删除选中的 ${deleteTargetPhotos.length} 张照片吗？`
                     }}
                   </p>
                   <div
@@ -2009,7 +1967,7 @@ watch(isImagePreviewOpen, (open) => {
                         name="tabler:alert-triangle-filled"
                         class="size-4"
                       />
-                      {{ $t('dashboard.photos.delete.warning') }}
+                      删除操作会同时移除原图、缩略图和实况视频，且无法恢复。
                     </p>
                   </div>
                 </div>
@@ -2024,7 +1982,7 @@ watch(isImagePreviewOpen, (open) => {
                 :disabled="isDeleting"
                 @click="isDeleteConfirmOpen = false"
               >
-                {{ $t('dashboard.photos.delete.buttons.cancel') }}
+                取消
               </UButton>
               <UButton
                 color="error"
@@ -2032,7 +1990,7 @@ watch(isImagePreviewOpen, (open) => {
                 :loading="isDeleting"
                 @click="confirmDelete"
               >
-                {{ $t('dashboard.photos.delete.buttons.confirm') }}
+                确认删除
               </UButton>
             </div>
           </template>
@@ -2041,7 +1999,7 @@ watch(isImagePreviewOpen, (open) => {
         <!-- 图片预览模态框 -->
         <UModal
           v-model:open="isImagePreviewOpen"
-          :title="$t('dashboard.photos.previewTitle')"
+          title="照片预览"
           :description="previewingPhoto?.description || ''"
         >
           <template #body>
@@ -2051,12 +2009,33 @@ watch(isImagePreviewOpen, (open) => {
             >
               <div class="w-full max-w-2xl rounded-lg overflow-hidden">
                 <MasonryItemPhoto
-                  v-if="previewingPhoto"
+                  v-if="
+                    previewingPhoto && previewingPhoto.mediaType !== 'video'
+                  "
                   :photo="previewingPhoto"
                   :index="0"
                   @visibility-change="() => {}"
                   @open-viewer="openInNewTab(`/${previewingPhoto.id}`)"
                 />
+                <div
+                  v-else-if="previewingPhoto"
+                  class="space-y-3"
+                >
+                  <video
+                    v-if="isImagePreviewOpen"
+                    :src="previewingPhoto.originalUrl || undefined"
+                    :poster="previewingPhoto.thumbnailUrl || undefined"
+                    class="w-full max-h-[65vh] bg-black"
+                    controls
+                    playsinline
+                    preload="metadata"
+                  />
+                  <UButton
+                    icon="tabler:cut"
+                    @click="openVideoTrim(previewingPhoto)"
+                    >裁剪视频</UButton
+                  >
+                </div>
               </div>
             </div>
           </template>
@@ -2064,6 +2043,13 @@ watch(isImagePreviewOpen, (open) => {
       </div>
     </template>
   </UDashboardPanel>
+  <VideoTrimEditor
+    v-if="trimTarget"
+    :photo="trimTarget"
+    :open="showTrimEditor"
+    @close="showTrimEditor = false"
+    @completed="refresh()"
+  />
 </template>
 
 <style scoped></style>

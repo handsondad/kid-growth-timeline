@@ -82,7 +82,7 @@ const handleSubmit = async (event: any) => {
         :loading="loading"
         :disabled="loading"
       >
-        {{ submitLabel ?? $t('common.actions.saveSettings') }}
+        {{ submitLabel ?? '保存设置' }}
       </UButton>
     </template>
   </UCard>

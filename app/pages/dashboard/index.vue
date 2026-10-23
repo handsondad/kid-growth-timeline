@@ -7,8 +7,24 @@ definePageMeta({
 })
 
 useHead({
-  title: () => $t('title.dashboard'),
+  title: () => '仪表板',
 })
+
+const runtimeLabels: Record<string, string> = {
+  windows: 'Microsoft Windows',
+  windows10: 'Microsoft Windows 10',
+  windows11: 'Microsoft Windows 11',
+  ubuntu: 'Ubuntu',
+  debian: 'Debian',
+  centos: 'CentOS',
+  redhat: 'Red Hat Enterprise Linux',
+  fedora: 'Fedora',
+  arch: 'Arch Linux',
+  alpine: 'Alpine Linux',
+  opensuse: 'openSUSE',
+  macos: 'macOS',
+  unknown: '未知系统',
+}
 
 const dayjs = useDayjs()
 const appTitle = useSettingRef('app:title')
@@ -114,7 +130,7 @@ const heatmapEndDate = computed(() => {
 const yearOptions = computed(() => {
   const options: Array<{ label: string; value: number | 'recent' }> = [
     {
-      label: $t('common.heatmap.legend.recentlyYear'),
+      label: '最近一年',
       value: 'recent' as const,
     },
   ]
@@ -142,14 +158,14 @@ const onShareSite = () => {
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="$t('dashboard.overview.title')" />
+      <UDashboardNavbar title="仪表板概览" />
     </template>
 
     <template #body>
       <div class="flex flex-col gap-6">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <DashboardIndicator
-            :title="$t('dashboard.overview.indicator.totalPhotos')"
+            title="照片总数"
             icon="tabler:photo"
             color="blue"
             :value="dashboardStats?.photos?.total || 0"
@@ -157,25 +173,25 @@ const onShareSite = () => {
             @click="$router.push('/dashboard/photos')"
           />
           <DashboardIndicator
-            :title="$t('dashboard.overview.indicator.thisMonth')"
+            title="本月新增"
             icon="tabler:photo-plus"
             color="green"
             :value="dashboardStats?.photos?.thisMonth || 0"
           />
           <DashboardIndicator
-            :title="$t('dashboard.overview.indicator.queueStatus.title')"
+            title="队列状态"
             icon="tabler:loader"
             color="purple"
             :value="
               (dashboardStats?.workerPool?.activeWorkers || 0) > 0
-                ? $t('dashboard.overview.indicator.queueStatus.processing')
-                : $t('dashboard.overview.indicator.queueStatus.pending')
+                ? '处理中'
+                : '空闲'
             "
             clickable
             @click="$router.push('/dashboard/queue')"
           />
           <DashboardIndicator
-            :title="$t('dashboard.overview.indicator.storageUsage')"
+            title="存储使用"
             icon="tabler:database"
             color="blue"
             :value="formatBytes(dashboardStats?.storage?.totalSize || 0)"
@@ -185,15 +201,13 @@ const onShareSite = () => {
         <!-- 运行信息 -->
         <UCard>
           <template #header>
-            <h2 class="text-lg font-semibold pb-1.5">
-              {{ $t('dashboard.overview.section.runtimeInfo.title') }}
-            </h2>
+            <h2 class="text-lg font-semibold pb-1.5">运行信息</h2>
           </template>
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                {{ $t('dashboard.overview.section.runtimeInfo.version') }}
+                运行版本
               </p>
               <NuxtLink
                 class="text-lg font-bold hover:text-primary"
@@ -206,7 +220,7 @@ const onShareSite = () => {
             </div>
             <div>
               <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                {{ $t('dashboard.overview.section.runtimeInfo.uptime') }}
+                运行时间
               </p>
               <p class="text-lg font-bold">
                 {{
@@ -220,22 +234,18 @@ const onShareSite = () => {
             </div>
             <div>
               <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                {{ $t('dashboard.overview.section.runtimeInfo.environment') }}
+                运行环境
               </p>
               <UBadge
                 color="success"
                 variant="soft"
               >
-                {{
-                  $t(
-                    `dashboard.overview.section.runtimeInfo.systems.${dashboardStats?.runningOn || 'unknown'}`,
-                  )
-                }}
+                {{ runtimeLabels[dashboardStats?.runningOn || 'unknown'] }}
               </UBadge>
             </div>
             <!-- <div>
           <p class="text-sm text-neutral-500 dark:text-neutral-400">
-            {{ $t('dashboard.overview.section.runtimeInfo.lastUpdate') }}
+            最后更新
           </p>
           <p class="text-lg font-bold">
             <ClientOnly>
@@ -246,7 +256,7 @@ const onShareSite = () => {
         </div> -->
             <div>
               <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                {{ $t('dashboard.overview.shareSite.label') }}
+                分享你的站点
               </p>
               <p class="text-lg font-bold">
                 <UButton
@@ -257,7 +267,7 @@ const onShareSite = () => {
                   trailing-icon="tabler:external-link"
                   @click="onShareSite"
                 >
-                  {{ $t('dashboard.overview.shareSite.button') }}
+                  分享你的站点
                 </UButton>
               </p>
             </div>
@@ -279,45 +289,12 @@ const onShareSite = () => {
                     :round="3"
                     :tooltip-formatter="
                       (item: CalendarItem) => {
-                        return $t('common.heatmap.tooltip.data', [
-                          $dayjs(item.date).format('LL'),
-                          item.count || 0,
-                        ])
+                        return `${$dayjs(item.date).format('LL')}拍摄了 ${item.count || 0} 张照片`
                       }
                     "
                     :tooltip-no-data-formatter="
-                      (date: Date) =>
-                        $t('common.heatmap.tooltip.noData', [
-                          $dayjs(date).format('LL'),
-                        ])
+                      (date: Date) => `${$dayjs(date).format('LL')}没有照片`
                     "
-                    :locale="{
-                      months: [
-                        $t('common.months.jan'),
-                        $t('common.months.feb'),
-                        $t('common.months.mar'),
-                        $t('common.months.apr'),
-                        $t('common.months.may'),
-                        $t('common.months.jun'),
-                        $t('common.months.jul'),
-                        $t('common.months.aug'),
-                        $t('common.months.sep'),
-                        $t('common.months.oct'),
-                        $t('common.months.nov'),
-                        $t('common.months.dec'),
-                      ],
-                      days: [
-                        $t('common.days.sun'),
-                        $t('common.days.mon'),
-                        $t('common.days.tue'),
-                        $t('common.days.wed'),
-                        $t('common.days.thu'),
-                        $t('common.days.fri'),
-                        $t('common.days.sat'),
-                      ],
-                      less: $t('common.heatmap.legend.less'),
-                      more: $t('common.heatmap.legend.more'),
-                    }"
                     :dark-mode="$colorMode.value === 'dark'"
                   >
                     <template #vch__legend-left>
@@ -352,9 +329,7 @@ const onShareSite = () => {
             <!-- 内存使用 -->
             <UCard>
               <template #header>
-                <h3 class="font-semibold pb-1.5">
-                  {{ $t('dashboard.overview.section.memory.title') }}
-                </h3>
+                <h3 class="font-semibold pb-1.5">内存使用率</h3>
               </template>
 
               <div class="space-y-2">
@@ -384,7 +359,7 @@ const onShareSite = () => {
                     {{
                       dashboardStats?.memory
                         ? `${Math.round((dashboardStats.memory.used / 1024 / 1024 / 1024) * 100) / 100}GB / ${Math.round((dashboardStats.memory.total / 1024 / 1024 / 1024) * 100) / 100}GB`
-                        : $t('dashboard.overview.memoryUnavailable')
+                        : '无法获取内存信息'
                     }}
                   </div>
                   <span>
@@ -405,48 +380,36 @@ const onShareSite = () => {
             <!-- 队列详情 -->
             <UCard>
               <template #header>
-                <h3 class="font-semibold pb-1.5">
-                  {{ $t('dashboard.overview.section.queue.title') }}
-                </h3>
+                <h3 class="font-semibold pb-1.5">队列状态</h3>
               </template>
 
               <div class="space-y-1">
                 <div class="flex justify-between items-center text-sm">
-                  <span>
-                    {{ $t('dashboard.overview.section.queue.activeWorkers') }}
-                  </span>
+                  <span> 活跃 Workers </span>
                   <UBadge variant="soft">
                     {{ dashboardStats?.workerPool?.activeWorkers || 0 }}
                   </UBadge>
                 </div>
                 <div class="flex justify-between items-center text-sm">
-                  <span>
-                    {{ $t('dashboard.overview.section.queue.totalWorkers') }}
-                  </span>
+                  <span> 总 Workers </span>
                   <UBadge variant="soft">
                     {{ dashboardStats?.workerPool?.totalWorkers || 0 }}
                   </UBadge>
                 </div>
                 <div class="flex justify-between items-center text-sm">
-                  <span>
-                    {{ $t('dashboard.overview.section.queue.totalProcessed') }}
-                  </span>
+                  <span> 已处理 </span>
                   <UBadge variant="soft">
                     {{ dashboardStats?.workerPool?.totalProcessed || 0 }}
                   </UBadge>
                 </div>
                 <div class="flex justify-between items-center text-sm">
-                  <span>
-                    {{ $t('dashboard.overview.section.queue.totalFailed') }}
-                  </span>
+                  <span> 失败计数 </span>
                   <UBadge variant="soft">
                     {{ dashboardStats?.workerPool?.totalErrors || 0 }}
                   </UBadge>
                 </div>
                 <div class="flex justify-between items-center text-sm">
-                  <span>
-                    {{ $t('dashboard.overview.section.queue.avgSuccessRate') }}
-                  </span>
+                  <span> 成功率 </span>
                   <UBadge
                     :color="
                       (dashboardStats?.workerPool?.averageSuccessRate || 0) > 90

@@ -53,6 +53,7 @@ export const batchTestLivePhotoDetection = async (photoIds?: string[]) => {
         .where(
           and(
             eq(tables.photos.isLivePhoto, 0),
+            eq(tables.photos.mediaType, 'photo'),
             inArray(tables.photos.id, photoIds),
           ),
         )
@@ -61,7 +62,12 @@ export const batchTestLivePhotoDetection = async (photoIds?: string[]) => {
       photos = await db
         .select()
         .from(tables.photos)
-        .where(eq(tables.photos.isLivePhoto, 0))
+        .where(
+          and(
+            eq(tables.photos.isLivePhoto, 0),
+            eq(tables.photos.mediaType, 'photo'),
+          ),
+        )
     }
 
     logger.main.info(`Testing ${photos.length} photos for LivePhoto detection`)

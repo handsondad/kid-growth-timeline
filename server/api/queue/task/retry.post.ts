@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
+import { assertVideoQueueCapacity } from '../../../services/video/tasks'
 
 /**
  * 重试指定的失败任务
@@ -35,6 +36,8 @@ export default defineEventHandler(async (event) => {
         statusMessage: `Task is not in failed status, current status: ${task.status}`,
       })
     }
+    if (task.payload.type === 'video' || task.payload.type === 'video-trim')
+      assertVideoQueueCapacity()
 
     // 重置任务状态为 pending，清除错误信息和状态阶段
     await db
@@ -42,6 +45,7 @@ export default defineEventHandler(async (event) => {
       .set({
         status: 'pending',
         statusStage: null,
+        progress: 0,
         errorMessage: null,
         attempts: 0, // 重置尝试次数
         createdAt: new Date(), // 更新创建时间以便重新调度
@@ -52,10 +56,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: `Task ${taskId} has been reset and will be retried`,
       taskId,
-      payload: {
-        type: task.payload.type,
-        storageKey: task.payload.storageKey,
-      },
+      payload: task.payload,
     }
   } catch (error) {
     if (error && typeof error === 'object' && 'statusCode' in error) {

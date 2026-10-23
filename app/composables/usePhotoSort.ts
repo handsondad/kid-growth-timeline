@@ -1,6 +1,6 @@
 interface SortOption {
   key: string
-  labelI18n: string
+  label: string
   icon?: string
   value: (photo: Photo) => any
   order: 'asc' | 'desc'
@@ -17,7 +17,7 @@ const globalSortState = ref<SortState>({
   availableSorts: [
     {
       key: 'dateTaken-desc',
-      labelI18n: 'ui.action.sort.options.dateTakenDesc',
+      label: '日期(最新的在前)',
       icon: 'tabler:sort-descending',
       value: (photo: Photo) =>
         photo.dateTaken ? new Date(photo.dateTaken).getTime() : 0,
@@ -25,7 +25,7 @@ const globalSortState = ref<SortState>({
     },
     {
       key: 'dateTaken-asc',
-      labelI18n: 'ui.action.sort.options.dateTakenAsc',
+      label: '日期(最旧的在前)',
       icon: 'tabler:sort-ascending',
       value: (photo: Photo) =>
         photo.dateTaken ? new Date(photo.dateTaken).getTime() : 0,
@@ -33,7 +33,7 @@ const globalSortState = ref<SortState>({
     },
     {
       key: 'lastModified-desc',
-      labelI18n: 'ui.action.sort.options.lastModifiedDesc',
+      label: '最后更新(最新的在前)',
       icon: 'tabler:sort-descending',
       value: (photo: Photo) =>
         photo.lastModified ? new Date(photo.lastModified).getTime() : 0,
@@ -41,7 +41,7 @@ const globalSortState = ref<SortState>({
     },
     {
       key: 'lastModified-asc',
-      labelI18n: 'ui.action.sort.options.lastModifiedAsc',
+      label: '最后更新(最旧的在前)',
       icon: 'tabler:sort-ascending',
       value: (photo: Photo) =>
         photo.lastModified ? new Date(photo.lastModified).getTime() : 0,
@@ -49,28 +49,28 @@ const globalSortState = ref<SortState>({
     },
     {
       key: 'fileSize-asc',
-      labelI18n: 'ui.action.sort.options.fileSizeAsc',
+      label: '文件大小(升序)',
       icon: 'tabler:sort-ascending-small-big',
       value: (photo: Photo) => photo.fileSize || 0,
       order: 'asc',
     },
     {
       key: 'fileSize-desc',
-      labelI18n: 'ui.action.sort.options.fileSizeDesc',
+      label: '文件大小(降序)',
       icon: 'tabler:sort-descending-small-big',
       value: (photo: Photo) => photo.fileSize || 0,
       order: 'desc',
     },
     {
       key: 'title-asc',
-      labelI18n: 'ui.action.sort.options.titleAsc',
+      label: '标题(A-Z)',
       icon: 'tabler:sort-ascending-letters',
       value: (photo: Photo) => (photo.title || photo.id).toLowerCase(),
       order: 'asc',
     },
     {
       key: 'title-desc',
-      labelI18n: 'ui.action.sort.options.titleDesc',
+      label: '标题(Z-A)',
       icon: 'tabler:sort-descending-letters',
       value: (photo: Photo) => (photo.title || photo.id).toLowerCase(),
       order: 'desc',
@@ -149,9 +149,7 @@ export function usePhotoSort() {
 
   // 获取当前排序的显示标签
   const currentSortLabel = computed(
-    () =>
-      currentSortOption.value?.labelI18n ||
-      'ui.action.sort.options.dateTakenDesc',
+    () => currentSortOption.value?.label || '日期(最新的在前)',
   )
 
   // 获取当前排序的显示图标
@@ -183,7 +181,7 @@ export function usePhotoSort() {
       // 如果没有 shuffle 排序选项，则添加它
       globalSortState.value.availableSorts.push({
         key: 'shuffle',
-        labelI18n: 'ui.action.sort.options.shuffle',
+        label: '打乱顺序',
         icon: 'tabler:dice-3',
         value: () => Math.random(),
         order: 'asc',

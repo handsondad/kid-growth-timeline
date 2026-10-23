@@ -37,6 +37,29 @@ const loadingIndicatorRef = ref<LoadingIndicatorRef>()
 
 const showExifPanel = ref(false)
 const showShareModal = ref(false)
+const showTrimEditor = ref(false)
+const trimPhoto = ref<Photo | null>(null)
+const ordinaryVideo = shallowRef<HTMLVideoElement | null>(null)
+const setOrdinaryVideo = (element: unknown) => {
+  ordinaryVideo.value = element instanceof HTMLVideoElement ? element : null
+}
+const { refresh: refreshMedia } = usePhotos()
+const openTrimEditor = () => {
+  if (
+    currentPhoto.value?.mediaType !== 'video' ||
+    currentPhoto.value.isLivePhoto
+  )
+    return
+  trimPhoto.value = currentPhoto.value
+  ordinaryVideo.value?.pause()
+  showTrimEditor.value = true
+}
+const handleTrimCompleted = async () => {
+  const id = currentPhoto.value?.id
+  await refreshMedia()
+  const index = props.photos.findIndex((photo) => photo.id === id)
+  if (props.isOpen && index >= 0) emit('indexChange', index)
+}
 let slideshowTimer: ReturnType<typeof setTimeout> | null = null
 
 const showReactionPicker = ref(false)
@@ -105,6 +128,7 @@ watch(
     if (!isOpen) {
       showExifPanel.value = false
       showShareModal.value = false
+      showTrimEditor.value = false
 
       // Reset reaction state
       showReactionPicker.value = false
@@ -441,16 +465,15 @@ const handleReactionSelect = async (reactionId: string, iconName: string) => {
     if (error?.statusCode === 429) {
       toast.add({
         icon: 'tabler:alert-circle',
-        title: $t('viewer.reaction.error.title'),
-        description: $t('viewer.reaction.error.rateLimited'),
+        title: '表态失败',
+        description: '操作过于频繁，请稍后再试',
         color: 'warning',
       })
     } else {
       toast.add({
         icon: 'tabler:alert-circle',
-        title: $t('viewer.reaction.error.title'),
-        description:
-          error instanceof Error ? error.message : $t('common.unknownError'),
+        title: '表态失败',
+        description: error instanceof Error ? error.message : '未知错误',
         color: 'warning',
       })
     }
@@ -604,14 +627,20 @@ const swiperModules = [Navigation, Keyboard, Virtual]
 
                 <!-- 右侧按钮组 -->
                 <div class="flex items-center gap-2">
-                  <UTooltip
-                    :text="
-                      $t(
-                        isSlideshowPlaying
-                          ? 'viewer.slideshow.pause'
-                          : 'viewer.slideshow.play',
-                      )
+                  <GlassButton
+                    v-if="
+                      currentPhoto?.mediaType === 'video' &&
+                      !currentPhoto.isLivePhoto
                     "
+                    icon="tabler:cut"
+                    size="sm"
+                    rounded
+                    aria-label="裁剪视频"
+                    title="裁剪视频"
+                    @click="openTrimEditor"
+                  />
+                  <UTooltip
+                    :text="isSlideshowPlaying ? '暂停放映' : '开始放映'"
                   >
                     <GlassButton
                       :icon="
@@ -622,13 +651,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                       size="sm"
                       rounded
                       :disabled="photos.length < 2"
-                      :aria-label="
-                        $t(
-                          isSlideshowPlaying
-                            ? 'viewer.slideshow.pause'
-                            : 'viewer.slideshow.play',
-                        )
-                      "
+                      :aria-label="isSlideshowPlaying ? '暂停放映' : '开始放映'"
                       @click="toggleSlideshow"
                     />
                   </UTooltip>
@@ -649,6 +672,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
 
                   <!-- 分享按钮 -->
                   <GlassButton
+                    v-if="currentPhoto?.mediaType !== 'video'"
                     icon="tabler:share-3"
                     size="sm"
                     rounded
@@ -676,7 +700,8 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                 :initial-slide="currentIndex"
                 :virtual="true"
                 :keyboard="{
-                  enabled: true,
+                  enabled:
+                    !showTrimEditor && currentPhoto?.mediaType !== 'video',
                   onlyInViewport: true,
                 }"
                 class="h-full w-full"
@@ -709,7 +734,30 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     @contextmenu.prevent=""
                   >
                     <!-- Main Image -->
+                    <video
+                      v-if="
+                        photo.mediaType === 'video' && index === currentIndex
+                      "
+                      :ref="setOrdinaryVideo"
+                      :src="photo.originalUrl || undefined"
+                      :poster="photo.thumbnailUrl || undefined"
+                      class="swiper-no-swiping h-full w-full object-contain"
+                      controls
+                      playsinline
+                      preload="metadata"
+                      :aria-label="photo.title || '视频'"
+                      @click.stop
+                      @pointerdown.stop
+                      @touchstart.stop
+                    />
+                    <img
+                      v-else-if="photo.mediaType === 'video'"
+                      :src="photo.thumbnailUrl || undefined"
+                      :alt="photo.title || '视频'"
+                      class="h-full w-full object-contain"
+                    />
                     <ProgressiveImage
+                      v-else
                       class="h-full w-full object-contain transition-opacity duration-400"
                       :class="{
                         'opacity-0':
@@ -722,11 +770,13 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                       :thumbhash="photo.thumbnailHash"
                       :alt="photo.title || ''"
                       :width="
-                        index === currentIndex ? currentPhoto?.width : undefined
+                        index === currentIndex
+                          ? (currentPhoto?.width ?? undefined)
+                          : undefined
                       "
                       :height="
                         index === currentIndex
-                          ? currentPhoto?.height
+                          ? (currentPhoto?.height ?? undefined)
                           : undefined
                       "
                       :is-live-photo="photo.isLivePhoto === 1"
@@ -768,7 +818,10 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     <!-- 操作提示 -->
                     <AnimatePresence>
                       <motion.div
-                        v-if="!isLivePhotoPlaying"
+                        v-if="
+                          !isLivePhotoPlaying &&
+                          currentPhoto?.mediaType !== 'video'
+                        "
                         :initial="{ opacity: 0, scale: 0.95 }"
                         :animate="{ opacity: 0.6, scale: 1 }"
                         :exit="{ opacity: 0, scale: 0.95 }"
@@ -776,18 +829,16 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                         class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 bg-black/50 rounded-lg border border-white/10 px-2 py-1 shadow-2xl text-white text-xs font-bold"
                       >
                         <span v-if="currentPhoto?.isLivePhoto && isMobile">
-                          {{ $t('viewer.hint.livePhoto.mobile') }}
+                          长按播放实况照片 · 双击或捏合缩放
                         </span>
                         <span
                           v-else-if="currentPhoto?.isLivePhoto && !isMobile"
                         >
-                          {{ $t('viewer.hint.livePhoto.desktop') }}
+                          悬停左上播放 · 双击/滚轮缩放
                         </span>
                         <span v-else>
                           {{
-                            isMobile
-                              ? $t('viewer.hint.mobile')
-                              : $t('viewer.hint.desktop')
+                            isMobile ? '双击或捏合缩放' : '双击或用鼠标滚轮缩放'
                           }}
                         </span>
                       </motion.div>
@@ -796,7 +847,10 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     <!-- 表态按钮 -->
                     <AnimatePresence>
                       <motion.div
-                        v-if="!isLivePhotoPlaying"
+                        v-if="
+                          !isLivePhotoPlaying &&
+                          currentPhoto?.mediaType !== 'video'
+                        "
                         :initial="{ opacity: 0, scale: 0.8, y: 20 }"
                         :animate="{ opacity: 1, scale: 1, y: 0 }"
                         :exit="{ opacity: 0, scale: 0.8, y: 20 }"
@@ -872,23 +926,13 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                             />
                             <div class="flex flex-col items-start gap-0.5">
                               <span class="text-sm font-medium leading-none">
-                                {{
-                                  selectedReaction
-                                    ? $t('viewer.reaction.change')
-                                    : $t('viewer.reaction.add')
-                                }}
+                                {{ selectedReaction ? '已表态' : '表态' }}
                               </span>
                               <span
                                 v-if="totalReactions > 0"
                                 class="text-[10px] leading-none opacity-70"
                               >
-                                {{
-                                  $t(
-                                    'viewer.reaction.count',
-                                    { count: totalReactions },
-                                    totalReactions,
-                                  )
-                                }}
+                                {{ `${totalReactions} 个表态` }}
                               </span>
                             </div>
                           </motion.button>
@@ -955,10 +999,17 @@ const swiperModules = [Navigation, Keyboard, Virtual]
 
     <!-- Share Modal -->
     <PhotoShareModal
-      v-if="currentPhoto"
+      v-if="currentPhoto && currentPhoto.mediaType !== 'video'"
       :is-open="showShareModal"
       :photo="currentPhoto"
       @close="showShareModal = false"
+    />
+    <VideoTrimEditor
+      v-if="trimPhoto"
+      :photo="trimPhoto"
+      :open="showTrimEditor"
+      @close="showTrimEditor = false"
+      @completed="handleTrimCompleted"
     />
   </Teleport>
 </template>

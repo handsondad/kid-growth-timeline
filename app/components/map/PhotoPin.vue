@@ -310,9 +310,7 @@ const onClick = () => {
             <div class="absolute inset-0 overflow-hidden rounded-full">
               <ThumbImage
                 :src="marker.thumbnailUrl!"
-                :alt="
-                  marker.title || $t('map.photo.altFallback', { id: marker.id })
-                "
+                :alt="marker.title || `照片 ${marker.id}`"
                 :thumbhash="marker.thumbnailHash"
                 :threshold="0.1"
                 root-margin="100px"
@@ -399,10 +397,7 @@ const onClick = () => {
                 <div class="relative h-36 overflow-hidden">
                   <ThumbImage
                     :src="marker.thumbnailUrl!"
-                    :alt="
-                      marker.title ||
-                      $t('map.photo.altFallback', { id: marker.id })
-                    "
+                    :alt="marker.title || `照片 ${marker.id}`"
                     :thumbhash="marker.thumbnailHash"
                     :threshold="0.1"
                     root-margin="200px"
@@ -418,10 +413,7 @@ const onClick = () => {
                     class="flex items-center gap-2 text-neutral-900 dark:text-white group/link"
                   >
                     <h3 class="flex-1 text-lg font-semibold truncate">
-                      {{
-                        marker.title ||
-                        $t('map.photo.altFallback', { id: marker.id })
-                      }}
+                      {{ marker.title || `照片 ${marker.id}` }}
                     </h3>
                     <Icon
                       name="tabler:external-link"
@@ -483,13 +475,13 @@ const onClick = () => {
                           marker.exif?.GPSLatitude !== undefined &&
                           marker.exif?.GPSLatitude !== null
                             ? `${Math.abs(Number(marker.exif?.GPSLatitude)).toFixed(4)}°${marker.exif?.GPSLatitudeRef}`
-                            : $t('map.photo.unknownCoord')
+                            : '未知'
                         }},
                         {{
                           marker.exif?.GPSLongitude !== undefined &&
                           marker.exif?.GPSLongitude !== null
                             ? `${Math.abs(Number(marker.exif?.GPSLongitude)).toFixed(4)}°${marker.exif?.GPSLongitudeRef}`
-                            : $t('map.photo.unknownCoord')
+                            : '未知'
                         }}
                       </span>
                     </div>

@@ -2,42 +2,42 @@ export const REACTION_DEFINITIONS = [
   {
     id: 'like',
     iconName: 'fluent-emoji-flat:thumbs-up',
-    labelKey: 'viewer.reaction.like',
+    label: '拍得好',
   },
   {
     id: 'love',
     iconName: 'fluent-emoji-flat:red-heart',
-    labelKey: 'viewer.reaction.love',
+    label: '喜欢',
   },
   {
     id: 'amazing',
     iconName: 'fluent-emoji-flat:smiling-face-with-heart-eyes',
-    labelKey: 'viewer.reaction.amazing',
+    label: '惊叹',
   },
   {
     id: 'funny',
     iconName: 'fluent-emoji-flat:face-with-tears-of-joy',
-    labelKey: 'viewer.reaction.funny',
+    label: '哈哈',
   },
   {
     id: 'wow',
     iconName: 'fluent-emoji-flat:face-with-open-mouth',
-    labelKey: 'viewer.reaction.wow',
+    label: '哇塞',
   },
   {
     id: 'sad',
     iconName: 'fluent-emoji-flat:crying-face',
-    labelKey: 'viewer.reaction.sad',
+    label: '感动',
   },
   {
     id: 'fire',
     iconName: 'fluent-emoji-flat:fire',
-    labelKey: 'viewer.reaction.fire',
+    label: '助火',
   },
   {
     id: 'sparkle',
     iconName: 'fluent-emoji-flat:sparkles',
-    labelKey: 'viewer.reaction.sparkle',
+    label: '闪耀',
   },
 ] as const
 

@@ -57,24 +57,17 @@ const dateRange = computed(() => {
   <section
     v-if="yearEntries.length"
     class="time-index"
-    :aria-label="$t('title.memories')"
+    aria-label="成长回忆"
   >
     <div class="time-index__heading">
       <div>
-        <p class="time-index__eyebrow">
-          {{ $t('title.memories') }}
-        </p>
+        <p class="time-index__eyebrow">成长回忆</p>
         <h2 class="time-index__title">
           {{ dateRange }}
         </h2>
       </div>
       <p class="time-index__summary">
-        {{
-          $t('ui.stats.totalPhotosWithRange', {
-            range: dateRange,
-            count: props.photos.length,
-          })
-        }}
+        {{ `${dateRange}, 共 ${props.photos.length} 张照片` }}
       </p>
     </div>
 
@@ -87,12 +80,7 @@ const dateRange = computed(() => {
           class="time-index__year"
           :class="{ 'is-active': activeYear === entry.year }"
           :style="{ '--year-accent': entry.accent }"
-          :aria-label="
-            $t('ui.stats.totalPhotosWithRange', {
-              range: String(entry.year),
-              count: entry.count,
-            })
-          "
+          :aria-label="`${entry.year}, 共 ${entry.count} 张照片`"
           :aria-pressed="activeYear === entry.year"
           @click="emit('selectYear', entry.firstIndex, entry.year)"
         >

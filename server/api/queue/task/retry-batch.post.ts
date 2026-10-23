@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { eq, inArray } from 'drizzle-orm'
+import { assertVideoQueueCapacity } from '../../../services/video/tasks'
 
 /**
  * 批量重试失败的任务
@@ -53,12 +54,18 @@ export default defineEventHandler(async (event) => {
 
     // 批量重置失败任务的状态
     const failedTaskIds = failedTasks.map((task) => task.id)
+    const videoCount = failedTasks.filter(
+      (task) =>
+        task.payload.type === 'video' || task.payload.type === 'video-trim',
+    ).length
+    if (videoCount) assertVideoQueueCapacity(videoCount)
 
     await db
       .update(tables.pipelineQueue)
       .set({
         status: 'pending',
         statusStage: null,
+        progress: 0,
         errorMessage: null,
         attempts: 0, // 重置尝试次数
         createdAt: new Date(), // 更新创建时间以便重新调度
@@ -73,7 +80,8 @@ export default defineEventHandler(async (event) => {
       retriedTasks: failedTasks.map((task) => ({
         id: task.id,
         type: task.payload.type,
-        storageKey: task.payload.storageKey,
+        storageKey:
+          'storageKey' in task.payload ? task.payload.storageKey : undefined,
       })),
       skippedTasks: nonFailedTasks.map((task) => ({
         id: task.id,

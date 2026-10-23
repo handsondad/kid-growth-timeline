@@ -90,7 +90,7 @@ const getComponentProps = (): Record<string, any> => {
     case 'tabs':
       propsMap.items = props.field.ui.options
         ? Array.from(props.field.ui.options).map((opt: any) => ({
-            label: $t(opt.label),
+            label: opt.label,
             value: opt.value,
             icon: opt.icon,
           }))
@@ -110,21 +110,8 @@ const handleChange = (value: any) => {
   emit('update:modelValue', value)
 }
 
-const labelKey = computed(() => {
-  // 尝试从 label 字段获取翻译键
-  if (props.field.label) {
-    return props.field.label
-  }
-  // 否则构造一个默认的翻译键
-  return `settings.${props.field.namespace}.${props.field.key}.label`
-})
-
-const descriptionKey = computed(() => {
-  if (props.field.description) {
-    return props.field.description
-  }
-  return `settings.${props.field.namespace}.${props.field.key}.description`
-})
+const label = computed(() => props.field.label || props.field.key)
+const description = computed(() => props.field.description || undefined)
 
 const isToggleField = computed(() => props.field.ui.type === 'toggle')
 </script>
@@ -137,16 +124,16 @@ const isToggleField = computed(() => props.field.ui.type === 'toggle')
     <div class="flex items-start justify-between gap-6">
       <div class="space-y-1">
         <p class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-          {{ $t(labelKey) }}
+          {{ label }}
         </p>
         <p class="text-sm text-neutral-600 dark:text-neutral-400">
-          {{ $t(descriptionKey) }}
+          {{ description }}
         </p>
         <p
           v-if="field.ui.help"
           class="text-xs text-neutral-500 dark:text-neutral-500"
         >
-          {{ $t(field.ui.help) }}
+          {{ field.ui.help }}
         </p>
       </div>
 
@@ -163,9 +150,9 @@ const isToggleField = computed(() => props.field.ui.type === 'toggle')
     :is="UFormField"
     v-else
     :name="field.key"
-    :label="$t(labelKey)"
-    :description="$t(descriptionKey)"
-    :help="field.ui.help ? $t(field.ui.help) : undefined"
+    :label="label"
+    :description="description"
+    :help="field.ui.help ? field.ui.help : undefined"
     :required="field.ui.required"
     :ui="{
       container: 'w-full *:w-full',

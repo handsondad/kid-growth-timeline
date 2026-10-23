@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-  title: () => $t('title.generalSettings'),
+  title: () => '基本设置',
 })
 
 const colorMode = useColorMode()
@@ -78,7 +78,7 @@ const handleAppearanceSettingsSubmit = async () => {
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="$t('title.generalSettings')" />
+      <UDashboardNavbar title="基本设置" />
     </template>
 
     <template #body>
@@ -89,10 +89,10 @@ const handleAppearanceSettingsSubmit = async () => {
           <h2
             class="text-xl font-semibold text-neutral-900 dark:text-neutral-100"
           >
-            {{ $t('title.generalSettings') }}
+            基本设置
           </h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            {{ $t('settings.general.description') }}
+            管理站点基础信息与展示外观。更改会立即影响控制台和前台展示。
           </p>
         </section>
 
@@ -105,7 +105,7 @@ const handleAppearanceSettingsSubmit = async () => {
             <h3
               class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
             >
-              {{ $t('title.generalSettings') }}
+              基本设置
             </h3>
           </header>
 
@@ -143,7 +143,7 @@ const handleAppearanceSettingsSubmit = async () => {
               v-if="isAppDirty"
               class="mb-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-900/60 dark:bg-warning-950/30 dark:text-warning-200"
             >
-              {{ $t('common.unsavedChanges') }}
+              存在未保存的更改。
             </div>
 
             <div class="flex items-center justify-end gap-2">
@@ -153,7 +153,7 @@ const handleAppearanceSettingsSubmit = async () => {
                 :disabled="!isAppDirty"
                 @click="resetAppSettings"
               >
-                {{ $t('common.actions.reset') }}
+                重置
               </UButton>
               <UButton
                 :loading="loading"
@@ -162,7 +162,7 @@ const handleAppearanceSettingsSubmit = async () => {
                 :disabled="!isAppDirty"
                 icon="tabler:device-floppy"
               >
-                {{ $t('common.actions.saveSettings') }}
+                保存设置
               </UButton>
             </div>
           </footer>
@@ -177,7 +177,7 @@ const handleAppearanceSettingsSubmit = async () => {
             <h3
               class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
             >
-              {{ $t('title.appearanceSettings') }}
+              外观设置
             </h3>
           </header>
 
@@ -211,7 +211,7 @@ const handleAppearanceSettingsSubmit = async () => {
               v-if="isAppearanceDirty"
               class="mb-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-900/60 dark:bg-warning-950/30 dark:text-warning-200"
             >
-              {{ $t('common.unsavedChanges') }}
+              存在未保存的更改。
             </div>
 
             <div class="flex items-center justify-end gap-2">
@@ -221,7 +221,7 @@ const handleAppearanceSettingsSubmit = async () => {
                 :disabled="!isAppearanceDirty"
                 @click="resetAppearanceSettings"
               >
-                {{ $t('common.actions.reset') }}
+                重置
               </UButton>
               <UButton
                 :loading="loading"
@@ -230,7 +230,7 @@ const handleAppearanceSettingsSubmit = async () => {
                 :disabled="!isAppearanceDirty"
                 icon="tabler:device-floppy"
               >
-                {{ $t('common.actions.saveSettings') }}
+                保存设置
               </UButton>
             </div>
           </footer>

@@ -1,39 +1,39 @@
-# Storage Provider Configuration
+# 存储提供器配置
 
-Kid Growth Timeline supports multiple storage backends to save your photos and thumbnails. This document will detail how to configure different storage providers.
+成长时光轴 支持多种存储后端来保存您的照片和缩略图。本文档将详细介绍如何配置不同的存储提供器。
 
-> Password-protected albums require media URLs that cannot be fetched without Kid Growth Timeline authorization. S3 buckets, OpenList download endpoints, and CDNs configured with public access do **not** meet this requirement: changing an album password does not revoke previously issued direct URLs or cached copies. Use local storage for protected albums until private remote-object delivery is supported. If media was already published, restrict access at the storage/CDN, purge its cache, and rotate or move the objects; changing only the album setting is insufficient.
+> 密码保护相簿要求媒体 URL 不能绕过 成长时光轴 授权直接获取。公开访问的 S3 存储桶、OpenList 下载地址或 CDN 不满足此要求：修改相簿密码不会撤销已发出的直链或缓存副本。在支持私有远端对象交付前，请对受保护相簿使用本地存储。若媒体已经公开，还需在存储/CDN 侧关闭公开访问、清理缓存并更换对象地址；只修改相簿设置并不足够。
 
-| Provider                                    | Support | Use Case                                | Cost               |
-| ------------------------------------------- | :-----: | --------------------------------------- | ------------------ |
-| [**S3 Compatible**](#s3-compatible-storage) |   ✅    | Production environment, cloud storage   | Varies by provider |
-| [**Local Filesystem**](#local-filesystem)   |   ✅    | Testing environment, offline deployment | Free               |
-| [**OpenList**](#openlist-storage)           |   ✅    | Personal cloud storage, NAS             | Free               |
+| 提供器                            | 支持 | 适用场景           | 成本         |
+| --------------------------------- | :--: | ------------------ | ------------ |
+| [**S3 兼容存储**](#s3-兼容存储)   |  ✅  | 生产环境，云存储   | 按使用量计费 |
+| [**本地文件系统**](#本地文件系统) |  ✅  | 测试环境，离线部署 | 免费         |
+| [**OpenList**](#openlist-存储)    |  ✅  | 个人云存储，NAS    | 免费         |
 
-## S3 Compatible Storage
+## S3 兼容存储
 
-S3 compatible storage is the most recommended production environment option, supporting all major cloud service providers.
+S3 兼容存储是最推荐的生产环境选项，支持所有主流云服务提供商。
 
-### Basic Configuration
+### 基础配置
 
 ```bash
-# Set storage provider to S3
+# 设置存储提供器为 S3
 NUXT_STORAGE_PROVIDER=s3
 
-# S3 basic configuration
+# S3 基础配置
 NUXT_PROVIDER_S3_ENDPOINT=https://your-s3-endpoint.com
 NUXT_PROVIDER_S3_BUCKET=kid-growth-timeline-photos
 NUXT_PROVIDER_S3_REGION=us-east-1
 NUXT_PROVIDER_S3_ACCESS_KEY_ID=your-access-key-id
 NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=your-secret-access-key
 
-# Optional configuration
+# 可选配置
 NUXT_PROVIDER_S3_PREFIX=photos/
 NUXT_PROVIDER_S3_CDN_URL=https://cdn.example.com
 NUXT_PROVIDER_S3_FORCE_PATH_STYLE=false
 ```
 
-### Cloud Provider Configuration Examples
+### 云服务商配置示例
 
 #### AWS S3
 
@@ -59,7 +59,7 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=...
 NUXT_PROVIDER_S3_CDN_URL=https://photos.example.com
 ```
 
-#### Alibaba Cloud OSS
+#### 阿里云 OSS
 
 ```bash
 NUXT_STORAGE_PROVIDER=s3
@@ -71,7 +71,7 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=...
 NUXT_PROVIDER_S3_CDN_URL=https://cdn.example.com
 ```
 
-#### Tencent Cloud COS
+#### 腾讯云 COS
 
 ```bash
 NUXT_STORAGE_PROVIDER=s3
@@ -82,7 +82,7 @@ NUXT_PROVIDER_S3_ACCESS_KEY_ID=AKID...
 NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=...
 ```
 
-#### MinIO Self-hosted
+#### MinIO 自托管
 
 ```bash
 NUXT_STORAGE_PROVIDER=s3
@@ -91,15 +91,15 @@ NUXT_PROVIDER_S3_BUCKET=kid-growth-timeline
 NUXT_PROVIDER_S3_REGION=us-east-1
 NUXT_PROVIDER_S3_ACCESS_KEY_ID=minioadmin
 NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=minioadmin
-# MinIO requires path-style access
+# MinIO 需要启用路径样式访问
 NUXT_PROVIDER_S3_FORCE_PATH_STYLE=true
 ```
 
-### Bucket Configuration
+### 存储桶配置
 
-#### CORS Settings
+#### CORS 设置
 
-Recommended CORS configuration:
+推荐的 CORS 配置：
 
 ```json
 [
@@ -113,57 +113,58 @@ Recommended CORS configuration:
 ]
 ```
 
-## Local Filesystem
+## 本地文件系统
 
-Local storage saves files in the server filesystem.
+本地存储将文件保存在服务器文件系统中。
 
 ```bash
-# Set storage provider to local
+# 设置存储提供器为本地
 NUXT_STORAGE_PROVIDER=local
 
-# Local storage configuration
+# 本地存储配置
 NUXT_PROVIDER_LOCAL_PATH=/app/data/storage
 NUXT_PROVIDER_LOCAL_BASE_URL=/storage
 ```
 
-## OpenList Storage
+## OpenList 存储
 
-OpenList is a file listing program that supports multiple cloud storage services.
+OpenList 是一个开源的文件管理系统，提供对各种云存储服务的 API 访问。此提供程序允许您使用与 OpenList 兼容的服务作为照片存储后端。
 
-| Environment Variable                       | Type   | Required | Default          | Description                                        |
-| ------------------------------------------ | ------ | -------- | ---------------- | -------------------------------------------------- |
-| `NUXT_PROVIDER_OPENLIST_BASE_URL`          | string | Yes      | -                | Base URL of the OpenList service                   |
-| `NUXT_PROVIDER_OPENLIST_ROOT_PATH`         | string | Yes      | -                | Root storage path                                  |
-| `NUXT_PROVIDER_OPENLIST_TOKEN`             | string | Required | -                | Authentication token (required for authentication) |
-| `NUXT_PROVIDER_OPENLIST_ENDPOINT_UPLOAD`   | string | Optional | `/api/fs/put`    | Upload endpoint                                    |
-| `NUXT_PROVIDER_OPENLIST_ENDPOINT_DOWNLOAD` | string | Optional | -                | Download endpoint                                  |
-| `NUXT_PROVIDER_OPENLIST_ENDPOINT_LIST`     | string | Optional | -                | List endpoint                                      |
-| `NUXT_PROVIDER_OPENLIST_ENDPOINT_DELETE`   | string | Optional | `/api/fs/remove` | Delete endpoint                                    |
-| `NUXT_PROVIDER_OPENLIST_ENDPOINT_META`     | string | Optional | `/api/fs/get`    | Metadata endpoint                                  |
-| `NUXT_PROVIDER_OPENLIST_PATH_FIELD`        | string | Optional | `path`           | Path field name                                    |
-| `NUXT_PROVIDER_OPENLIST_CDN_URL`           | string | Optional | -                | CDN URL                                            |
+| 环境变量                                   | 类型   | 必需 | 默认值           | 描述                    |
+| ------------------------------------------ | ------ | ---- | ---------------- | ----------------------- |
+| `NUXT_PROVIDER_OPENLIST_BASE_URL`          | string | 是   | -                | OpenList 服务的基础 URL |
+| `NUXT_PROVIDER_OPENLIST_ROOT_PATH`         | string | 是   | -                | 根存储路径              |
+| `NUXT_PROVIDER_OPENLIST_TOKEN`             | string | 必需 | -                | 认证令牌（认证时必需）  |
+| `NUXT_PROVIDER_OPENLIST_ENDPOINT_UPLOAD`   | string | 可选 | `/api/fs/put`    | 上传端点                |
+| `NUXT_PROVIDER_OPENLIST_ENDPOINT_DOWNLOAD` | string | 可选 | -                | 下载端点                |
+| `NUXT_PROVIDER_OPENLIST_ENDPOINT_LIST`     | string | 可选 | -                | 列表端点                |
+| `NUXT_PROVIDER_OPENLIST_ENDPOINT_DELETE`   | string | 可选 | `/api/fs/remove` | 删除端点                |
+| `NUXT_PROVIDER_OPENLIST_ENDPOINT_META`     | string | 可选 | `/api/fs/get`    | 元数据端点              |
+| `NUXT_PROVIDER_OPENLIST_PATH_FIELD`        | string | 可选 | `path`           | 路径字段名              |
+| `NUXT_PROVIDER_OPENLIST_CDN_URL`           | string | 可选 | -                | CDN URL                 |
 
-**Authentication:**
+**认证：**
 
-OpenList provider requires token authentication for secure access:
+OpenList 提供程序需要令牌认证以确保安全访问：
 
 ```bash
 NUXT_PROVIDER_OPENLIST_TOKEN=your-static-token
 ```
 
-### Basic Configuration
+### 基础配置
 
 ```bash
-# Set storage provider to OpenList
+# 设置存储提供器为 OpenList
 NUXT_STORAGE_PROVIDER=openlist
 
-# OpenList basic configuration
+# OpenList 基础配置
 NUXT_PROVIDER_OPENLIST_BASE_URL=https://your-openlist-server.com
 NUXT_PROVIDER_OPENLIST_ROOT_PATH=/kid-growth-timeline/photos
-# Token is required for authentication
+
+# 认证配置 - Token 认证
 NUXT_PROVIDER_OPENLIST_TOKEN=your-api-token
 
-# Optional configuration
+# 可选配置
 NUXT_PROVIDER_OPENLIST_ENDPOINT_UPLOAD=/api/fs/put
 NUXT_PROVIDER_OPENLIST_ENDPOINT_DOWNLOAD=
 NUXT_PROVIDER_OPENLIST_ENDPOINT_LIST=
@@ -173,27 +174,27 @@ NUXT_PROVIDER_OPENLIST_PATH_FIELD=path
 NUXT_PROVIDER_OPENLIST_CDN_URL=
 ```
 
-### Configuration Examples
+### 配置示例
 
-#### OpenList
+#### OpenList（理论上Alist也可行）
 
 ```bash
 NUXT_STORAGE_PROVIDER=openlist
-NUXT_PROVIDER_OPENLIST_BASE_URL=https://your-openlist-server.com
-NUXT_PROVIDER_OPENLIST_ROOT_PATH=/local/kid-growth-timeline
+NUXT_PROVIDER_OPENLIST_BASE_URL=https://openlist.example.com
+NUXT_PROVIDER_OPENLIST_ROOT_PATH=/115pan/kid-growth-timeline
 NUXT_PROVIDER_OPENLIST_TOKEN=your-static-token
 ```
 
-## Common Issues
+## 常见问题
 
 :::details `The AWS Access Key Id you provided does not exist in our records`
-Access key error, check if `ACCESS_KEY_ID` and `SECRET_ACCESS_KEY` are correct.
+访问密钥错误，检查 `ACCESS_KEY_ID` 和 `SECRET_ACCESS_KEY` 是否正确。
 :::
 
 :::details `The specified bucket does not exist`
-Bucket does not exist, confirm the bucket name is correct and exists in the specified region.
+存储桶不存在，确认存储桶名称正确，且在指定区域存在
 :::
 
-:::details Can upload but cannot access images, console shows `Access to fetch at '...' from origin '...' has been blocked by CORS policy`
-Bucket CORS configuration error, refer to [CORS Settings](#cors-settings) for configuration.
+:::details 可以上传但无法访问图片，控制台提示 `Access to fetch at '...' from origin '...' has been blocked by CORS policy`
+存储桶 CORS 配置错误，参考 [CORS 设置](#CORS-设置) 进行配置。
 :::

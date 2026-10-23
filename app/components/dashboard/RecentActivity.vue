@@ -1,11 +1,18 @@
 <script lang="ts" setup>
+import {
+  taskTypeLabels,
+  taskStageLabels,
+  taskStatusLabels,
+} from '~/utils/task-labels'
+import type { PipelineQueueItem } from '~~/server/utils/db'
 type ActivityStatus = 'pending' | 'in-stages' | 'completed' | 'failed'
 
 type ActivityItem = {
   id: number
-  type: string
+  type: PipelineQueueItem['payload']['type']
   status: ActivityStatus
-  statusStage: string | null
+  statusStage: PipelineQueueItem['statusStage']
+  progress: number
   errorMessage: string | null
   createdAt: string | Date
   completedAt: string | Date | null
@@ -55,11 +62,7 @@ const getStatusColor = (status: ActivityStatus) => {
 }
 
 const getItemTitle = (item: ActivityItem) => {
-  return (
-    item.photo?.title ||
-    item.fileName ||
-    $t(`dashboard.queue.types.${item.type}`)
-  )
+  return item.photo?.title || item.fileName || taskTypeLabels[item.type]
 }
 
 const getItemMeta = (item: ActivityItem) => {
@@ -67,11 +70,13 @@ const getItemMeta = (item: ActivityItem) => {
   const titleIsTaskType = !item.photo?.title && !item.fileName
 
   if (!titleIsTaskType) {
-    parts.push($t(`dashboard.queue.types.${item.type}`))
+    parts.push(taskTypeLabels[item.type])
   }
 
   if (item.status === 'in-stages' && item.statusStage) {
-    parts.push($t(`dashboard.queue.stages.${item.statusStage}`))
+    parts.push(taskStageLabels[item.statusStage])
+    if (item.type === 'video' || item.type === 'video-trim')
+      parts.push(`${item.progress}%`)
   }
 
   const timestamp = item.completedAt || item.createdAt
@@ -87,9 +92,7 @@ const getItemMeta = (item: ActivityItem) => {
   <UCard>
     <template #header>
       <div class="flex items-center justify-between gap-3 pb-1.5">
-        <h2 class="text-lg font-semibold">
-          {{ $t('dashboard.overview.section.recentActivity.title') }}
-        </h2>
+        <h2 class="text-lg font-semibold">最近动态</h2>
         <UButton
           to="/dashboard/queue"
           size="xs"
@@ -97,7 +100,7 @@ const getItemMeta = (item: ActivityItem) => {
           color="neutral"
           trailing-icon="tabler:arrow-right"
         >
-          {{ $t('dashboard.overview.section.recentActivity.viewQueue') }}
+          队列
         </UButton>
       </div>
     </template>
@@ -122,7 +125,7 @@ const getItemMeta = (item: ActivityItem) => {
         class="size-8 text-neutral-400"
       />
       <p class="text-sm text-neutral-500 dark:text-neutral-400">
-        {{ $t('dashboard.overview.section.recentActivity.empty') }}
+        暂无最近的任务。
       </p>
     </div>
 
@@ -179,7 +182,7 @@ const getItemMeta = (item: ActivityItem) => {
         </div>
 
         <UBadge
-          :label="$t(`dashboard.queue.status.${item.status}`)"
+          :label="taskStatusLabels[item.status]"
           variant="soft"
           :color="getStatusColor(item.status)"
           size="sm"

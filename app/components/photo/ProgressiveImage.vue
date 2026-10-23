@@ -164,7 +164,7 @@ onUnmounted(() => {
       v-if="showThumbnail"
       :src="thumbnailSrc"
       :thumbhash="thumbhash"
-      :alt="alt || $t('ui.photo.altFallback')"
+      :alt="alt || '照片'"
       class="absolute inset-0 w-full h-full object-contain"
       thumbhash-class="opacity-50"
       image-contain
@@ -175,7 +175,7 @@ onUnmounted(() => {
       :src="currentSrc!"
       :class="className"
       class="absolute inset-0 h-full w-full object-contain"
-      :alt="alt || $t('ui.photo.altFallback')"
+      :alt="alt || '照片'"
       :width="width"
       :height="height"
       @load="handleImageLoad"
@@ -191,7 +191,7 @@ onUnmounted(() => {
         name="tabler:photo-off"
         class="w-12 h-12"
       />
-      <p class="text-sm">{{ $t('photo.image.loadError') }}</p>
+      <p class="text-sm">图片加载失败</p>
     </div>
   </div>
 </template>

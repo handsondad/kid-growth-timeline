@@ -26,9 +26,9 @@ const shareUrl = computed(() => {
 })
 
 const shareText = computed(() => {
-  const title = props.photo.title || $t('ui.action.share.fallback.photoTitle')
+  const title = props.photo.title || '美丽的照片'
   const description = props.photo.description || ''
-  return `${$t('ui.action.share.text.prefix')} ${title}${description ? ' - ' + description : ''}`
+  return `${'来看看这张照片:'} ${title}${description ? ' - ' + description : ''}`
 })
 
 const shareTextAndUrl = computed(() => {
@@ -191,15 +191,15 @@ const copyLink = async () => {
   try {
     await navigator.clipboard.writeText(shareTextAndUrl.value)
     toast.add({
-      title: $t('ui.action.share.success.linkCopied'),
+      title: '链接已复制到剪贴板',
       color: 'success',
       icon: 'tabler:check',
       duration: 3000,
     })
   } catch (error) {
     toast.add({
-      title: $t('ui.action.share.error.linkCopyFailed'),
-      description: (error as Error)?.message || $t('common.unknownError'),
+      title: '链接复制失败',
+      description: (error as Error)?.message || '未知错误',
       color: 'error',
       icon: 'tabler:x',
       duration: 3000,
@@ -223,7 +223,7 @@ const nativeShare = async () => {
         url: shareUrl.value,
       })
     } catch (error) {
-      console.error($t('ui.action.share.error.nativeShareFailed'), error)
+      console.error('原生分享失败', error)
     }
   }
 }
@@ -243,15 +243,15 @@ const downloadOgImage = async () => {
     window.URL.revokeObjectURL(url)
 
     toast.add({
-      title: $t('ui.action.share.success.ogImageDownloaded'),
+      title: '预览图下载成功',
       color: 'success',
       icon: 'tabler:download',
       duration: 3000,
     })
   } catch (error) {
     toast.add({
-      title: $t('ui.action.share.error.ogImageDownloadFailed'),
-      description: (error as Error)?.message || $t('common.unknownError'),
+      title: '预览图下载失败',
+      description: (error as Error)?.message || '未知错误',
       color: 'error',
       icon: 'tabler:x',
       duration: 3000,
@@ -296,15 +296,15 @@ const downloadOriginalImage = async () => {
     })
 
     toast.add({
-      title: $t('ui.action.share.success.originalImageDownloaded'),
+      title: '原图下载成功',
       color: 'success',
       icon: 'tabler:download',
       duration: 3000,
     })
   } catch (error) {
     toast.add({
-      title: $t('ui.action.share.error.originalImageDownloadFailed'),
-      description: (error as Error)?.message || $t('common.unknownError'),
+      title: '原图下载失败',
+      description: (error as Error)?.message || '未知错误',
       color: 'error',
       icon: 'tabler:x',
       duration: 3000,
@@ -320,37 +320,37 @@ const canNativeShare = computed(() => {
 // Social media platforms data
 const socialPlatforms = computed(() => [
   {
-    name: $t('ui.action.share.platforms.twitter'),
+    name: 'Twitter',
     icon: 'tabler:brand-twitter',
     color: 'text-blue-500',
     action: shareToTwitter,
   },
   {
-    name: $t('ui.action.share.platforms.telegram'),
+    name: 'Telegram',
     icon: 'tabler:brand-telegram',
     color: 'text-blue-400',
     action: shareToTelegram,
   },
   {
-    name: $t('ui.action.share.platforms.weibo'),
+    name: '微博',
     icon: 'tabler:brand-weibo',
     color: 'text-red-500',
     action: shareToWeibo,
   },
   {
-    name: $t('ui.action.share.platforms.facebook'),
+    name: 'Facebook',
     icon: 'tabler:brand-facebook',
     color: 'text-blue-600',
     action: shareToFacebook,
   },
   {
-    name: $t('ui.action.share.platforms.whatsapp'),
+    name: 'WhatsApp',
     icon: 'tabler:brand-whatsapp',
     color: 'text-green-500',
     action: shareToWhatsApp,
   },
   {
-    name: $t('ui.action.share.platforms.linkedin'),
+    name: 'LinkedIn',
     icon: 'tabler:brand-linkedin',
     color: 'text-blue-700',
     action: shareToLinkedIn,
@@ -408,7 +408,7 @@ defineShortcuts({
               <h3
                 class="text-lg font-semibold text-neutral-900 dark:text-white"
               >
-                {{ $t('ui.action.share.title') }}
+                分享照片
               </h3>
             </div>
             <UButton
@@ -438,7 +438,7 @@ defineShortcuts({
                 icon="tabler:share-2"
                 @click="nativeShare"
               >
-                {{ $t('ui.action.share.actions.nativeShare') }}
+                使用系统分享
               </UButton>
               <UButton
                 block
@@ -448,7 +448,7 @@ defineShortcuts({
                 icon="tabler:download"
                 @click="downloadOriginalImage"
               >
-                {{ $t('ui.action.share.actions.downloadOriginalImage') }}
+                下载原图
               </UButton>
             </div>
 
@@ -460,7 +460,7 @@ defineShortcuts({
                 <label
                   class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400"
                 >
-                  {{ $t('ui.action.share.actions.shareUrl') }}
+                  分享链接
                 </label>
                 <div class="flex items-center gap-2">
                   <input
@@ -486,7 +486,7 @@ defineShortcuts({
                   <label
                     class="block text-xs font-medium text-neutral-600 dark:text-neutral-400"
                   >
-                    {{ $t('ui.action.share.ogImage.title') }}
+                    分享预览图
                   </label>
                   <UButton
                     size="xs"
@@ -495,7 +495,7 @@ defineShortcuts({
                     icon="tabler:download"
                     @click="downloadOgImage"
                   >
-                    {{ $t('ui.action.share.actions.downloadOgImage') }}
+                    下载预览图
                   </UButton>
                 </div>
                 <div
@@ -514,7 +514,7 @@ defineShortcuts({
                       <span
                         class="text-xs text-neutral-500 dark:text-neutral-400"
                       >
-                        {{ $t('ui.action.share.ogImage.loading') }}
+                        加载中...
                       </span>
                     </div>
                   </div>
@@ -532,7 +532,7 @@ defineShortcuts({
                       <span
                         class="text-xs text-neutral-500 dark:text-neutral-400"
                       >
-                        {{ $t('ui.action.share.ogImage.loadError') }}
+                        加载失败
                       </span>
                     </div>
                   </div>
@@ -542,7 +542,7 @@ defineShortcuts({
                     v-show="!ogImageLoading && !ogImageError"
                     :key="`og-image-${props.photo.id}-${Date.now()}`"
                     :src="ogImageUrl"
-                    :alt="$t('ui.action.share.ogImage.alt')"
+                    alt="照片分享预览图"
                     class="w-full h-auto aspect-2/1 object-cover rounded"
                     loading="eager"
                     @load="handleOgImageLoad"

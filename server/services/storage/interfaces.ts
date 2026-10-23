@@ -32,4 +32,6 @@ export interface StorageProvider {
   getFileMeta(key: string): Promise<StorageObject | null>
   listAll(): Promise<StorageObject[]>
   listImages(): Promise<StorageObject[]>
+  getFilePath?(key: string): Promise<string>
+  createFromFile?(key: string, sourceFile: string): Promise<StorageObject>
 }

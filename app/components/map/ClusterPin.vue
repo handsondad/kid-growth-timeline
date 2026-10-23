@@ -76,8 +76,7 @@ const sizeDelta = computed(() => {
               <ThumbImage
                 :src="representativePhoto.thumbnailUrl!"
                 :alt="
-                  representativePhoto.title ||
-                  $t('map.cluster.altFallback', { id: representativePhoto.id })
+                  representativePhoto.title || `聚类 ${representativePhoto.id}`
                 "
                 :thumbhash="representativePhoto.thumbnailHash"
                 :threshold="0.1"
@@ -142,12 +141,10 @@ const sizeDelta = computed(() => {
                     <h3
                       class="text-sm font-semibold text-neutral-900 dark:text-white"
                     >
-                      {{
-                        $t('map.cluster.nearbyPhotos', [clusteredPhotos.length])
-                      }}
+                      {{ `附近有 ${clusteredPhotos.length} 张照片` }}
                     </h3>
                     <div class="text-neutral-500 dark:text-muted text-[10px]">
-                      {{ $t('map.cluster.details') }}
+                      点击图片查看详情
                     </div>
                   </div>
                   <!-- Show grid of photos for cluster -->
@@ -176,10 +173,7 @@ const sizeDelta = computed(() => {
                       >
                         <ThumbImage
                           :src="photo.thumbnailUrl!"
-                          :alt="
-                            photo.title ||
-                            $t('map.photo.altFallback', { id: photo.id })
-                          "
+                          :alt="photo.title || `照片 ${photo.id}`"
                           :thumbhash="photo.thumbnailHash"
                           :threshold="0.1"
                           root-margin="200px"

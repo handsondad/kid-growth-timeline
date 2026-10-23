@@ -12,8 +12,6 @@ interface PhotoProps {
 
 const { photo, appTitle: appTitleProp } = defineProps<PhotoProps>()
 
-const { $i18n } = useNuxtApp()
-
 const resolvedAppTitle = computed(() => {
   if (typeof appTitleProp === 'string' && appTitleProp.length > 0) {
     return appTitleProp
@@ -25,9 +23,7 @@ const resolvedAppTitle = computed(() => {
   return 'Kid Growth Timeline'
 })
 
-const headline = computed(() =>
-  photo ? $i18n.t('title.fallback.photo') : 'Kid Growth Timeline',
-)
+const headline = computed(() => (photo ? '照片' : 'Kid Growth Timeline'))
 const title = computed(() =>
   (photo?.title || resolvedAppTitle.value).slice(0, 60),
 )
