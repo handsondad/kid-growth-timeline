@@ -189,7 +189,7 @@ const thumbnailUrl = computed(() =>
 
 <style scoped>
 .og-photo {
-  font-family: 'Rubik', 'Noto Sans SC', sans-serif;
+  font-family: 'Timeline Chinese', sans-serif;
 }
 
 .og-photo__gradient {

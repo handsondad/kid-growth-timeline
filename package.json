@@ -36,7 +36,6 @@
     "@aws-sdk/s3-request-presigner": "^3.1065.0",
     "@iconify/vue": "5.0.1",
     "@indoorequal/vue-maplibre-gl": "^8.4.2",
-    "@nuxt/fonts": "0.14.0",
     "@nuxt/icon": "2.2.3",
     "@nuxt/ui": "^4.8.2",
     "@pinia/nuxt": "^0.11.3",

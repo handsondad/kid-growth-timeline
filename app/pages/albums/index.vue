@@ -192,7 +192,7 @@ const hoveredAlbum = ref<number | null>(null)
         {{ '相簿'.toUpperCase() }}
       </h1>
       <p
-        class="mt-2 text-lg text-neutral-600 dark:text-neutral-400 font-medium font-[Pacifico]"
+        class="mt-2 text-lg text-neutral-600 dark:text-neutral-400 font-medium font-serif italic"
       >
         {{ appSlogan }}
       </p>

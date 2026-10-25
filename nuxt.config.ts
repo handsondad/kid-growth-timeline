@@ -9,7 +9,6 @@ export default defineNuxtConfig({
   modules: [
     'reka-ui/nuxt',
     '@nuxt/ui',
-    '@nuxt/fonts',
     '@nuxt/icon',
     '@pinia/nuxt',
     'motion-v/nuxt',
@@ -219,11 +218,8 @@ export default defineNuxtConfig({
     },
   },
 
-  fonts: {
-    families: [
-      { name: 'Rubik', weights: [400, 500, 600, 700], global: true },
-      { name: 'Noto Sans SC', weights: [400, 500, 600, 700], global: true },
-    ],
+  ui: {
+    fonts: false,
   },
 
   dayjs: {

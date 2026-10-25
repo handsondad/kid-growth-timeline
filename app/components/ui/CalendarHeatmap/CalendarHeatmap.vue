@@ -487,9 +487,7 @@ function handleDayClick(day: CalendarItem): void {
 }
 
 svg.vch__wrapper {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-    Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-sans);
   line-height: 10px;
   width: 100%;
 

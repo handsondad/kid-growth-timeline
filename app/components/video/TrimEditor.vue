@@ -243,7 +243,7 @@ onBeforeUnmount(() => {
     :open="open"
     title="裁剪视频"
     description="生成新的媒体条目，原视频文件保持不变。"
-    :ui="{ content: 'sm:max-w-3xl' }"
+    :ui="{ overlay: 'z-60', content: 'z-60 sm:max-w-3xl' }"
     @update:open="!$event && emit('close')"
   >
     <template #body>

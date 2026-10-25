@@ -94,6 +94,20 @@ test('video ranges require finite safe integer milliseconds and at least 250 ms'
   }
 })
 
+test('video trim dialog and backdrop stay above the full-screen viewer', () => {
+  const editor = readFileSync(
+    path.join(root, 'app/components/video/TrimEditor.vue'),
+    'utf8',
+  )
+  assert.match(editor, /overlay: 'z-60'/)
+  assert.match(editor, /content: 'z-60 sm:max-w-3xl'/)
+  const viewer = readFileSync(
+    path.join(root, 'app/components/photo/Viewer.vue'),
+    'utf8',
+  )
+  assert.match(viewer, /fixed inset-0 z-50 flex items-center justify-center/)
+})
+
 test('streamed byte ranges support seeking, suffixes, clamping and 416 cases', () => {
   assert.deepEqual(parseByteRange('bytes=10-19', 100), { start: 10, end: 19 })
   assert.deepEqual(parseByteRange('bytes=90-', 100), { start: 90, end: 99 })

@@ -134,7 +134,7 @@ const dateRange = computed(() => {
 
 .time-index__title {
   margin: 0;
-  font-family: Georgia, 'Noto Serif SC', serif;
+  font-family: var(--font-serif);
   font-size: 27px;
   font-weight: 400;
   line-height: 1.15;
@@ -240,7 +240,7 @@ const dateRange = computed(() => {
 
 .time-index__year-label {
   margin-top: 9px;
-  font-family: Georgia, 'Noto Serif SC', serif;
+  font-family: var(--font-serif);
   font-size: 15px;
   font-variant-numeric: tabular-nums;
 }

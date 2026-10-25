@@ -103,6 +103,78 @@ test('all Vue templates and scripts remain syntactically valid after Chinese tex
   }
 })
 
+test('application fonts use system stacks without automatic online font providers', () => {
+  const pkg = JSON.parse(read('package.json'))
+  assert.equal(pkg.dependencies['@nuxt/fonts'], undefined)
+  const config = read('nuxt.config.ts')
+  assert.doesNotMatch(config, /['"]@nuxt\/fonts['"]/)
+  assert.match(config, /ui:\s*\{\s*fonts:\s*false/)
+  const css = read('app/assets/css/tailwind.css')
+  assert.match(
+    css,
+    /--font-sans:[^;]*Microsoft YaHei[^;]*PingFang SC[^;]*system-ui/s,
+  )
+  assert.match(css, /--font-serif:[^;]*SimSun/s)
+  for (const file of sourceFiles(path.join(root, 'app'))) {
+    assert.doesNotMatch(
+      readFileSync(file, 'utf8'),
+      /Rubik|Noto Sans SC|Noto Serif SC|Pacifico|fonts\.(?:googleapis|gstatic|google)\.com/,
+      file,
+    )
+  }
+})
+
+test('server-rendered sharing images retain Chinese glyphs with a bundled offline font', async () => {
+  const css = read('app/assets/css/tailwind.css')
+  assert.match(
+    css,
+    /@font-face\s*\{[^}]*font-family: 'Timeline Chinese';[^}]*url\('\/fonts\/NotoSansSC\.woff2'\)/s,
+  )
+  assert.match(
+    read('app/components/OgImage/Photo.takumi.vue'),
+    /font-family: 'Timeline Chinese', sans-serif/,
+  )
+  assert.match(read('public/fonts/LICENSE.txt'), /SIL OPEN FONT LICENSE/)
+  const data = readFileSync(path.join(root, 'public/fonts/NotoSansSC.woff2'))
+  assert.equal(data.subarray(0, 4).toString(), 'wOF2')
+
+  const { Renderer } = await import('@takumi-rs/core')
+  const { default: sharp } = await import('sharp')
+  const renderer = new Renderer()
+  await renderer.registerFont({ name: 'Timeline Chinese', data })
+  for (const fontWeight of [400, 700]) {
+    const png = await renderer.render(
+      {
+        type: 'text',
+        text: '中文成长时光轴',
+        style: {
+          width: 400,
+          height: 80,
+          fontFamily: 'Timeline Chinese',
+          fontSize: 40,
+          fontWeight,
+          color: '#000000',
+          backgroundColor: '#ffffff',
+        },
+      },
+      { width: 400, height: 80, format: 'png' },
+    )
+    const pixels = await sharp(png).ensureAlpha().raw().toBuffer()
+    let inkPixels = 0
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (
+        pixels[i + 3] > 0 &&
+        pixels[i] < 100 &&
+        pixels[i + 1] < 100 &&
+        pixels[i + 2] < 100
+      ) {
+        inkPixels++
+      }
+    }
+    assert.ok(inkPixels > 1000, `Chinese text is blank at weight ${fontWeight}`)
+  }
+})
+
 test('Chinese EXIF values retain unknown values and valid zero values', () => {
   const { formatExifValue } = loadTypescript('app/utils/format-exif.ts')
   assert.equal(formatExifValue('whiteBalance', 'Auto'), '自动')

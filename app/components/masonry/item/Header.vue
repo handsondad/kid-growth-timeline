@@ -86,7 +86,7 @@ const isRepoLinkHovering = ref(false)
           </p>
           <p
             v-if="getSetting('app:slogan')"
-            class="font-[Pacifico]"
+            class="font-serif italic"
           >
             {{ getSetting('app:slogan') }}
           </p>
