@@ -16,7 +16,7 @@ description: >-
 
 目标：把小念长大路上值得记住的一件事挂上绳子，做成一篇小小的图文。大人（和 agent）负责挑、剪、记下来。
 
-一件事一个图集，放在项目的 `albums/<id>/`（明文，不进 git）；`npm run seal` 把它加密进 `vault/`，只有 `vault/` 提交、发布。仓库结构、命令、规矩见根目录 `AGENTS.md`，给大人看的说明在 `README.md`。**有视频的，剪辑那一步照 [../kid-growth-video/SKILL.md](../kid-growth-video/SKILL.md) 做。**
+一件事一个图集，放在项目的 `albums/<id>/`（明文，不进 git）；`npm run seal` 把它加密进 `vault/`，只有 `vault/` 提交、发布。怎么做图集、命令、规矩都在根目录 `AGENTS.md`。**有视频的，剪辑那一步照 [../kid-growth-video/SKILL.md](../kid-growth-video/SKILL.md) 做。**
 
 ## 八步
 
