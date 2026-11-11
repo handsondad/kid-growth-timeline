@@ -19,7 +19,7 @@
 | | 是什么 | 在哪 | 进 git 吗 |
 |---|---|---|---|
 | **原片** | 手机里拍的原图、原视频，又大又带拍摄地点 | 家里的相册，或者项目里的 `private/` | 不进 |
-| **成长节点** | 规划好的一件件事（出生、百天、一岁生日……）：标题、日子、起步文字，没有照片 | 项目里的 `starter/` | 进（只有通用的起步文字） |
+| **成长节点** | 规划好的一件件事（出生、回家、满月、百天……）：标题、日子、大人的话，没有照片 | 项目里的 `starter/` | 进（公开的明文，只有文字） |
 | **图集** | 挑过、压缩好的照片和视频，加上标题、日子、文字。一件事一个文件夹 | 项目里的 `albums/` | **不进**（明文） |
 | **vault** | `albums/` 加密后的样子，看不出任何内容 | 项目里的 `vault/` | **进**，发布到网上的就是它 |
 
@@ -66,13 +66,39 @@ GitHub Pages 第一次要在仓库 Settings → Pages → Source 选「GitHub Ac
 
 ### 成长节点（starter/）
 
-`starter/` 里规划好了 2024～2026 年的 18 个节点：`hello`（出生）、`first-spring-festival`、`hundred-days`、`first-tooth`、`learn-to-crawl`、`first-birthday`、`first-steps`、`first-word`、`zoo`、`bubbles`、`first-sea`、`mid-autumn-2025`、`second-birthday`、`spring-festival-2026`、`spring-outing`、`puddle-jumping`、`first-day-nursery`、`autumn-leaves`。
+小念的生日是 **2024-08-01**（`starter/profile.json`）。`starter/` 里有 2024～2026 年的 22 个节点：
 
-- 每个节点只有 `moment.json`（标题、一句话、日子、一段起步文字）和 `notes.md`，没有照片、视频，没有 `said`
-- 日子是先填的（`notes.md` 里写着「起步占位的日子」）；生日先填的 `2024-01-01`（`profile.json` 的 `birthday`，用来算「那年几岁」），改成真的生日时 `hello` 的日子也一起改
+| 日子 | id | 节点 |
+|---|---|---|
+| 2024-08-01 | `hello` | 你好，小念（出生） |
+| 2024-08-04 | `coming-home` | 从医院回家 |
+| 2024-08-12 | `belly-button` | 脐带脱落（日子待确认） |
+| 2024-09-01 | `full-month` | 满月啦 |
+| 2024-11-08 | `hundred-days` | 满百天 |
+| 2024-12-15 | `winter-cold` | 冬天生病了（日子待确认） |
+| 2025-01-29 | `first-spring-festival` | 第一个春节 |
+| 2025-03-10 | `first-tooth` | 长第一颗牙 |
+| 2025-04-20 | `learn-to-crawl` | 会爬了 |
+| 2025-06-20 | `first-word` | 第一次开口叫人 |
+| 2025-08-01 | `first-birthday` | 一岁生日 |
+| 2025-08-10 | `first-sea` | 第一次看海 |
+| 2025-09-10 | `first-steps` | 迈出第一步 |
+| 2025-10-06 | `mid-autumn-2025` | 中秋赏月 |
+| 2026-02-17 | `spring-festival-2026` | 过年 |
+| 2026-03-14 | `bubbles` | 吹泡泡 |
+| 2026-04-05 | `spring-outing` | 春天去踏青 |
+| 2026-05-01 | `zoo` | 去动物园 |
+| 2026-06-18 | `puddle-jumping` | 雨天踩水坑 |
+| 2026-08-01 | `second-birthday` | 两岁生日 |
+| 2026-09-01 | `first-day-nursery` | 第一天上托班 |
+| 2026-10-25 | `autumn-leaves` | 捡树叶 |
+
+- 每个节点只有 `moment.json`（标题、一句话、日子、文字段）和 `notes.md`，没有照片、视频，没有 `said`
+- 日子从哪来写在 `notes.md` 的标题里：大人确认的（出生、回家）、按生日算的（满月、百天、生日）、节日当天，其余是按常见月龄先填的「起步占位的日子」或「先估的，问大人」
+- 出生、回家、脐带脱落、满月、冬天生病这几个的文字是大人说的（`notes.md` 里记着大人的原话）；其余是起步文字，等大人讲那天的事
 - `npm run starter` 把 albums/ 里还没有的节点复制进去，已经有的不动；之后在 albums/ 里改
 - **还没有照片的节点不加密、页面上不显示**（`seal` 会列在「没加密」里），加了照片才挂上绳子。用不上的整个文件夹删掉
-- `starter/` 进 git、是明文：**只放通用的规划，真实的事、日子、小念的原话只写进 albums/**。想加新的规划节点可以往 starter/ 加，同样只写通用文字
+- `starter/` 进 git、是**公开的明文**：大人决定把生日、节点的日子和大人的话放在这里，换机器 `npm run starter` 就有。照片、视频、小念的原话（`said`）不放这里，只放 albums/（测试会查）。大人确认了新的日子、新的话，albums/ 和 starter/ 里都改
 
 ## 做一个新图集：以「去动物园」为例
 
@@ -173,7 +199,7 @@ git clone https://github.com/handsondad/kid-growth-timeline.git
 cd kid-growth-timeline
 npm install
 Copy-Item .env.example .env.local   # 填 TIMELINE_PASSWORD
-npm run starter                     # 18 个节点复制进 albums/，再 album:add 加照片
+npm run starter                     # 22 个节点复制进 albums/，再 album:add 加照片
 ```
 
 **已经提交过 vault**：图集都在加密的 `vault/` 里，用同一个密码解出来：
@@ -226,7 +252,7 @@ npm run dev
 
 ```
 albums/
-  profile.json         { "name": "小念", "birthday": "2024-01-01", "covers": { "2025": "zoo/01.jpg" } }
+  profile.json         { "name": "小念", "birthday": "2024-08-01", "covers": { "2026": "zoo/01.jpg" } }
   .sealed.json         上次和哪一版 vault 对上了
   zoo/                 一个图集一个文件夹，文件夹名就是 id（小写字母、数字、短横线）
     moment.json        这个图集的数据（类型见 src/moment/types.ts，不写 id）
@@ -287,7 +313,7 @@ vault/
 
 ## 硬性规矩
 
-- **明文不进 git**：真实的照片、视频、`moment.json`、`notes.md`、`profile.json` 只写进 `albums/`，进 git 的只有 `vault/` 和只有通用起步文字的 `starter/`（不放照片、视频、真实的事和原话；测试会查它只有 `moment.json`、`notes.md`，blocks 只有文字）。测试里用工具现场生成的假素材。`albums/`、`dist/`、`snapshots/`、`private/` 都已被忽略，不要改 `.gitignore` 把它们放出来，也不要 `git add -f`。
+- **明文不进 git**：真实的照片、视频、`moment.json`、`notes.md`、`profile.json` 只写进 `albums/`，进 git 的只有 `vault/` 和只有文字的 `starter/`（大人同意公开的生日、节点日子和大人的话；不放照片、视频和小念的原话，测试会查它只有 `moment.json`、`notes.md`，blocks 只有文字）。测试里用工具现场生成的假素材。`albums/`、`dist/`、`snapshots/`、`private/` 都已被忽略，不要改 `.gitignore` 把它们放出来，也不要 `git add -f`。
 - **密码不进 git**：不写进代码、提交信息、PR、日志、截图和测试里（测试用固定的假密码）。只放 `.env.local` 或环境变量。不要替大人起密码。
 - **加密别削弱**：不要调低 `src/vault/crypto.ts` 里 Argon2id 的强度、不要缩短密码下限、不要在 vault 外面放能看出内容的东西。改加密格式要能读旧的，或者让大人跑 `--rotate`。
 - **别弄丢别处做的图集**：`seal` 报「vault 里的图集比 albums/ 新」时先 `unseal`；`--force` 只在大人选好用哪边之后加。

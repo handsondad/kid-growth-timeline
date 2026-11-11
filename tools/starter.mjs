@@ -1,6 +1,6 @@
-// 起步节点：starter/ 里是规划好的成长节点（出生、百天、一岁生日……），只有标题、日子、起步文字，没有照片。
-// 它进 git；npm run starter 把它复制进 albums/，再往里 npm run album:add 加照片。
-// 真实的事、小念的原话只写进 albums/，不要写回 starter/（它是明文，仓库是公开的）。
+// 成长节点：starter/ 里是规划好的一件件事（出生、回家、满月、百天……），只有标题、日子、文字，没有照片。
+// 它进 git、是公开的明文；npm run starter 把它复制进 albums/，再往里 npm run album:add 加照片。
+// 照片、视频、小念的原话（said）只放 albums/，不写进 starter/。
 //
 //   npm run starter        albums/ 里还没有的节点复制进去；已经有的不动
 import { copyFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";

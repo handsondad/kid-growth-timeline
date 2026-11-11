@@ -110,14 +110,14 @@ id 按这件事起，小写英文、数字和短横线：`zoo`、`first-bike`、
 
 ### 给成长节点加照片
 
-`starter/` 里规划好的节点（`hello`、`hundred-days`、`zoo`……）只有标题、一句话、先填的日子和一段起步文字，没有照片；`notes.md` 里写着「起步占位的日子」。albums/ 里没有就先 `npm run starter`。
+`starter/` 里规划好的节点（`hello`、`coming-home`、`full-month`、`zoo`……，清单见 `AGENTS.md`）只有标题、一句话、日子和文字段，没有照片；日子从哪来写在 `notes.md` 的标题里（大人确认的、按生日算的、先估的）。albums/ 里没有就先 `npm run starter`。
 
 1. `npm run album:add -- <id> <真照片或原片…>`：第一张放在最前面当开头大图，起步文字跟在后面
 2. 问大人真的日子和那天的事，改 `title`、`about`、`when`、每段说明，把起步文字换成真实的事，`notes.md` 里的占位说明也改掉
 3. 大人说这件事没有发生过、或者不想要，整个文件夹删掉
 4. 还没照片的节点检查不过、不加密、页面上不显示，这是正常的
 
-**真实的内容只改 albums/ 里的，不要写回 `starter/`**：它是明文、进 git，只放通用的规划。
+`starter/` 是公开的明文、进 git：大人同意在这里放生日、节点日子和大人的话。大人确认了新的日子、新的节点、新的话，albums/ 和 starter/ 都改；**照片、视频、小念的原话（`said`）只放 albums/**，不写进 starter/。
 
 以前留下的带色块占位图的图集（照片上写着「占位照片 · 换成真的」）：删掉那些 `NN.jpg`、`NN.mp4`、`NN.poster.jpg` 和 `blocks` 里引用它们的段，再 `album:add`。
 
