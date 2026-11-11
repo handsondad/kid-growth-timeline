@@ -136,7 +136,7 @@ function main() {
       console.log(`✓ ${moment.id}`);
     }
   }
-  if (!lib.moments.length) console.log(`${lib.dir} 里还没有图集：npm run album:new -- <id> <照片或原片>`);
+  if (!lib.moments.length) console.log(`${lib.dir} 里还没有图集：照着规划好的节点开始 npm run starter，或者新做一个 npm run album:new -- <id> <照片或原片>`);
   if (failed) process.exit(1);
 }
 

@@ -37,7 +37,7 @@ export const password = () => setting("TIMELINE_PASSWORD");
 
 /** 图集文件夹能不能用：返回问题，能用返回 null */
 export function libraryProblem(dir = libraryDir()) {
-  if (!existsSync(dir) || !statSync(dir).isDirectory()) return `还没有图集文件夹 ${dir}：新收一个 npm run album:new -- <id> <照片…>；换了电脑先 npm run unseal`;
+  if (!existsSync(dir) || !statSync(dir).isDirectory()) return `还没有图集文件夹 ${dir}：照着规划好的成长节点开始 npm run starter；新做一个 npm run album:new -- <id> <照片…>；vault 里已经有加密好的图集就 npm run unseal`;
   const rel = relative(root, dir);
   // 放在项目里必须被 git 忽略，不然明文的照片和视频会被提交上去
   if (!rel.startsWith("..") && !isAbsolute(rel)) {
@@ -50,9 +50,9 @@ export function libraryProblem(dir = libraryDir()) {
 /** 某个图集的文件夹 */
 export const momentDir = (id, dir = libraryDir()) => join(dir, id);
 
-/** 读出所有图集和 profile.json；读不出来的放进 errors，不影响别的 */
-export function readLibrary(dir = libraryDir()) {
-  const problem = libraryProblem(dir);
+/** 读出所有图集和 profile.json；读不出来的放进 errors，不影响别的。tracked：读进 git 的 starter/（只有文字），不查忽略 */
+export function readLibrary(dir = libraryDir(), { tracked = false } = {}) {
+  const problem = tracked ? (existsSync(dir) ? null : `没有 ${dir}`) : libraryProblem(dir);
   const profile = { name: "小念" };
   if (problem) return { dir, problem, errors: [], profile, moments: [] };
   const moments = [];

@@ -1,0 +1,13 @@
+# first-spring-festival
+
+## 那天的事（2024-02-10，起步占位的日子，改成真的）
+
+- 还没有照片：npm run album:add -- first-spring-festival <照片或原片…>
+- 标题、一句话、文字是起步写的，换成那天真实的事
+
+## 小念说
+
+- 
+
+## 剪辑
+

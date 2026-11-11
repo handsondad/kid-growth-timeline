@@ -19,10 +19,11 @@
 | | 是什么 | 在哪 | 进 git 吗 |
 |---|---|---|---|
 | **原片** | 手机里拍的原图、原视频，又大又带拍摄地点 | 家里的相册，或者项目里的 `private/` | 不进 |
+| **成长节点** | 规划好的一件件事（出生、百天、一岁生日……）：标题、日子、起步文字，没有照片 | 项目里的 `starter/` | 进（只有通用的起步文字） |
 | **图集** | 挑过、压缩好的照片和视频，加上标题、日子、文字。一件事一个文件夹 | 项目里的 `albums/` | **不进**（明文） |
 | **vault** | `albums/` 加密后的样子，看不出任何内容 | 项目里的 `vault/` | **进**，发布到网上的就是它 |
 
-原片 → `npm run album:new` / `album:add`（挑、压缩、去掉拍摄信息）→ `albums/` → `npm run seal`（加密）→ `vault/` → `git push` → CI 发布到 GitHub Pages → 网页上输密码，在浏览器里解开。
+`starter/` →（`npm run starter` 复制）→ 原片 → `npm run album:new` / `album:add`（挑、压缩、去掉拍摄信息）→ `albums/` → `npm run seal`（加密）→ `vault/` → `git push` → CI 发布到 GitHub Pages → 网页上输密码，在浏览器里解开。
 
 仓库是公开的，`albums/`、`private/`、`.env.local` 都已被 `.gitignore` 忽略；推上去的只有加密的 `vault/`，安全全靠密码。**剪视频不在网页里做**：原片交给代码助手，在后台用 `npm run video` 看信息、截帧，挑一段，`album:add` 剪好压好；网页只负责播放。
 
@@ -49,25 +50,35 @@ TIMELINE_PASSWORD=换成你自己的密码
 **密码忘了就再也解不开了**，没有找回的办法。代码助手不要替大人起密码，也不要把密码写进任何文件、提交信息或者回复里。
 
 ```bash
+npm run starter         # 把规划好的成长节点复制进 albums/（还没有照片）
 npm run status          # 图集有几个、vault 在哪、密码设了没有
+```
+
+然后照着下面「给成长节点加照片」一个个加照片。有照片的节点检查得过了：
+
+```bash
 npm run seal -- --init  # 生成钥匙 vault/key.json，把 albums/ 加密进 vault/
 npm run dev             # 浏览器打开，输密码看；开着的时候 albums/ 一改就自动加密、页面自己刷新
-git add vault && git commit -m "起步图集" && git push   # 发布
+git add vault && git commit -m "第一批图集" && git push   # 发布
 ```
 
 GitHub Pages 第一次要在仓库 Settings → Pages → Source 选「GitHub Actions」（已经开好了）。
 
-### 起步图集
+### 成长节点（starter/）
 
-本机 `albums/` 里有一套 2024～2026 年的起步图集，共 18 个：`hello`（出生）、`first-spring-festival`、`hundred-days`、`first-tooth`、`learn-to-crawl`、`first-birthday`、`first-steps`、`first-word`、`zoo`、`bubbles`（视频）、`first-sea`、`mid-autumn-2025`、`second-birthday`、`spring-festival-2026`、`spring-outing`、`puddle-jumping`（视频）、`first-day-nursery`、`autumn-leaves`。
+`starter/` 里规划好了 2024～2026 年的 18 个节点：`hello`（出生）、`first-spring-festival`、`hundred-days`、`first-tooth`、`learn-to-crawl`、`first-birthday`、`first-steps`、`first-word`、`zoo`、`bubbles`、`first-sea`、`mid-autumn-2025`、`second-birthday`、`spring-festival-2026`、`spring-outing`、`puddle-jumping`、`first-day-nursery`、`autumn-leaves`。
 
-- 照片、视频是写着「占位照片 · 换成真的」的色块；日子、标题、文字是先填的，`notes.md` 里写着「起步占位的日子」；没有 `said`
-- 生日先填的 `2024-01-01`（`albums/profile.json` 的 `birthday`，用来算「那年几岁」），改成真的生日时 `hello` 的日子也一起改
-- 照着下面「换掉占位照片」换成真的；大人说没发生过、不想要的，整个文件夹删掉
+- 每个节点只有 `moment.json`（标题、一句话、日子、一段起步文字）和 `notes.md`，没有照片、视频，没有 `said`
+- 日子是先填的（`notes.md` 里写着「起步占位的日子」）；生日先填的 `2024-01-01`（`profile.json` 的 `birthday`，用来算「那年几岁」），改成真的生日时 `hello` 的日子也一起改
+- `npm run starter` 把 albums/ 里还没有的节点复制进去，已经有的不动；之后在 albums/ 里改
+- **还没有照片的节点不加密、页面上不显示**（`seal` 会列在「没加密」里），加了照片才挂上绳子。用不上的整个文件夹删掉
+- `starter/` 进 git、是明文：**只放通用的规划，真实的事、日子、小念的原话只写进 albums/**。想加新的规划节点可以往 starter/ 加，同样只写通用文字
 
 ## 做一个新图集：以「去动物园」为例
 
 一个图集就是一天里的一件事，一般 3～8 张照片、最多一两段视频。
+
+规划好的节点（`starter/` 里有的）不用新建，见「给成长节点加照片」。这里是新做一件规划里没有的事。
 
 **1. 先对上。** `npm run status`。刚 `git pull` 过或者换了电脑，先 `npm run unseal`（见「换一台电脑」）。
 
@@ -133,20 +144,39 @@ git add vault && git commit -m "去动物园" && git push
 
 **年份卡**：默认用那一年最后一个图集的封面；想指定就在 `albums/profile.json` 写 `"covers": { "2025": "zoo/01.jpg" }`。
 
-## 换掉占位照片
+## 给成长节点加照片
 
-以 `zoo` 为例，起步图集里是 `01.jpg`～`04.jpg` 四张占位图：
+`npm run starter` 复制进来的节点已经有文件夹和 `moment.json`，**不要再 `album:new`**，直接加：
 
-1. 删掉占位的 `NN.jpg`（视频连 `NN.poster.jpg`），`moment.json` 的 `blocks` 里引用它们的段也删掉
-2. `npm run album:add -- zoo private/zoo/IMG_1201.jpg private/zoo/IMG_1203.jpg`，编号接着排（`05.jpg`……）
-3. 改 `title`、`about`、`when.date`、每段说明，删掉「照片和这段字都是起步占位的……」那段，`notes.md` 里的占位说明也改掉
-4. `npm run check -- zoo`
+```bash
+npm run album:add -- zoo D:\相册\动物园\IMG_1201.jpg D:\相册\动物园\IMG_1203.jpg
+npm run album:add -- zoo D:\相册\动物园\IMG_1220.MOV --from 0:12 --to 0:40
+```
 
-想让编号从 01 开始，先把要留的文字记下来，删掉整个 `albums/zoo/`，再 `album:new` 重新建。
+第一张照片放在最前面当开头的大图，起步文字跟在它后面，其余的接在最后。然后：
+
+1. 改 `title`、`about`、`when.date`（真的日子）、每段说明；把起步文字换成那天真实的事；有小念的原话加 `said`
+2. 并排的照片合进一段（`"photos": ["02.jpg", "03.jpg"]`）
+3. `notes.md` 里的占位说明改掉，记下那天的事
+4. `npm run check -- zoo`，通过了就会被加密、挂上绳子
+
+这台电脑上要是还留着以前带色块占位图的 albums/（`01.jpg` 上写着「占位照片 · 换成真的」）：删掉那些 `NN.jpg`、`NN.poster.jpg` 和 `NN.mp4`，`blocks` 里引用它们的段也删掉，再 `album:add`。
 
 ## 换一台电脑、几台电脑一起做
 
-`albums/` 不进 git，新电脑 clone 下来是没有的；它在加密的 `vault/` 里，用密码解出来：
+`albums/` 不进 git，新电脑 clone 下来是没有的。
+
+**还没提交过 vault**（GitHub 上没有 `vault/`）：从成长节点开始，见「第一次：准备好」：
+
+```bash
+git clone https://github.com/handsondad/kid-growth-timeline.git
+cd kid-growth-timeline
+npm install
+Copy-Item .env.example .env.local   # 填 TIMELINE_PASSWORD
+npm run starter                     # 18 个节点复制进 albums/，再 album:add 加照片
+```
+
+**已经提交过 vault**：图集都在加密的 `vault/` 里，用同一个密码解出来：
 
 ```bash
 git clone https://github.com/handsondad/kid-growth-timeline.git
@@ -154,6 +184,7 @@ cd kid-growth-timeline
 npm install
 Copy-Item .env.example .env.local   # 填同一个 TIMELINE_PASSWORD
 npm run unseal          # 解回 albums/：照片、视频、moment.json、notes.md、profile.json，和加密前一个字节都不差
+npm run starter         # 可选：还没做的规划节点也复制进来（已经有的不动）
 npm run dev
 ```
 
@@ -170,6 +201,7 @@ npm run dev
 | 命令 | 作用 |
 |---|---|
 | `npm run status` | 图集在哪、有几个，vault 在哪，密码设了没有 |
+| `npm run starter` | 把 `starter/` 里规划好的成长节点复制进 `albums/`（已经有的不动） |
 | `npm run album:new -- <id> [照片或原片…] [剪辑参数]` | 新建一个图集（建文件夹，照片、视频处理好接进 blocks） |
 | `npm run album:add -- <id> <照片或原片…> [剪辑参数]` | 往图集里加照片、视频：照片转正、缩到长边 1600、去掉拍摄信息；视频剪好压成 720p，编号接在后面 |
 | `npm run video -- --info <原片>` | 看原片：时长、尺寸、拍摄日、有没有声音和位置 |
@@ -244,7 +276,8 @@ vault/
 - `tools/vite-library.mjs`：Vite 插件，开发时只给 `vault/` 下的三种文件（支持分段）、不给 albums/ 里的任何东西（包括 `/@fs/` 路径），并自动加密；构建时把 vault 复制进 `dist/`
 - `tools/photo.mjs`：用本机浏览器的画布重画照片，顺便去掉 Exif；也给检查器读 JPEG/PNG
 - `tools/video.mjs`：调 ffmpeg 看原片、截帧、剪辑、截封面；也给检查器读 MP4（纯 JS）
-- `tools/add-media.mjs`（album:add）、`tools/new-moment.mjs`（album:new）、`tools/snapshot.mjs`
+- `tools/add-media.mjs`（album:add）、`tools/new-moment.mjs`（album:new）、`tools/starter.mjs`（starter）、`tools/snapshot.mjs`
+- `starter/`：规划好的成长节点（只有文字，进 git）
 - `tests/moment-rules.mjs`：图集检查器；`tests/fixtures.mjs`：测试用的假图集
 - `skills/`：给代码助手的做图集、剪视频说明
 - `.github/workflows/ci.yml`：检查、构建，main 上发布到 GitHub Pages
@@ -254,7 +287,7 @@ vault/
 
 ## 硬性规矩
 
-- **明文不进 git**：真实的照片、视频、`moment.json`、`notes.md`、`profile.json` 只写进 `albums/`，进 git 的只有 `vault/`。测试里用工具现场生成的假素材。`albums/`、`dist/`、`snapshots/`、`private/` 都已被忽略，不要改 `.gitignore` 把它们放出来，也不要 `git add -f`。
+- **明文不进 git**：真实的照片、视频、`moment.json`、`notes.md`、`profile.json` 只写进 `albums/`，进 git 的只有 `vault/` 和只有通用起步文字的 `starter/`（不放照片、视频、真实的事和原话；测试会查它只有 `moment.json`、`notes.md`，blocks 只有文字）。测试里用工具现场生成的假素材。`albums/`、`dist/`、`snapshots/`、`private/` 都已被忽略，不要改 `.gitignore` 把它们放出来，也不要 `git add -f`。
 - **密码不进 git**：不写进代码、提交信息、PR、日志、截图和测试里（测试用固定的假密码）。只放 `.env.local` 或环境变量。不要替大人起密码。
 - **加密别削弱**：不要调低 `src/vault/crypto.ts` 里 Argon2id 的强度、不要缩短密码下限、不要在 vault 外面放能看出内容的东西。改加密格式要能读旧的，或者让大人跑 `--rotate`。
 - **别弄丢别处做的图集**：`seal` 报「vault 里的图集比 albums/ 新」时先 `unseal`；`--force` 只在大人选好用哪边之后加。

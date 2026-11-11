@@ -8,7 +8,7 @@ description: >-
   snapshot. Plaintext albums/ never go into git; only the encrypted vault/
   does. Use when adding or revising an album, replacing placeholder photos,
   fixing a title, date, caption or notes, or when the user mentions 成长时光轴、
-  图集、新照片、新视频、挂上绳子、占位照片、notes.md、moment.json、加密、seal、
+  图集、成长节点、starter、新照片、新视频、挂上绳子、占位照片、notes.md、moment.json、加密、seal、
   unseal、vault.
 ---
 
@@ -62,7 +62,7 @@ npm run album:add -- zoo private/zoo/IMG_1251.jpg
 
 id 按这件事起，小写英文、数字和短横线：`zoo`、`first-bike`、`lost-tooth`、`birthday-3`。会建 `albums/zoo/`，里面有 `moment.json`、`notes.md`；照片按顺序编号成 `01.jpg`、`02.jpg`（转正、长边 1600、去掉拍摄信息，一张三五百 KB），视频是 `03.mp4` + `03.poster.jpg`。每加一个，`blocks` 后面接一段。视频的拍摄日会自动填进 `when.date`；只有照片的先填今天，要问大人。剪辑参数只配一段视频，一次加一段。
 
-**已经有这个图集**（比如起步图集，照片写着「占位照片 · 换成真的」）：不要 `album:new`，见下面「换掉占位照片」。
+**规划好的成长节点**（`starter/` 里有的，`npm run starter` 复制进 albums/ 的）：已经有文件夹，不要 `album:new`，见下面「给成长节点加照片」。
 
 ### 4. 记下那天的事
 
@@ -108,16 +108,18 @@ id 按这件事起，小写英文、数字和短横线：`zoo`、`first-bike`、
 
 **年份卡和生日**：`albums/profile.json` 里 `birthday` 用来算「那天几岁」，不知道就问，别猜；`covers` 可以指定一年用哪张照片（`"2026": "first-bike/01.jpg"`），不写就用那一年最后一个图集的封面。
 
-### 换掉占位照片
+### 给成长节点加照片
 
-起步图集（`hello`、`hundred-days`、`zoo`……）的照片、视频是占位的，日子、标题、文字是先填的，`notes.md` 里写着「起步占位的日子」。换成真的：
+`starter/` 里规划好的节点（`hello`、`hundred-days`、`zoo`……）只有标题、一句话、先填的日子和一段起步文字，没有照片；`notes.md` 里写着「起步占位的日子」。albums/ 里没有就先 `npm run starter`。
 
-1. 删掉占位的 `NN.jpg`（视频连 `NN.poster.jpg`），`blocks` 里引用它们的段也删掉
-2. `npm run album:add -- <id> <真照片…>`，编号接在后面
-3. 问大人真的日子和那天的事，改 `title`、`about`、`when`、每段说明，删掉「照片和这段字都是起步占位的……」那段，`notes.md` 里的占位说明也改掉
-4. 大人说这件事没有发生过、或者不想要，整个文件夹删掉
+1. `npm run album:add -- <id> <真照片或原片…>`：第一张放在最前面当开头大图，起步文字跟在后面
+2. 问大人真的日子和那天的事，改 `title`、`about`、`when`、每段说明，把起步文字换成真实的事，`notes.md` 里的占位说明也改掉
+3. 大人说这件事没有发生过、或者不想要，整个文件夹删掉
+4. 还没照片的节点检查不过、不加密、页面上不显示，这是正常的
 
-想让编号从 01 开始，删掉整个文件夹再 `album:new`（先把要留的文字记下来）。
+**真实的内容只改 albums/ 里的，不要写回 `starter/`**：它是明文、进 git，只放通用的规划。
+
+以前留下的带色块占位图的图集（照片上写着「占位照片 · 换成真的」）：删掉那些 `NN.jpg`、`NN.mp4`、`NN.poster.jpg` 和 `blocks` 里引用它们的段，再 `album:add`。
 
 ### 6. 加密
 

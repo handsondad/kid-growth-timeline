@@ -16,7 +16,7 @@
 
 ## 怎么做内容、怎么开发
 
-见 [AGENTS.md](AGENTS.md)：第一次怎么准备、怎么做一个图集、换掉占位照片、换一台电脑接着做、命令、加密细节和规矩。
+见 [AGENTS.md](AGENTS.md)：第一次怎么准备、规划好的成长节点（`starter/`）、怎么给节点加照片、换一台电脑接着做、命令、加密细节和规矩。
 
 React 18 + TypeScript + Vite 5；加密用 Argon2id + AES-256-GCM。
 

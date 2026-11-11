@@ -1,5 +1,5 @@
 // 往一个图集里加照片和视频：处理好、按顺序编号（01.jpg、02.mp4 + 02.poster.jpg……），
-// 一个一段接到 moment.json 的 blocks 后面；说明（caption）、并排、文字段留给大人和 agent 再改。
+// 一个一段接到 moment.json 的 blocks 后面（还没有照片视频的，第一个放最前面）；说明（caption）、并排、文字段留给大人和 agent 再改。
 // 用法：
 //   npm run album:add -- <id> <照片或原片> [更多照片…]
 //   npm run album:add -- <id> <原片> --from 0:12.5 --to 0:41 [--poster 0:20] [--mute]   剪辑参数只配一段视频
@@ -41,6 +41,13 @@ export async function addMedia(dir, sources, opts = {}) {
   const file = join(dir, "moment.json");
   const moment = JSON.parse(readFileSync(file, "utf8"));
   const blocks = Array.isArray(moment.blocks) ? [...moment.blocks] : [];
+  // 还没有照片和视频的（起步节点只有一段文字）：第一个放在最前面，当开头那张大图
+  let first = !blocks.some((b) => b && (b.photos || b.video));
+  const push = (block) => {
+    if (first) blocks.unshift(block);
+    else blocks.push(block);
+    first = false;
+  };
   let n = nextNumber(dir);
   if (n + sources.length > 100) throw new Error("一个图集最多 99 个文件，挑一挑，或者分成两个图集");
   const added = [];
@@ -48,11 +55,11 @@ export async function addMedia(dir, sources, opts = {}) {
     const name = String(n++).padStart(2, "0");
     if (isVideo(src)) {
       await processVideo(src, { ...opts, dir, name });
-      blocks.push({ video: `${name}.mp4` });
+      push({ video: `${name}.mp4` });
       added.push(`${name}.mp4`, `${name}.poster.jpg`);
     } else {
       await processPhoto(resolve(src), { dir, name: `${name}.jpg` });
-      blocks.push({ photos: [`${name}.jpg`] });
+      push({ photos: [`${name}.jpg`] });
       added.push(`${name}.jpg`);
     }
     // 每处理好一个就写一次，中途出错也不丢已经做好的
