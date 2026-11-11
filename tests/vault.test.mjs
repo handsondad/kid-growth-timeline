@@ -215,17 +215,16 @@ test("开发服务器：只给 vault 里的密文（支持分段），明文的�
     const plain = library.replaceAll("\\", "/");
     await leaks(["albums/profile.json", "vault/../profile.json", `@fs/${plain}/profile.json`, `@fs/${plain}/first-bike/notes.md`, `@fs/${plain}/first-bike/01.jpg`]);
 
-    // 默认的 albums/ 在项目里面：直接的路径、/@fs/ 绝对路径都不给
-    const inside = join(root, "albums", `test-${process.pid}`);
+    // 图集文件夹在项目里面（像默认的 albums/）：直接的路径、/@fs/ 绝对路径都不给。
+    // 不碰真的 albums/：开着的 npm run dev 盯着它，Windows 上建了又删会让监视报错
+    const rel = `node_modules/.kgt-albums-test-${process.pid}`;
+    const inside = join(root, rel);
     mkdirSync(join(inside, "first-bike"), { recursive: true });
     try {
       for (const name of ["profile.json", "first-bike/notes.md", "first-bike/01.jpg"]) copyFileSync(join(library, name), join(inside, name));
       process.env.ALBUMS_DIR = inside;
-      const rel = `albums/test-${process.pid}`;
       const abs = inside.replaceAll("\\", "/");
       await leaks([`${rel}/profile.json`, `${rel}/first-bike/01.jpg`, `@fs/${abs}/profile.json`, `@fs/${abs}/first-bike/notes.md`, `@fs/${abs}/first-bike/01.jpg`]);
-      process.env.ALBUMS_DIR = join(root, "albums");
-      await leaks([`${rel}/first-bike/01.jpg`, `@fs/${abs}/first-bike/notes.md`]);
     } finally {
       rmSync(inside, { recursive: true, force: true });
     }

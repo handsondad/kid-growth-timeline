@@ -133,6 +133,8 @@ export function momentLibrary() {
     },
     configureServer(server) {
       server.middlewares.use(middleware);
+      // Windows 上文件刚建就删、或者被别的程序占着，监视会报 EBUSY；没人接就整个服务器退出
+      server.watcher.on("error", (err) => server.config.logger.warn(`文件监视出错（不影响页面）：${err.message}`, { timestamp: true }));
       // 截图、测试起的服务器设 KGT_AUTOSEAL=0，只读现成的 vault
       if (process.env.KGT_AUTOSEAL !== "0") autoSeal(server);
     },
