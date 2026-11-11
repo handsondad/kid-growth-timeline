@@ -8,6 +8,7 @@ vite.config.d.ts
 # 看页面的密码写在 .env.local 里，每台电脑自己写一份，密码绝不进 git
 .env
 .env.*
+!.env.example
 
 # 图集的明文（挑好压好的照片、视频、文字），只在本机；进 git 的是加密后的 vault/，换电脑用 npm run unseal 解回来
 /albums/

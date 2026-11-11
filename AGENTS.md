@@ -34,11 +34,17 @@
 npm install
 ```
 
-在项目根目录建 `.env.local`（不进 git），写一行密码。至少 12 位，几个随机的词连起来最好记：
+把 `.env.example` 复制成 `.env.local`（不进 git），填上密码。至少 12 位，几个随机的词连起来最好记：
+
+```bash
+Copy-Item .env.example .env.local    # macOS / Linux：cp .env.example .env.local
+```
 
 ```
 TIMELINE_PASSWORD=换成你自己的密码
 ```
+
+`.env.example` 里还列了别的可选设置（图集、vault 放哪，ffmpeg、浏览器的路径），一般不用改。
 
 **密码忘了就再也解不开了**，没有找回的办法。代码助手不要替大人起密码，也不要把密码写进任何文件、提交信息或者回复里。
 
@@ -146,7 +152,7 @@ git add vault && git commit -m "去动物园" && git push
 git clone https://github.com/handsondad/kid-growth-timeline.git
 cd kid-growth-timeline
 npm install
-# 建 .env.local，写同一个 TIMELINE_PASSWORD=…
+Copy-Item .env.example .env.local   # 填同一个 TIMELINE_PASSWORD
 npm run unseal          # 解回 albums/：照片、视频、moment.json、notes.md、profile.json，和加密前一个字节都不差
 npm run dev
 ```
@@ -182,7 +188,7 @@ npm run dev
 
 改代码交付前要过：`npm run typecheck`、`npm test`、`npm run build`。做了图集还要 `npm run check`、`npm run seal`，`npm run snapshot` 自己看一遍图，手机宽度（`--width 390`）也看。
 
-环境变量（也可以写进 `.env.local`）：`TIMELINE_PASSWORD`（密码）、`ALBUMS_DIR`（默认 `albums/`；放在项目里又没被 git 忽略的，工具会拒绝）、`VAULT_DIR`（默认 `vault/`）、`FFMPEG_PATH` / `FFPROBE_PATH`、`BROWSER_PATH`、`KGT_AUTOSEAL=0`。
+环境变量（也可以写进 `.env.local`，模板见 `.env.example`）：`TIMELINE_PASSWORD`（密码）、`ALBUMS_DIR`（默认 `albums/`；放在项目里又没被 git 忽略的，工具会拒绝）、`VAULT_DIR`（默认 `vault/`）、`FFMPEG_PATH` / `FFPROBE_PATH`、`BROWSER_PATH`、`KGT_AUTOSEAL=0`。
 
 ## albums/（明文，不进 git）
 
