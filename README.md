@@ -1,56 +1,116 @@
-# 成长时光轴
+# 小念的成长时光轴
 
-一个面向个人本机使用的照片与视频时间轴，用来持续整理、浏览和回看孩子成长过程中的影像。应用默认将媒体文件和 SQLite 数据库保存在本机，不需要账号或云服务即可启动。
+小念长大路上的照片和小视频，按发生的日子夹在一根晾衣绳上。每一年收成一张年份卡，挂着一张照片和「那年几岁」；点开一年，那一年的瞬间在绳子上左右滑着看。点一个「看详情」，是那天的一篇图文：几张照片、一段小视频、大人写的话、小念的原话。
 
-## 项目设计
+**照片和视频是加密的。** 明文的照片、视频和说明放在你自己电脑上的一个文件夹里（叫「时光库」），不提交；`npm run seal` 把它们加密成仓库里的 `vault/`，只有它提交到 GitHub、发布到 GitHub Pages。打开网页输入密码，才在浏览器里解开。手机、平板打开网址输密码就能看。
 
-- **本地优先**：照片、视频、缩略图和数据库保存在项目的 `data/` 目录中，便于自行管理与备份。
-- **按时间浏览**：以瀑布流呈现照片和视频，可按日期、标签、相机及地点筛选，并查看单张媒体的详情。
-- **保留影像信息**：服务端扫描本机照片目录，读取 EXIF 元数据并生成缩略图；照片不会从浏览器上传。
-- **保持简单和私密**：应用面向单人本机使用，不提供登录或相册密码保护；开发服务器仅监听本机地址，不要通过公网或反向代理公开访问。
-- **仅使用简体中文**：界面、日期和地图地点请求固定使用中文，不提供语言切换，也不依赖多语言框架。
-- **无需在线字体服务**：界面使用本机字体，优先微软雅黑、苹方及系统字体，不从 Google Fonts 或其他字体 CDN 下载字体。服务端分享图片使用随项目附带的本地中文字体，不影响页面字体加载。
-- **地图为可选功能**：配置地图服务后可查看照片拍摄地点；不配置时，图库和本地存储仍可使用。
+剪视频不在网页里做：原片交给代码助手，它在后台用 `npm run video` 看信息、截帧、挑一段，剪好压好放进时光库，网页只负责播放。
 
-## 本机运行
+和 [小念的画廊](https://github.com/handsondad/kids-gallery)、[小念家的漫画书](https://github.com/handsondad/storyverse) 是同一个系列：同一套颜色、字体和首页晾衣绳。
 
-环境要求：Node.js 22 LTS、pnpm 10.34.1。
+## 先看看效果
+
+需要 Node.js 22+ 和 ffmpeg。
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run demo        # 生成演示时光库 demo/（不进 git），加密，打开网站；密码打印在终端里
 ```
 
-打开 [http://127.0.0.1:3000](http://127.0.0.1:3000)。首次启动会初始化本地 SQLite 数据库和文件存储。
-
-照片、视频和数据库位于 `data/`。备份前先停止应用，并一并备份该目录；不要删除或覆盖已有数据目录。
-
-### 导入本机照片
-
-在项目根目录的 `.env` 中设置 `NUXT_LOCAL_PHOTO_IMPORT_DIR` 为照片源目录的绝对路径，例如 `D:/FamilyPhotos`。确保本地存储提供器已启用，然后启动应用，在“照片管理”中选择“扫描本地目录”。应用会把新照片及同名 Live Photo MOV 伴侣文件复制到本机存储，并将照片加入后台处理队列；源文件不会被修改。源目录必须与 `data/storage` 分开，避免扫描到应用生成的缩略图。
-
-### 普通视频与非破坏式裁剪
-
-安装带 FFprobe、libx264 和 AAC 编码器的原生 FFmpeg 后，同一入口也支持 MP4、MOV、M4V、WebM、AVI、MKV。工具默认从服务端 PATH 查找，也可通过 `NUXT_FFMPEG_PATH`、`NUXT_FFPROBE_PATH` 指定可执行文件路径。视频导入保留原片，生成可播放的 MP4 副本和封面；详情中的“裁剪视频”会创建后台任务，输出新的媒体条目并记录来源及裁剪区间。Live Photo 伴侣保持原行为，不参与普通视频裁剪。
-
-裁剪入口仅在普通视频中显示：在时间轴打开视频，点击右上角的剪刀按钮“裁剪视频”，即可预览和设置起止时间。照片和 Live Photo 不显示此按钮。
-
-首版仅支持本地存储；配置、使用方式、资源限制与元数据策略见[快速开始](docs/guide/getting-started.md#ffmpeg-与视频裁剪)。FFmpeg 只在服务端执行，应用仍仅供本机使用。
-
-## 常用命令
+## 用起来
 
 ```bash
-pnpm dev       # 启动本机开发服务
-pnpm build     # 构建生产版本
-pnpm preview   # 在本机预览生产构建
+npm run library -- D:/小念/时光轴    # 指定时光库，记在 .env.local 里（不进 git）
 ```
 
-## 项目来源
+在 `.env.local` 里加一行密码（至少 12 位，几个随机的词连起来最好记；不进 git）：
 
-本项目参考并引用了 [ChronoFrame](https://github.com/HoshinoSuzumi/chronoframe) 的部分设计与实现，并针对个人本机使用进行了精简调整。感谢 ChronoFrame 项目及其贡献者。
+```
+TIMELINE_PASSWORD=换成你自己的密码
+```
 
-## 许可证
+```bash
+npm run seal -- --init   # 第一次：生成钥匙，把时光库加密进 vault/
+npm run dev              # 本机打开看；开着的时候时光库一改就自动加密、页面刷新
+git add vault && git commit -m "新瞬间" && git push   # 发布
+```
 
-本项目采用 MIT 许可证，详见 [LICENSE](LICENSE)。
+第一次发布前，到仓库 Settings → Pages → Source 选「GitHub Actions」。之后每次推到 main，CI 都会发布到 https://handsondad.github.io/kid-growth-timeline/ 。
 
-分享图片使用本地打包的 [Noto Sans SC](https://github.com/notofonts/noto-cjk/tree/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/Variable/TTF/Subset)，仅转换为 WOFF2 格式，遵循 [SIL Open Font License 1.1](public/fonts/LICENSE.txt)；运行时无需访问字体源站。
+几件要知道的事：
+
+- **密码忘了就解不开**，没有找回的办法。时光库（明文）要自己另外备份
+- 仓库是公开的，密文谁都能下载，安全全靠密码：别用短的、常用的
+- 推上去的东西一直在 git 历史里。密码泄露了用 `TIMELINE_NEW_PASSWORD=新密码 npm run seal -- --rotate` 连主钥匙一起换
+- 网页上「这台设备记住我」只在自己的手机、电脑上勾
+
+| 路由 | 看什么 |
+|---|---|
+| `#/` | 时间绳：每年一张年份卡；点开一年，那一年的瞬间左右滑着看（没有滚动条），点小旗收起；点一个，下面出预览 |
+| `#/moment/<id>` | 详情：那天的一篇图文，点照片看大图，视频点了才下载解密；← → 或左右滑动换一个，Esc 回首页 |
+
+## 时光库
+
+```
+D:/小念/时光轴/
+  library.json       名字、生日（算「几岁」）、每年的年份卡用哪张照片
+  first-bike/
+    moment.json      标题、日子、那天的事，一段一段的图文（照片、视频、文字、小念的原话）
+    notes.md         更多记录、剪辑记录（不进页面，也不加密进 vault）
+    01.jpg 02.jpg    照片
+    03.mp4           视频 + 03.poster.jpg 封面
+  lost-tooth/
+    ...
+```
+
+## 命令
+
+| 命令 | 作用 |
+|---|---|
+| `npm run library [-- <路径>]` | 看 / 换时光库 |
+| `npm run dev` | 本机打开看（自动加密） |
+| `npm run demo [-- --fresh]` | 用演示时光库打开看（要 ffmpeg） |
+| `npm run seal [-- --init]` | 加密进 `vault/`；`--new-password` 换密码，`--rotate` 连主钥匙一起换 |
+| `npm run moment:new -- <id> [照片或原片…]` | 新收一个瞬间 |
+| `npm run moment:add -- <id> <照片或原片…>` | 往瞬间里加照片、视频（转正、缩小、去掉拍摄信息；视频剪好压好） |
+| `npm run video -- --info <原片>` | 看原片的时长、尺寸、拍摄日 |
+| `npm run video -- --frames <原片>` | 截帧拼成一张图，挑起止点用 |
+| `npm run check` | 检查时光库里的内容、照片和视频 |
+| `npm run snapshot` | 截成 PNG（加 `--width 390` 看手机） |
+| `npm run typecheck` / `npm test` | 类型检查 / 测试 |
+| `npm run build` / `npm run preview` | 构建到 `dist/`（页面 + 加密的 vault），用 preview 打开 |
+
+收新瞬间时还要：
+
+- 本机的 Edge 或 Chrome（处理照片、截图）
+- ffmpeg 7+，带 ffprobe 和 libx264（剪视频、做缩略图）
+
+## 收一个新瞬间
+
+见 [AGENTS.md](AGENTS.md)、[skills/kid-growth-curate/SKILL.md](skills/kid-growth-curate/SKILL.md) 和剪视频的 [skills/kid-growth-video/SKILL.md](skills/kid-growth-video/SKILL.md)。一般是把照片或原片交给代码助手，说清楚是哪天、发生了什么。
+
+## 加密是怎么做的
+
+先压缩、再加密（加密后的数据压不小了）：`moment:add` 收进时光库时，照片缩到长边 1600（一张三五百 KB），视频压成 720p、码率封顶 2 Mbps（一分钟十几 MB）；`npm run seal` 加密的是压好的这份，加密本身几乎不增加体积。
+
+- 密码经过 Argon2id（3 轮、64 MB 内存）变成一把钥匙，包着一把随机的主钥匙，放在 `vault/key.json`
+- 每张照片、每段视频用主钥匙按 1 MB 分块 AES-256-GCM 加密，改过、截短都解得出来；文件名是主钥匙算出来的，看不出是哪张
+- 标题、日子、文字、缩略图都在加密的 `vault/index.enc` 里，网页上没解锁之前什么都看不到
+- 解密在浏览器里做（WebCrypto），密码不会发到任何地方
+
+## 目录
+
+| 位置 | 内容 |
+|---|---|
+| `src/` | 页面：输密码、首页时间绳、详情页、加密的照片和播放器；`src/vault/` 加密 |
+| `tools/` | 时光库、加密、Vite 插件、新建瞬间、处理照片、剪视频、截图、演示 |
+| `tests/` | 测试和内容检查器 |
+| `skills/` | 给代码助手的收瞬间、剪视频说明 |
+| `vault/` | 加密后的时光库（`npm run seal` 生成） |
+| `public/fonts/` | 站酷快乐体 |
+
+旧的 Nuxt + SQLite 版本（本机服务、网页里导入和裁剪视频）在提交 `f060b94` 及之前的历史里。
+
+## 许可
+
+代码 MIT，见 [LICENSE](LICENSE)。字体：站酷快乐体（OFL）；加密用到 hash-wasm（MIT），见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

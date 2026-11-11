@@ -1,37 +1,24 @@
-# Nuxt dev/build outputs
-.output
-.data
-.nuxt
-.nitro
-.cache
-dist
-node-compile-cache
-
-# Date
-data
-
-# Wrangler
-.wrangler
-
-# Node dependencies
-node_modules
-
-# Logs
-logs
+node_modules/
+dist/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
 *.log
 
-# Misc
-.DS_Store
-.fleet
-.idea
-
-# Local env files
+# 时光库的位置和看页面的密码写在 .env.local 里，每台电脑不一样，密码绝不进 git
 .env
 .env.*
-!.env.example
 
-# VitePress outputs
-docs/.vitepress/dist
-docs/.vitepress/cache
+# 时光库想放在仓库里，就放 library/；明文的照片、视频、数据都不进 git，进 git 的只有加密后的 vault/
+library/
+# npm run demo 生成的演示时光库
+demo/
 
-3001
+# snapshot 工具的输出，给 agent 自查用
+snapshots/
+
+# 原片、视频截帧
+private/
+
+.vscode/
+.DS_Store
