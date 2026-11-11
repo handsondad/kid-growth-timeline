@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -8,6 +8,7 @@ import {
 } from "../src/vault/crypto.ts";
 import { root } from "../tools/library.mjs";
 import { openKey, sealLibrary } from "../tools/seal.mjs";
+import { unsealLibrary } from "../tools/unseal.mjs";
 import { add, GOOD, JPEG, makeLibrary } from "./fixtures.mjs";
 
 const PASSWORD = "correct horse battery";
@@ -71,7 +72,7 @@ const decrypt = async (vault, file) => openBytes(await openVault(await openKey(v
 const readIndex = async (vault) => JSON.parse(new TextDecoder().decode(await decrypt(vault, join(vault, "index.enc"))));
 const allBytes = (vault) => Buffer.concat([readFileSync(join(vault, "index.enc")), ...readdirSync(join(vault, "blobs")).map((n) => readFileSync(join(vault, "blobs", n)))]);
 
-test("加密时光库：只放密文；没改就不重写；删掉的跟着删；检查不过的不加密", async () => {
+test("加密图集：只放密文；没改就不重写；删掉的跟着删；检查不过的不加密", async () => {
   const library = makeLibrary();
   const vault = mkdtempSync(join(tmpdir(), "kid-growth-vault-"));
   try {
@@ -81,18 +82,21 @@ test("加密时光库：只放密文；没改就不重写；删掉的跟着删�
     const first = await sealLibrary({ library, vault, password: PASSWORD, init: true });
     assert.equal(first.moments, 1);
     assert.deepEqual(first.skipped, []);
-    assert.equal(first.written, 2, "照片和缩略图");
+    assert.equal(first.written, 3, "照片、notes.md 和缩略图");
     const index = await readIndex(vault);
-    assert.deepEqual(index.profile, { name: "小念", birthday: "2022-09-08" });
+    assert.deepEqual(index.profile, { name: "小念", birthday: "2022-09-08", covers: { 2026: "first-bike/01.jpg" } });
     assert.deepEqual(Object.keys(index.years), ["2026"]);
     const [moment] = index.moments;
     assert.equal(moment.title, GOOD.title);
     assert.equal(moment.files["01.jpg"].w, 900);
     assert.equal(moment.files["01.jpg"].h, 1200);
     assert.deepEqual(Buffer.from(await decrypt(vault, join(vault, "blobs", moment.files["01.jpg"].blob))), JPEG);
+    assert.equal(Buffer.from(await decrypt(vault, join(vault, "blobs", moment.notes.blob))).toString(), "# first-bike\n");
     const sealed = allBytes(vault);
-    assert.ok(!sealed.includes(Buffer.from(GOOD.title)) && !sealed.includes(JPEG.subarray(0, 20)), "vault 里没有明文");
-    assert.ok(!readdirSync(vault).includes("notes.md"));
+    for (const secret of [Buffer.from(GOOD.title), JPEG.subarray(0, 20), Buffer.from("# first-bike"), Buffer.from("2022-09-08")]) {
+      assert.ok(!sealed.includes(secret), "vault 里没有明文");
+    }
+    assert.deepEqual(readdirSync(vault).sort(), ["blobs", "index.enc", "key.json"]);
 
     const indexBefore = readFileSync(join(vault, "index.enc"));
     const again = await sealLibrary({ library, vault, password: PASSWORD });
@@ -110,9 +114,9 @@ test("加密时光库：只放密文；没改就不重写；删掉的跟着删�
     assert.deepEqual((await readIndex(vault)).moments.map((m) => m.title), ["骑车"]);
 
     rmSync(join(library, "first-bike"), { recursive: true });
-    rmSync(join(library, "library.json"));
+    rmSync(join(library, "profile.json"));
     const emptied = await sealLibrary({ library, vault, password: PASSWORD });
-    assert.equal(emptied.removed, 2);
+    assert.equal(emptied.removed, 3);
     assert.deepEqual(readdirSync(join(vault, "blobs")), []);
     assert.deepEqual((await readIndex(vault)).moments, []);
   } finally {
@@ -121,10 +125,63 @@ test("加密时光库：只放密文；没改就不重写；删掉的跟着删�
   }
 });
 
-test("开发服务器：只给 vault 里的密文（支持分段），明文的时光库一个字节都不给", async () => {
+test("换台电脑：unseal 原样解回来，再 seal 不改 vault；albums/ 比 vault 旧时 seal 拦住，不会把新内容删掉", async () => {
+  const laptopA = makeLibrary();
+  const laptopB = mkdtempSync(join(tmpdir(), "kid-growth-albums-"));
+  const vault = mkdtempSync(join(tmpdir(), "kid-growth-vault-"));
+  const seal = (library, more) => sealLibrary({ library, vault, password: PASSWORD, ...more });
+  const unseal = (library, more) => unsealLibrary({ library, vault, password: PASSWORD, ...more });
+  try {
+    await seal(laptopA, { init: true });
+    const indexA = readFileSync(join(vault, "index.enc"));
+
+    // 刚 clone 下来，albums/ 是空的：直接 seal 会把 vault 清空，要拦住
+    await assert.rejects(seal(laptopB), /npm run unseal/);
+    await assert.rejects(unseal(laptopB, { password: "wrong password!!" }), WrongPassword);
+    const restored = await unseal(laptopB);
+    assert.deepEqual([restored.restored, restored.differ], [["first-bike"], []]);
+    for (const name of ["01.jpg", "notes.md"]) {
+      assert.deepEqual(readFileSync(join(laptopB, "first-bike", name)), readFileSync(join(laptopA, "first-bike", name)));
+    }
+    assert.deepEqual(JSON.parse(readFileSync(join(laptopB, "first-bike", "moment.json"), "utf8")), GOOD);
+    assert.deepEqual(JSON.parse(readFileSync(join(laptopB, "profile.json"), "utf8")).covers, { 2026: "first-bike/01.jpg" });
+    const resealed = await seal(laptopB);
+    assert.deepEqual([resealed.written, resealed.removed, resealed.changed], [0, 0, false]);
+    assert.deepEqual(readFileSync(join(vault, "index.enc")), indexA);
+    assert.deepEqual((await unseal(laptopB)).same, ["first-bike"]);
+
+    // B 上改了、加了一个，加密了；A 还是旧的
+    writeFileSync(join(laptopB, "first-bike", "moment.json"), JSON.stringify({ ...GOOD, title: "骑车去公园" }));
+    add(laptopB, "zoo", { "moment.json": JSON.stringify({ ...GOOD, title: "去动物园" }), "notes.md": "# zoo\n", "01.jpg": JPEG });
+    await seal(laptopB);
+    await assert.rejects(seal(laptopA), /npm run unseal/);
+
+    const merged = await unseal(laptopA);
+    assert.deepEqual([merged.restored, merged.differ], [["zoo"], ["first-bike"]]);
+    assert.equal(JSON.parse(readFileSync(join(laptopA, "first-bike", "moment.json"), "utf8")).title, GOOD.title, "两边不一样的不动");
+    await assert.rejects(seal(laptopA), /npm run unseal/, "还没对上，还是拦着");
+    const forced = await unseal(laptopA, { force: true });
+    assert.deepEqual(forced.restored, ["first-bike"]);
+    assert.equal(JSON.parse(readFileSync(join(laptopA, "first-bike", "moment.json"), "utf8")).title, "骑车去公园");
+    assert.equal((await seal(laptopA)).changed, false);
+
+    // A 上新做一个，B 上没有：unseal 列出来，不删
+    add(laptopA, "first-snow", { "moment.json": JSON.stringify({ ...GOOD, title: "第一场雪" }), "notes.md": "", "01.jpg": JPEG });
+    await seal(laptopA);
+    rmSync(join(laptopB, "zoo"), { recursive: true });
+    await assert.rejects(seal(laptopB), /npm run unseal/);
+    const lost = await seal(laptopB, { force: true });
+    assert.equal(lost.moments, 1, "--force 就是用这台电脑上的盖掉 vault");
+    assert.deepEqual((await unseal(laptopA)).extra, ["first-snow", "zoo"]);
+  } finally {
+    for (const dir of [laptopA, laptopB, vault]) rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("开发服务器：只给 vault 里的密文（支持分段），明文的图集一个字节都不给", async () => {
   const library = makeLibrary();
   const vault = mkdtempSync(join(tmpdir(), "kid-growth-vault-"));
-  const env = { MOMENTS_DIR: library, VAULT_DIR: vault, KGT_AUTOSEAL: "0" };
+  const env = { ALBUMS_DIR: library, VAULT_DIR: vault, KGT_AUTOSEAL: "0" };
   const before = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
   Object.assign(process.env, env);
   await sealLibrary({ library, vault, password: PASSWORD, init: true });
@@ -147,12 +204,30 @@ test("开发服务器：只给 vault 里的密文（支持分段），明文的�
     assert.deepEqual(Buffer.from(await part.arrayBuffer()), whole.subarray(2, 6));
     assert.equal((await fetch(`${base}vault/blobs/${"0".repeat(32)}`)).status, 404);
 
-    const plain = library.replaceAll("\\", "/");
-    for (const path of ["moments/index.json", "moments/first-bike/01.jpg", "vault/../library.json", `@fs/${plain}/first-bike/notes.md`, `@fs/${plain}/first-bike/01.jpg`]) {
-      const body = Buffer.from(await (await fetch(`${base}${path}`)).arrayBuffer());
-      for (const secret of [Buffer.from(GOOD.title), Buffer.from("# first-bike"), Buffer.from("2022-09-08"), JPEG.subarray(0, 20)]) {
-        assert.ok(!body.includes(secret), `${path} 不该给出去`);
+    const leaks = async (paths) => {
+      for (const path of paths) {
+        const body = Buffer.from(await (await fetch(`${base}${path}`)).arrayBuffer());
+        for (const secret of [Buffer.from(GOOD.title), Buffer.from("# first-bike"), Buffer.from("2022-09-08"), JPEG.subarray(0, 20)]) {
+          assert.ok(!body.includes(secret), `${path} 不该给出去`);
+        }
       }
+    };
+    const plain = library.replaceAll("\\", "/");
+    await leaks(["albums/profile.json", "vault/../profile.json", `@fs/${plain}/profile.json`, `@fs/${plain}/first-bike/notes.md`, `@fs/${plain}/first-bike/01.jpg`]);
+
+    // 默认的 albums/ 在项目里面：直接的路径、/@fs/ 绝对路径都不给
+    const inside = join(root, "albums", `test-${process.pid}`);
+    mkdirSync(join(inside, "first-bike"), { recursive: true });
+    try {
+      for (const name of ["profile.json", "first-bike/notes.md", "first-bike/01.jpg"]) copyFileSync(join(library, name), join(inside, name));
+      process.env.ALBUMS_DIR = inside;
+      const rel = `albums/test-${process.pid}`;
+      const abs = inside.replaceAll("\\", "/");
+      await leaks([`${rel}/profile.json`, `${rel}/first-bike/01.jpg`, `@fs/${abs}/profile.json`, `@fs/${abs}/first-bike/notes.md`, `@fs/${abs}/first-bike/01.jpg`]);
+      process.env.ALBUMS_DIR = join(root, "albums");
+      await leaks([`${rel}/first-bike/01.jpg`, `@fs/${abs}/first-bike/notes.md`]);
+    } finally {
+      rmSync(inside, { recursive: true, force: true });
     }
   } finally {
     await server.close();

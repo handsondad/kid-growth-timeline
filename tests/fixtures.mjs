@@ -1,4 +1,4 @@
-// 测试用的假时光库：现场生成，用完删掉
+// 测试用的假图集文件夹：现场生成，用完删掉
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -32,10 +32,10 @@ export const add = (dir, id, files) => {
   for (const [name, body] of Object.entries(files)) writeFileSync(join(dir, id, name), body);
 };
 
-/** 一个瞬间 first-bike（一张照片）+ library.json */
+/** 一个图集 first-bike（一张照片）+ profile.json */
 export function makeLibrary() {
-  const dir = mkdtempSync(join(tmpdir(), "kid-growth-library-"));
-  writeFileSync(join(dir, "library.json"), JSON.stringify({ birthday: "2022-09-08", covers: { 2026: "first-bike/01.jpg" } }));
+  const dir = mkdtempSync(join(tmpdir(), "kid-growth-albums-"));
+  writeFileSync(join(dir, "profile.json"), JSON.stringify({ birthday: "2022-09-08", covers: { 2026: "first-bike/01.jpg" } }));
   add(dir, "first-bike", { "moment.json": JSON.stringify(GOOD), "notes.md": "# first-bike\n", "01.jpg": JPEG });
   return dir;
 }

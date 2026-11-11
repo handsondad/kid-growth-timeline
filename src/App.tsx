@@ -6,7 +6,7 @@ import { LockPage } from "./pages/LockPage.tsx";
 import { MomentPage } from "./pages/MomentPage.tsx";
 import { WallPage } from "./pages/WallPage.tsx";
 
-/** #/moment/<id> 看一个瞬间；#/at/<id> 回首页停在它那里；#/year/<年> 打开那一年 */
+/** #/moment/<id> 看一个图集；#/at/<id> 回首页停在它那里；#/year/<年> 打开那一年 */
 function route(hash: string): { page: string; param?: string } {
   const [, page = "", param] = hash.replace(/^#/, "").split("/");
   return { page, param: param ? decodeURIComponent(param) : undefined };
@@ -37,9 +37,9 @@ export default function App() {
   }, []);
   useEffect(() => { window.scrollTo(0, 0); }, [hash]);
 
-  if (state.step === "loading") return <div className="app"><p className="loading">正在打开时光库…</p></div>;
+  if (state.step === "loading") return <div className="app"><p className="loading">正在打开…</p></div>;
   if (state.step === "failed") return <div className="app"><p className="loading">{state.message}</p></div>;
-  if (state.step === "empty") return <div className="app"><p className="loading">还没有加密好的时光库：npm run seal -- --init</p></div>;
+  if (state.step === "empty") return <div className="app"><p className="loading">还没有加密好的图集：在项目里 npm run seal -- --init</p></div>;
   if (state.step === "locked") return <LockPage keyFile={state.keyFile} onOpen={(library) => setState({ step: "open", library })} />;
 
   const { library } = state;

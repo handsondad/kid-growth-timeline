@@ -1,10 +1,10 @@
 // 让页面读到加密的 vault：开发时 /vault/key.json、/vault/index.enc、/vault/blobs/<名字> 从 vault 目录给出，
-// 时光库一改就自动加密一遍（同 npm run seal），页面自己刷新；构建时把 vault 复制进 dist/vault，GitHub Pages 发布的就是它。
-// 明文的时光库不经过这里。
+// albums/ 一改就自动加密一遍（同 npm run seal），页面自己刷新；构建时把 vault 复制进 dist/vault，GitHub Pages 发布的就是它。
+// 明文的 albums/ 不经过这里，开发服务器也不给。
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
-import { libraryDir, libraryProblem, password, vaultDir } from "./library.mjs";
-import { report, sealLibrary } from "./seal.mjs";
+import { basename, isAbsolute, join, relative, resolve } from "node:path";
+import { libraryDir, password, root, vaultDir } from "./library.mjs";
+import { report, sealLibrary, SYNC_FILE } from "./seal.mjs";
 
 const FILE = /^\/vault\/(key\.json|index\.enc|blobs\/[0-9a-f]{32})$/;
 
@@ -50,8 +50,26 @@ function sendFile(req, res, file, type) {
   createReadStream(file, { start, end }).pipe(res);
 }
 
+/** 请求落在明文的 albums/ 里（直接的路径，或者 Vite 的 /@fs/绝对路径） */
+function inAlbums(path) {
+  const file = path.startsWith("/@fs/") ? resolve(path.slice(5)) : join(root, path);
+  const rel = relative(libraryDir(), file);
+  return !rel.startsWith("..") && !isAbsolute(rel);
+}
+
 function middleware(req, res, next) {
-  const m = FILE.exec((req.url ?? "").split("?")[0]);
+  let path;
+  try {
+    path = decodeURIComponent((req.url ?? "").split("?")[0]);
+  } catch {
+    path = "";
+  }
+  if (!path || inAlbums(path)) {
+    res.statusCode = 404;
+    res.end();
+    return;
+  }
+  const m = FILE.exec(path);
   if (!m) return next();
   const file = join(vaultDir(), ...m[1].split("/"));
   if (!existsSync(file)) {
@@ -62,13 +80,12 @@ function middleware(req, res, next) {
   sendFile(req, res, file, m[1] === "key.json" ? "application/json" : "application/octet-stream");
 }
 
-/** 开发时跟着时光库自动加密：同一时间只跑一次，跑的时候又改了就再跑一次 */
+/** 开发时跟着 albums/ 自动加密：同一时间只跑一次，跑的时候又改了就再跑一次 */
 function autoSeal(server) {
   const log = server.config.logger;
   const lib = libraryDir();
-  const problem = libraryProblem(lib) ?? (password() ? null : "还没设密码，不会自动加密：在 .env.local 里加一行 TIMELINE_PASSWORD=…");
-  if (problem) {
-    log.warn(`${problem}\n页面显示的是 ${vaultDir()} 里已经加密好的内容`);
+  if (!password()) {
+    log.warn(`还没设密码，不会自动加密：在 .env.local 里加一行 TIMELINE_PASSWORD=…\n页面显示的是 ${vaultDir()} 里已经加密好的内容`);
     return;
   }
   let running = false;
@@ -85,7 +102,7 @@ function autoSeal(server) {
       log.info(report(r), { timestamp: true });
       if (r.changed || r.written || r.removed) server.ws.send({ type: "full-reload" });
     } catch (err) {
-      log.error(`加密没成功：${err.message}`, { timestamp: true });
+      log.warn(`没有自动加密：${err.message}`, { timestamp: true });
     } finally {
       running = false;
       if (again) {
@@ -97,7 +114,8 @@ function autoSeal(server) {
   seal();
   server.watcher.add(lib);
   const changed = (file) => {
-    if (!resolve(file).startsWith(lib)) return;
+    const rel = relative(lib, resolve(file));
+    if (rel.startsWith("..") || isAbsolute(rel) || basename(file) === SYNC_FILE) return;
     clearTimeout(timer);
     timer = setTimeout(seal, 400);
   };

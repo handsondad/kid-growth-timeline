@@ -1,7 +1,7 @@
 // 把页面截成 PNG，放在 snapshots/ 下，给能看图的 agent 自查用。
 //
-//   npm run snapshot                          首页 + 每一年 + 每一个瞬间
-//   npm run snapshot -- home 2025 first-bike  只截首页、2025 年展开的样子和这一个瞬间
+//   npm run snapshot                          首页 + 每一年 + 每一个图集
+//   npm run snapshot -- home 2025 first-bike  只截首页、2025 年展开的样子和这一个图集
 //   npm run snapshot -- --width 390           手机宽度（默认 1000）
 //
 // 会自己起一个 Vite 开发服务器（不自动加密，截的是 vault 里现有的），用 TIMELINE_PASSWORD 解锁；
@@ -80,7 +80,7 @@ async function main() {
   const years = [...new Set(moments.map((m) => m.when.date.slice(0, 4)))].sort();
   const targets = opts.targets.length ? opts.targets : ["home", ...years, ...moments.map((m) => m.id)];
   for (const t of targets) {
-    if (t !== "home" && !YEAR.test(t) && !moments.some((m) => m.id === t)) throw new Error(`没有瞬间 ${t}，看看 ${dir ?? "时光库"} 下的目录名`);
+    if (t !== "home" && !YEAR.test(t) && !moments.some((m) => m.id === t)) throw new Error(`没有图集 ${t}，看看 ${dir} 下的文件夹名`);
   }
   const pw = password();
   if (!pw) throw new Error("没有密码：在 .env.local 里写 TIMELINE_PASSWORD=…");

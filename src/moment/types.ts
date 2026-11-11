@@ -1,7 +1,7 @@
 /**
- * 一个瞬间 = 时光库里的一个目录：moment.json（这份数据，不含 id）+ 一组照片和小视频，排成一篇图文。
- * 照片是 01.jpg、02.jpg……，视频是 03.mp4 + 封面 03.poster.jpg（npm run moment:add 处理好、编好号）。
- * 发布出去的是加密后的 vault/（npm run seal），页面输入密码解开。
+ * 一个图集 = 一件事 = albums/ 里的一个文件夹：moment.json（这份数据，不含 id）+ 一组照片和小视频，排成一篇图文。
+ * 照片是 01.jpg、02.jpg……，视频是 03.mp4 + 封面 03.poster.jpg（npm run album:add 处理好、编好号）。
+ * 发布出去的是加密后的 vault/（npm run seal），页面输入密码解开；npm run unseal 能整个解回 albums/。
  */
 
 /** 详情页从上往下的一段 */
@@ -18,7 +18,7 @@ export type Block =
 export type Moment = {
   /** 目录名，小写字母和短横线；读的时候按目录名填上，moment.json 里不用写 */
   readonly id: string;
-  /** 这个瞬间叫什么，≤12 个字 */
+  /** 这个图集叫什么，≤12 个字 */
   readonly title: string;
   /** 一句话说那天的事，放在首页预览和详情页开头，≤80 个字 */
   readonly about: string;
@@ -38,12 +38,12 @@ export type Moment = {
   readonly work?: string;
 };
 
-/** 时光库根目录的 library.json */
+/** albums/profile.json */
 export type Profile = {
   readonly name: string;
   /** 生日 YYYY-MM-DD，用来算「那天几岁」；不写就不显示 */
   readonly birthday?: string;
-  /** 年份卡用哪张照片：{ "2025": "first-sea/01.jpg" }；不写就用那一年最后一个瞬间的封面 */
+  /** 年份卡用哪张照片：{ "2025": "first-sea/01.jpg" }；不写就用那一年最后一个图集的封面 */
   readonly covers?: Readonly<Record<string, string>>;
 };
 
@@ -63,12 +63,14 @@ export type SealedMoment = Moment & {
   readonly files: Readonly<Record<string, FileRef>>;
   /** 绳子上的小缩略图 */
   readonly thumb?: FileRef;
+  /** notes.md：页面不显示，只为了 npm run unseal 换台电脑能解回来 */
+  readonly notes?: FileRef;
 };
 
 /** vault/index.enc 解开后的样子 */
 export type Library = {
   readonly v: 1;
-  readonly profile: Omit<Profile, "covers">;
+  readonly profile: Profile;
   /** 年份卡的缩略图 */
   readonly years: Readonly<Record<string, FileRef>>;
   readonly moments: readonly SealedMoment[];

@@ -1,5 +1,5 @@
 /**
- * 页面读加密的 vault：vault/key.json（被密码包着的钥匙）、vault/index.enc（所有瞬间）、vault/blobs/（照片视频）。
+ * 页面读加密的 vault：vault/key.json（被密码包着的钥匙）、vault/index.enc（所有图集）、vault/blobs/（照片视频）。
  * 输对密码在浏览器里解开；解开的照片只放在内存里，关掉页面就没了。都是相对路径，GitHub Pages 上也一样。
  */
 import type { FileRef, Library } from "./moment/types.ts";

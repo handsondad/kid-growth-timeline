@@ -136,7 +136,7 @@ export function WallPage({ library, at, year }: { library: Library; at?: string;
             <span className="pole" style={{ left: size.pad / 2 - 9, height: size.rowH - 24 }} aria-hidden="true" />
             <span className="pole" style={{ left: width - size.pad / 2 - 9, height: size.rowH - 24 }} aria-hidden="true" />
             {!moments.length && <p className="line-empty">绳子上还空着，等第一张照片挂上来</p>}
-            <div role="listbox" aria-label={open ? `${open} 年的瞬间，从早到晚` : "每一年"} aria-orientation="horizontal" onKeyDown={onKey}>
+            <div role="listbox" aria-label={open ? `${open} 年的图集，从早到晚` : "每一年"} aria-orientation="horizontal" onKeyDown={onKey}>
               {items.map((it) => {
                 if (it.kind === "flag") {
                   return (
@@ -152,7 +152,7 @@ export function WallPage({ library, at, year }: { library: Library; at?: string;
                   const last = it.moments[it.moments.length - 1];
                   return (
                     <button key={`y${it.year}`} className="tag year-card" aria-expanded="false"
-                      aria-label={`${it.year} 年${age(it.year) ? `，${age(it.year)}` : ""}，${it.moments.length} 个瞬间，点开看`}
+                      aria-label={`${it.year} 年${age(it.year) ? `，${age(it.year)}` : ""}，${it.moments.length} 个图集，点开看`}
                       style={{ left: it.x - size.yearW / 2, top: size.top + it.y - 10, width: size.yearW }} onClick={() => toggle(it.year)}>
                       <span className="peg" aria-hidden="true" />
                       <span className="card" style={{ background: it.color, ["--tilt" as string]: `${it.tilt}deg` }}>
@@ -161,7 +161,7 @@ export function WallPage({ library, at, year }: { library: Library; at?: string;
                           {age(it.year) && <span className="age-badge">{age(it.year)}</span>}
                         </span>
                         <span className="day">{it.year}</span>
-                        <span className="name">{it.moments.length} 个瞬间</span>
+                        <span className="name">{it.moments.length} 个图集</span>
                       </span>
                     </button>
                   );

@@ -1,6 +1,6 @@
 import type { Block, Moment } from "./types.ts";
 
-/** 时光库里一个瞬间目录下的文件名：两位编号 + 扩展名 */
+/** 图集文件夹里的文件名：两位编号 + 扩展名 */
 export const PHOTO_FILE = /^\d{2}\.jpg$/;
 export const VIDEO_FILE = /^\d{2}\.mp4$/;
 export const posterOf = (video: string) => video.replace(/\.mp4$/, ".poster.jpg");
@@ -14,7 +14,7 @@ export function blockKind(block: Block): BlockKind | null {
   return kinds.length === 1 ? kinds[0] : null;
 }
 
-/** 这个瞬间用到的所有媒体文件：照片、视频和视频的封面 */
+/** 这个图集用到的所有媒体文件：照片、视频和视频的封面 */
 export function mediaFiles(moment: Pick<Moment, "blocks">): string[] {
   const files: string[] = [];
   for (const b of moment.blocks ?? []) {

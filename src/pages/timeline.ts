@@ -1,5 +1,5 @@
 /**
- * 首页的时间绳：默认每一年收成一张年份卡（照片 + 那年几岁），点开一年，那一年的瞬间按日子从左往右夹在绳子上，
+ * 首页的时间绳：默认每一年收成一张年份卡（照片 + 那年几岁），点开一年，那一年的图集按日子从左往右夹在绳子上，
  * 年份卡变成开头的一面小旗。绳子是一条二次贝塞尔曲线，两头高、中间垂下去；挂件的高度跟着绳子走。
  * 绳子比屏幕长就左右滑（滚动条藏起来）。和《小念家的漫画书》《小念的画廊》首页是同一根绳子。
  */
@@ -44,7 +44,7 @@ export function sagAt(x: number, width: number, size: LineSize = LINE): number {
   return 4 * size.sag * t * (1 - t);
 }
 
-/** 每一年的瞬间，从早到晚 */
+/** 每一年的图集，从早到晚 */
 export function byYear<M extends Moment>(moments: readonly M[]): Map<number, M[]> {
   const years = new Map<number, M[]>();
   for (const m of [...moments].sort(byDate)) years.set(yearOf(m), [...(years.get(yearOf(m)) ?? []), m]);

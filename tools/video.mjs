@@ -2,11 +2,11 @@
 //
 //   npm run video -- --info <原片>
 //       看时长、尺寸、编码、拍摄日期、带没带位置；不写任何文件
-//   npm run video -- --frames <原片 或 瞬间id/编号> [--every 2] [--from 0:10] [--to 0:40]
+//   npm run video -- --frames <原片 或 图集id/编号> [--every 2] [--from 0:10] [--to 0:40]
 //       每隔几秒截一帧，拼成一张大图放在 private/frames/，给能看图的 agent 挑起止点、看拍了什么；
-//       写 first-bike/03 就看时光库里剪好的 03.mp4
+//       写 first-bike/03 就看 albums/ 里剪好的 03.mp4
 //
-// 真正剪一段用 npm run moment:add -- <id> <原片> --from --to（它调这里的 processVideo）。
+// 真正剪一段用 npm run album:add -- <id> <原片> --from --to（它调这里的 processVideo）。
 // 时间可以写 12.5、0:12.5、1:02:03。输出是 H.264 + AAC 的 MP4，长边 1280，最多 30 帧，码率封顶 2 Mbps，
 // 去掉拍摄时间、GPS、机型这些信息，索引放在文件头。原片不动。
 // 需要 PATH 里的 ffmpeg / ffprobe（带 libx264），或者用环境变量 FFMPEG_PATH、FFPROBE_PATH 指定。
@@ -176,7 +176,7 @@ export function inspectVideo(buf) {
 /** 返回问题列表，空数组表示这段视频能直接发布 */
 export function videoIssues(buf) {
   const info = inspectVideo(buf);
-  const redo = "删掉后用 npm run moment:add 重新剪";
+  const redo = "删掉后用 npm run album:add 重新剪";
   if (!info) return [`认不出来，只收 MP4，${redo}`];
   const problems = [];
   if (info.meta) problems.push(`带着拍摄信息（时间、GPS、机型），${redo}`);
@@ -303,7 +303,7 @@ export async function contactSheet(source, { every = 2, from = 0, to, cols = 6, 
 
 // ---------- 命令行 ----------
 
-/** 原片和 moment:add 共用：--from --to --poster --every 时间，--mute，其余是位置参数 */
+/** 原片和 album:add 共用：--from --to --poster --every 时间，--mute，其余是位置参数 */
 export function parseArgs(argv) {
   const opts = { mode: null, mute: false, positional: [] };
   for (let i = 0; i < argv.length; i++) {
@@ -324,8 +324,8 @@ export function parseArgs(argv) {
 
 const USAGE = `用法：
   npm run video -- --info <原片>
-  npm run video -- --frames <原片 或 瞬间id/编号> [--every 2] [--from 0:10] [--to 0:40]
-剪一段放进瞬间：npm run moment:add -- <瞬间id> <原片> [--from 0:12.5] [--to 0:41] [--poster 0:20] [--mute]`;
+  npm run video -- --frames <原片 或 图集id/编号> [--every 2] [--from 0:10] [--to 0:40]
+剪一段放进图集：npm run album:add -- <图集id> <原片> [--from 0:12.5] [--to 0:41] [--poster 0:20] [--mute]`;
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
@@ -343,7 +343,7 @@ async function main() {
   if (opts.mode === "frames") {
     const [target] = opts.positional;
     if (!target) throw new Error(USAGE);
-    // 写 瞬间id/编号 就看时光库里剪好的成片
+    // 写 图集id/编号 就看 albums/ 里剪好的成片
     const [id, n] = target.split("/");
     const file = !existsSync(target) && ID.test(id) && /^\d{2}$/.test(n ?? "") ? join(momentDir(id), `${n}.mp4`) : target;
     const sheet = await contactSheet(file, opts);

@@ -5,17 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "demo": "node tools/demo.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs",
+    "status": "node tools/library.mjs",
+    "album:new": "node tools/new-moment.mjs",
+    "album:add": "node tools/add-media.mjs",
     "check": "node tests/moment-rules.mjs",
-    "snapshot": "node tools/snapshot.mjs",
-    "moment:new": "node tools/new-moment.mjs",
-    "moment:add": "node tools/add-media.mjs",
     "seal": "node tools/seal.mjs",
-    "library": "node tools/library.mjs",
+    "unseal": "node tools/unseal.mjs",
+    "snapshot": "node tools/snapshot.mjs",
     "video": "node tools/video.mjs"
   },
   "dependencies": {

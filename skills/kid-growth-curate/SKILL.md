@@ -1,30 +1,31 @@
 ---
 name: kid-growth-curate
 description: >-
-  Guides adding one moment (a small photo-and-text story with photos and short
-  videos) of Nian's growth to the local moment library used by the
-  kid-growth-timeline app: confirm the library, run moment:new / moment:add,
-  write notes.md and moment.json blocks, run check, seal the encrypted vault and
-  snapshot. Plaintext media and data never go into git; only the encrypted
-  vault/ does. Use when adding or revising a moment, photo, video, title, date,
-  caption or notes, or when the user mentions 成长时光轴、时光库、新照片、新视频、
-  收进时光轴、挂上绳子、图集、notes.md、moment.json、加密、seal、vault.
+  Guides making or revising one album (图集: one event in Nian's life, a small
+  photo-and-text story with photos and short videos) in the kid-growth-timeline
+  app: check status, unseal if needed, run album:new / album:add, write
+  notes.md and moment.json blocks, run check, seal the encrypted vault and
+  snapshot. Plaintext albums/ never go into git; only the encrypted vault/
+  does. Use when adding or revising an album, replacing placeholder photos,
+  fixing a title, date, caption or notes, or when the user mentions 成长时光轴、
+  图集、新照片、新视频、挂上绳子、占位照片、notes.md、moment.json、加密、seal、
+  unseal、vault.
 ---
 
-# 小念的成长时光轴：收一个新瞬间
+# 小念的成长时光轴：做一个图集
 
-目标：把小念长大路上值得记住的一天挂上绳子，做成一篇小小的图文。大人（和 agent）负责挑、剪、记下来。
+目标：把小念长大路上值得记住的一件事挂上绳子，做成一篇小小的图文。大人（和 agent）负责挑、剪、记下来。
 
-明文的照片、视频和数据都放在**时光库**（仓库外面的一个文件夹）里，不进 git；`npm run seal` 把它加密进 `vault/`，只有 `vault/` 提交、发布。仓库结构、命令、规矩见根目录 `AGENTS.md`。**有视频的，剪辑那一步照 [../kid-growth-video/SKILL.md](../kid-growth-video/SKILL.md) 做。**
+一件事一个图集，放在项目的 `albums/<id>/`（明文，不进 git）；`npm run seal` 把它加密进 `vault/`，只有 `vault/` 提交、发布。仓库结构、命令、规矩见根目录 `AGENTS.md`，给大人看的说明在 `README.md`。**有视频的，剪辑那一步照 [../kid-growth-video/SKILL.md](../kid-growth-video/SKILL.md) 做。**
 
 ## 八步
 
 每一步都要大人点头才往下走。和孩子聊时一次只问一个问题。
 
 ```
-- [ ] 1. npm run library：确认时光库、密码设了
+- [ ] 1. npm run status：图集在、密码设了；别的电脑做过的先 git pull + npm run unseal
 - [ ] 2. 看素材，挑几张 / 挑一段
-- [ ] 3. npm run moment:new -- <id> <照片…>，再加用 npm run moment:add
+- [ ] 3. npm run album:new -- <id> <照片…>，再加用 npm run album:add
 - [ ] 4. 问大人那天的事（能问小念就问小念）→ notes.md
 - [ ] 5. 写 moment.json → npm run check -- <id>
 - [ ] 6. npm run seal
@@ -32,40 +33,47 @@ description: >-
 - [ ] 8. 给大人看；说好了 git add vault && git commit
 ```
 
-### 1. 确认时光库
+### 1. 先对上
 
 ```bash
-npm run library
+npm run status
 ```
 
-会打印时光库的位置、里面有几个瞬间、vault 在哪、密码设了没有。说「还没指定」就问大人照片放哪儿，然后 `npm run library -- <路径>`。**不要把时光库指到仓库里没被忽略的地方**，工具会拒绝；想放仓库里只能放 `library/`。
+会打印 `albums/` 在哪、有几个图集、vault 在哪、密码设了没有。
 
-没设密码就请大人自己在 `.env.local` 里加一行 `TIMELINE_PASSWORD=…`（至少 12 位）。**你不要替大人起密码，也不要把密码写进任何文件、提交信息或者回复里。** 第一次用还要 `npm run seal -- --init` 生成钥匙。
+- 说「还没有图集文件夹」又有 vault：换了电脑，先 `npm run unseal`
+- 说密码「还没设」：请大人自己在 `.env.local` 里加一行 `TIMELINE_PASSWORD=…`（至少 12 位）。**你不要替大人起密码，也不要把密码写进任何文件、提交信息或者回复里**
+- 还没有 vault：第一次用，`npm run seal -- --init`
+- 刚 `git pull` 过：`npm run unseal`，把别的电脑做的图集解出来。`seal` 报「vault 里的图集比 albums/ 新」也是这个意思；`unseal` 列出「两边不一样」的，问大人用哪边（`unseal -- --force` 用 vault 的，`seal -- --force` 用这台电脑的），别自己挑
 
 ### 2. 看素材
 
-原片、原图可以放 `private/`（已被忽略），也可以直接用大人给的路径。用读图工具看照片；视频先 `npm run video -- --frames` 截帧再看（见 video skill）。
+原片、原图放 `private/`（已被忽略），或者直接用大人给的路径。用读图工具看照片；视频先 `npm run video -- --frames` 截帧再看（见 video skill）。
 
-一个瞬间是一天里的一件事，一般 3～8 张照片、最多一两段视频就够。拍糊的、重复的、不是那件事的，跟大人说一声去掉。手机的 HEIC 照片先导出成 JPG。
+一个图集是一天里的一件事，一般 3～8 张照片、最多一两段视频。拍糊的、重复的、不是那件事的，跟大人说一声去掉。HEIC 照片先请大人导出成 JPG。
 
-### 3. 建目录、加照片和视频
+### 3. 建图集、加照片和视频
 
 ```bash
-npm run moment:new -- first-bike private/IMG_1234.jpg private/IMG_1236.jpg
-npm run moment:add -- first-bike private/IMG_1240.MOV --from 0:12 --to 0:40
-npm run moment:add -- first-bike private/IMG_1251.jpg
+npm run album:new -- zoo private/zoo/IMG_1201.jpg private/zoo/IMG_1203.jpg
+npm run album:add -- zoo private/zoo/IMG_1220.MOV --from 0:12 --to 0:40
+npm run album:add -- zoo private/zoo/IMG_1251.jpg
 ```
 
-id 按这件事起，小写英文和短横线：`first-bike`、`lost-tooth`、`first-day-school`。会在时光库里建 `first-bike/`，里面有 `moment.json`、`notes.md`，照片按顺序编号成 `01.jpg`、`02.jpg`（转正、长边 1600、去掉拍摄信息，一张三五百 KB），视频是 `03.mp4` + `03.poster.jpg`。每加一个，`moment.json` 的 `blocks` 后面就接一段。视频的拍摄日会自动填进 `when.date`。剪辑参数只配一段视频，一次加一段。
+id 按这件事起，小写英文、数字和短横线：`zoo`、`first-bike`、`lost-tooth`、`birthday-3`。会建 `albums/zoo/`，里面有 `moment.json`、`notes.md`；照片按顺序编号成 `01.jpg`、`02.jpg`（转正、长边 1600、去掉拍摄信息，一张三五百 KB），视频是 `03.mp4` + `03.poster.jpg`。每加一个，`blocks` 后面接一段。视频的拍摄日会自动填进 `when.date`；只有照片的先填今天，要问大人。剪辑参数只配一段视频，一次加一段。
+
+**已经有这个图集**（比如起步图集，照片写着「占位照片 · 换成真的」）：不要 `album:new`，见下面「换掉占位照片」。
 
 ### 4. 记下那天的事
 
-照片和视频本身不会说话。问大人（能问小念就问小念），每次一句，记进时光库里的 `<id>/notes.md`：
+照片和视频本身不会说话。问大人（能问小念就问小念），每次一句，记进 `albums/<id>/notes.md`：
 
 1. 这是哪天？那天是什么日子吗？（不知道就问，别猜）
 2. 在哪儿？在干什么？
 3. 为什么想把这一天留下来？（第一次？好笑？感动？）
 4. 小念那时候说了什么？（原话记进「小念说」）
+
+`notes.md` 不显示在页面上，但会加密进 vault，换电脑 `unseal` 能找回来。
 
 ### 5. 写 moment.json
 
@@ -94,11 +102,22 @@ id 按这件事起，小写英文和短横线：`first-bike`、`lost-tooth`、`f
 - 好看的顺序：先一张最能说明那天的照片，再一段话，再照片和视频，原话放在最打动人的那张后面
 - `cover`：绳子上的缩略图用哪张（文件名），不写就用第一张照片
 - 同一天画廊里有作品加 `"work": "<作品id>"`，漫画书里有故事加 `"story": "<故事id>"`
-- 不写 `id`：目录名就是 id
+- 不写 `id`：文件夹名就是 id
 
-用不上的照片：文件删掉，blocks 里也去掉。跑 `npm run check -- <id>`，检查器管：JSON 读不读得出来、字数、日子、每一段的格式、媒体文件在不在、有没有拍摄信息、视频编码和大小、多出来的文件。
+跑 `npm run check -- <id>`，检查器管：JSON 读不读得出来、字数、日子、每一段的格式、媒体文件在不在、有没有拍摄信息、视频编码和大小、多出来的文件。
 
-**这一年的年份卡**：时光库根目录的 `library.json` 里 `covers` 可以指定一年用哪张照片（`"2026": "first-bike/01.jpg"`），不写就用那一年最后一个瞬间的封面。`birthday` 是生日，用来算「那天几岁」，不知道就问，别猜。
+**年份卡和生日**：`albums/profile.json` 里 `birthday` 用来算「那天几岁」，不知道就问，别猜；`covers` 可以指定一年用哪张照片（`"2026": "first-bike/01.jpg"`），不写就用那一年最后一个图集的封面。
+
+### 换掉占位照片
+
+起步图集（`hello`、`hundred-days`、`zoo`……）的照片、视频是占位的，日子、标题、文字是先填的，`notes.md` 里写着「起步占位的日子」。换成真的：
+
+1. 删掉占位的 `NN.jpg`（视频连 `NN.poster.jpg`），`blocks` 里引用它们的段也删掉
+2. `npm run album:add -- <id> <真照片…>`，编号接在后面
+3. 问大人真的日子和那天的事，改 `title`、`about`、`when`、每段说明，删掉「照片和这段字都是起步占位的……」那段，`notes.md` 里的占位说明也改掉
+4. 大人说这件事没有发生过、或者不想要，整个文件夹删掉
+
+想让编号从 01 开始，删掉整个文件夹再 `album:new`（先把要留的文字记下来）。
 
 ### 6. 加密
 
@@ -115,9 +134,9 @@ npm run snapshot -- home 2026 <id>
 npm run snapshot -- home 2026 <id> --width 390
 ```
 
-`2026` 是这个瞬间所在的年，截的是那一年展开的样子。打开 `snapshots/` 看：
+`2026` 是这个图集所在的年，截的是那一年展开的样子。打开 `snapshots/` 看：
 
-- 首页年份卡的照片认得出、几岁对；展开那一年，新瞬间夹在对的日子上
+- 首页年份卡的照片认得出、几岁对；展开那一年，新图集夹在对的日子上
 - 详情页照片是正的，并排的几张是一组，文字和照片穿插得顺；视频封面挑的那一帧好看
 - 手机宽度下字没有挤出框
 - snapshot 没有报「视频放不出来」或者页面报错
@@ -130,7 +149,7 @@ npm run snapshot -- home 2026 <id> --width 390
 
 ```bash
 git add vault
-git commit -m "收进：第一次骑车"
+git commit -m "去动物园"
 ```
 
 推不推、什么时候推，问大人（推到 main 就发布到网上了）。
@@ -138,6 +157,6 @@ git commit -m "收进：第一次骑车"
 ## 验收
 
 - `npm run check` 无报错，`npm run seal` 没有「没加密」的
-- `git status` 里只有 `vault/` 的变化，没有照片、视频、`moment.json`、`notes.md`、`.env.local`
+- `git status` 里只有 `vault/` 的变化，没有 `albums/`、照片、视频、`.env.local`
 - `said` 是小念的原话，或者没有
 - 手机宽度下能看清、能左右滑、能换一个，视频能点开放

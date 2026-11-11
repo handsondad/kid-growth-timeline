@@ -1,5 +1,5 @@
 // 处理照片：转正、缩到长边 1600、存成 JPEG，顺便去掉拍摄时间、GPS 这些信息。原图不动。
-// 给 npm run moment:add 用；也给检查器读 JPEG/PNG 的尺寸和拍摄信息。
+// 给 npm run album:add 用（album:new 也是它）；也给检查器读 JPEG/PNG 的尺寸和拍摄信息。
 //
 // 用本机 Edge/Chrome 的画布重画一遍，所以不需要装图像库；手机的 HEIC 先导出成 JPG 再用。
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -60,9 +60,9 @@ export function photoIssues(buf) {
   const info = inspectPhoto(buf);
   if (!info) return ["认不出来，只收 JPEG 或 PNG"];
   const problems = [];
-  if (info.meta) problems.push("带着拍摄信息（时间、GPS、相机），删掉后用 npm run moment:add 重新处理");
-  if (Math.max(info.width, info.height) > PHOTO.maxSide) problems.push(`${info.width}×${info.height} 太大，长边不超过 ${PHOTO.maxSide}，用 npm run moment:add 处理`);
-  if (buf.length > PHOTO.maxBytes) problems.push(`${(buf.length / 1024).toFixed(0)} KB 太大，不超过 ${PHOTO.maxBytes / 1024} KB，用 npm run moment:add 处理`);
+  if (info.meta) problems.push("带着拍摄信息（时间、GPS、相机），删掉后用 npm run album:add 重新处理");
+  if (Math.max(info.width, info.height) > PHOTO.maxSide) problems.push(`${info.width}×${info.height} 太大，长边不超过 ${PHOTO.maxSide}，用 npm run album:add 处理`);
+  if (buf.length > PHOTO.maxBytes) problems.push(`${(buf.length / 1024).toFixed(0)} KB 太大，不超过 ${PHOTO.maxBytes / 1024} KB，用 npm run album:add 处理`);
   return problems;
 }
 

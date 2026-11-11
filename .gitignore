@@ -5,13 +5,12 @@ vite.config.js
 vite.config.d.ts
 *.log
 
-# 时光库的位置和看页面的密码写在 .env.local 里，每台电脑不一样，密码绝不进 git
+# 看页面的密码写在 .env.local 里，每台电脑自己写一份，密码绝不进 git
 .env
 .env.*
 
-# 时光库想放在仓库里，就放 library/；明文的照片、视频、数据都不进 git，进 git 的只有加密后的 vault/
-/library/
-# demo/ 是 npm run demo 生成的演示时光库（假素材），进 git，换台电脑不用 ffmpeg 也能看
+# 图集的明文（挑好压好的照片、视频、文字），只在本机；进 git 的是加密后的 vault/，换电脑用 npm run unseal 解回来
+/albums/
 
 # snapshot 工具的输出，给 agent 自查用
 snapshots/

@@ -187,7 +187,7 @@ button, a { font-family: inherit; }
   background: var(--accent-orange); color: #fff; font-size: 17px; line-height: 1; white-space: nowrap;
   transform: rotate(10deg); box-shadow: 0 3px 0 rgba(61, 48, 39, 0.2);
 }
-/* 有视频的瞬间，缩略图右下角挂个播放标 */
+/* 有视频的图集，缩略图右下角挂个播放标 */
 .play-badge {
   position: absolute; right: 6px; bottom: 6px; display: grid; place-items: center;
   width: 32px; height: 32px; padding-left: 3px; border-radius: 50%;

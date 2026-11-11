@@ -13,7 +13,7 @@ const inPlayer = (target: EventTarget | null) => target instanceof HTMLVideoElem
 
 type Photo = { readonly name: string; readonly caption?: string };
 
-/** 一个瞬间的详情：一组照片、视频和文字从上往下排；点照片看大图，← → 换前后一个瞬间 */
+/** 一个图集的详情：一组照片、视频和文字从上往下排；点照片看大图，← → 换前后一个图集 */
 export function MomentPage({ moment, library }: { moment: SealedMoment; library: Library }) {
   const { prev, next } = neighbors(library.moments, moment.id);
   const prevHref = prev ? `#/moment/${prev.id}` : null;
@@ -99,7 +99,7 @@ export function MomentPage({ moment, library }: { moment: SealedMoment; library:
         {prevHref ? <a className="btn ghost" href={prevHref}>更早</a> : <button className="btn ghost" disabled>更早</button>}
         {nextHref ? <a className="btn" href={nextHref}>后来</a> : <a className="btn" href={back}>回时光轴</a>}
       </div>
-      <p className="hint">点照片看大图 · ← → 或左右滑动换一个瞬间 · Esc 回时光轴</p>
+      <p className="hint">点照片看大图 · ← → 或左右滑动换一个图集 · Esc 回时光轴</p>
 
       {viewing !== null && photos[viewing] && (
         <div className="lightbox" role="dialog" aria-modal="true" aria-label="看大图" onClick={(e) => { if (e.target === e.currentTarget) setViewing(null); }}>

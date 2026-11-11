@@ -1,12 +1,12 @@
-// 往一个瞬间里加照片和视频：处理好、按顺序编号（01.jpg、02.mp4 + 02.poster.jpg……），
+// 往一个图集里加照片和视频：处理好、按顺序编号（01.jpg、02.mp4 + 02.poster.jpg……），
 // 一个一段接到 moment.json 的 blocks 后面；说明（caption）、并排、文字段留给大人和 agent 再改。
 // 用法：
-//   npm run moment:add -- <id> <照片或原片> [更多照片…]
-//   npm run moment:add -- <id> <原片> --from 0:12.5 --to 0:41 [--poster 0:20] [--mute]   剪辑参数只配一段视频
+//   npm run album:add -- <id> <照片或原片> [更多照片…]
+//   npm run album:add -- <id> <原片> --from 0:12.5 --to 0:41 [--poster 0:20] [--mute]   剪辑参数只配一段视频
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { extname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { ID, requireLibrary } from "./library.mjs";
+import { ID, libraryDir } from "./library.mjs";
 import { processPhoto, sourceMime } from "./photo.mjs";
 import { parseArgs, planClip, probe, processVideo, VIDEO_EXTENSIONS } from "./video.mjs";
 
@@ -42,7 +42,7 @@ export async function addMedia(dir, sources, opts = {}) {
   const moment = JSON.parse(readFileSync(file, "utf8"));
   const blocks = Array.isArray(moment.blocks) ? [...moment.blocks] : [];
   let n = nextNumber(dir);
-  if (n + sources.length > 100) throw new Error("一个瞬间最多 99 个文件，挑一挑，或者分成两个瞬间");
+  if (n + sources.length > 100) throw new Error("一个图集最多 99 个文件，挑一挑，或者分成两个图集");
   const added = [];
   for (const src of sources) {
     const name = String(n++).padStart(2, "0");
@@ -64,9 +64,9 @@ export async function addMedia(dir, sources, opts = {}) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const [id, ...sources] = opts.positional;
-  if (!id || !ID.test(id) || !sources.length) throw new Error("用法：npm run moment:add -- <id> <照片或原片> [更多…] [--from --to --poster --mute]");
-  const dir = join(requireLibrary(), id);
-  if (!existsSync(join(dir, "moment.json"))) throw new Error(`还没有这个瞬间：npm run moment:new -- ${id}`);
+  if (!id || !ID.test(id) || !sources.length) throw new Error("用法：npm run album:add -- <id> <照片或原片> [更多…] [--from --to --poster --mute]");
+  const dir = join(libraryDir(), id);
+  if (!existsSync(join(dir, "moment.json"))) throw new Error(`还没有这个图集：npm run album:new -- ${id}`);
   if (sources.some(isVideo)) console.log("剪辑中，长一点的要等一会儿…");
   const added = await addMedia(dir, sources, opts);
   console.log(`加好了：${added.join("、")}`);

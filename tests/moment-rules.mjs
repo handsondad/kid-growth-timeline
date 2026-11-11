@@ -1,11 +1,11 @@
-// 内容检查：时光库里的 library.json 和每个瞬间的字数、日子、每一段图文、媒体文件（大小、编码、拍摄信息）。不需要 ffmpeg。
+// 内容检查：albums/ 里的 profile.json 和每个图集的字数、日子、每一段图文、媒体文件（大小、编码、拍摄信息）。不需要 ffmpeg。
 // 用法：
 //   npm run check
 //   npm run check -- first-bike
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { ID, readLibrary } from "../tools/library.mjs";
+import { ID, PROFILE_FILE, readLibrary } from "../tools/library.mjs";
 import { photoIssues } from "../tools/photo.mjs";
 import { videoIssues } from "../tools/video.mjs";
 import { blockKind, mediaFiles, PHOTO_FILE, posterOf, VIDEO_FILE } from "../src/moment/vocab.ts";
@@ -22,19 +22,19 @@ const LIMITS = {
   photos: 3,
 };
 
-/** 时光库目录里除了媒体文件，还可以有这些 */
+/** 图集文件夹里除了媒体文件，还可以有这些 */
 const KEEP = ["moment.json", "notes.md"];
 
 const chars = (text) => [...text].length;
 const isDay = (day) => /^\d{4}-\d{2}-\d{2}$/.test(day ?? "") && !Number.isNaN(Date.parse(day));
 
-/** 返回问题列表，空数组表示通过；dir 是这个瞬间在时光库里的目录 */
+/** 返回问题列表，空数组表示通过；dir 是这个图集的文件夹 */
 export function checkMoment(moment, dir) {
   const problems = [];
   const say = (where, text) => problems.push(`${moment.id} ${where}：${text}`);
-  const add = `npm run moment:add -- ${moment.id} <照片或原片>`;
+  const add = `npm run album:add -- ${moment.id} <照片或原片>`;
 
-  if (!ID.test(moment.id)) say("id", "目录名只能用小写字母、数字和短横线，且以字母开头");
+  if (!ID.test(moment.id)) say("id", "文件夹名只能用小写字母、数字和短横线，且以字母开头");
   for (const key of ["title", "about"]) {
     if (typeof moment[key] !== "string" || !moment[key].trim()) say(key, "不能空着");
     else if (chars(moment[key]) > LIMITS[key]) say(key, `超过 ${LIMITS[key]} 个字`);
@@ -81,7 +81,7 @@ export function checkMoment(moment, dir) {
     });
     const files = mediaFiles(moment);
     if (!files.length) say("图文", `至少要有一张照片或一段视频，${add}`);
-    if (moment.cover !== undefined && !(files.includes(moment.cover) && moment.cover.endsWith(".jpg"))) say("封面", `cover 写这个瞬间里一张照片或视频封面的文件名`);
+    if (moment.cover !== undefined && !(files.includes(moment.cover) && moment.cover.endsWith(".jpg"))) say("封面", `cover 写这个图集里一张照片或视频封面的文件名`);
     // 换过照片、剪过两遍留下的旧文件，或者原片误放进来
     const extra = existsSync(dir) ? readdirSync(dir).filter((n) => !files.includes(n) && !KEEP.includes(n)) : [];
     if (extra.length) say("媒体", `目录里多出 ${extra.join("、")}，用不上就删掉（原片放别处）`);
@@ -91,17 +91,17 @@ export function checkMoment(moment, dir) {
   return problems;
 }
 
-/** library.json：名字、生日、年份卡的照片 */
+/** profile.json：名字、生日、年份卡的照片 */
 export function checkProfile(profile, dir, moments) {
   const problems = [];
-  const say = (text) => problems.push(`library.json：${text}`);
+  const say = (text) => problems.push(`${PROFILE_FILE}：${text}`);
   if (typeof profile.name !== "string" || !profile.name.trim() || chars(profile.name) > LIMITS.name) say(`name 写名字，不超过 ${LIMITS.name} 个字`);
   if (profile.birthday !== undefined && (!isDay(profile.birthday) || Date.parse(profile.birthday) > Date.now())) say("birthday 写生日，格式 YYYY-MM-DD");
   for (const [year, path] of Object.entries(profile.covers ?? {})) {
     const [id, name] = String(path).split("/");
     const moment = moments.find((m) => m.id === id);
     if (!/^\d{4}$/.test(year)) say(`covers 的键写年份，比如 "2025"`);
-    else if (!moment || !mediaFiles(moment).includes(name) || !name.endsWith(".jpg") || !existsSync(join(dir, id, name))) say(`covers.${year} 写「瞬间id/照片文件名」，比如 first-sea/01.jpg`);
+    else if (!moment || !mediaFiles(moment).includes(name) || !name.endsWith(".jpg") || !existsSync(join(dir, id, name))) say(`covers.${year} 写「图集id/照片文件名」，比如 first-sea/01.jpg`);
     else if (!moment.when?.date?.startsWith(year)) say(`covers.${year} 用的 ${id} 不是 ${year} 年的`);
   }
   return problems;
@@ -121,7 +121,7 @@ function main() {
   }
   for (const id of only) {
     if (!lib.moments.some((m) => m.id === id)) {
-      console.error(`✗ ${id}：时光库里没有 ${id}/moment.json`);
+      console.error(`✗ ${id}：albums/ 里没有 ${id}/moment.json`);
       failed++;
     }
   }
@@ -136,7 +136,7 @@ function main() {
       console.log(`✓ ${moment.id}`);
     }
   }
-  if (!lib.moments.length) console.log(`时光库（${lib.dir}）里还没有瞬间：npm run moment:new -- <id> <照片或原片>`);
+  if (!lib.moments.length) console.log(`${lib.dir} 里还没有图集：npm run album:new -- <id> <照片或原片>`);
   if (failed) process.exit(1);
 }
 
