@@ -10,9 +10,8 @@ vite.config.d.ts
 .env.*
 
 # 时光库想放在仓库里，就放 library/；明文的照片、视频、数据都不进 git，进 git 的只有加密后的 vault/
-library/
-# npm run demo 生成的演示时光库
-demo/
+/library/
+# demo/ 是 npm run demo 生成的演示时光库（假素材），进 git，换台电脑不用 ffmpeg 也能看
 
 # snapshot 工具的输出，给 agent 自查用
 snapshots/

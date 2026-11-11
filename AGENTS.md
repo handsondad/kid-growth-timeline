@@ -58,7 +58,7 @@ vault/
 |---|---|
 | `npm run library [-- <路径>]` | 看现在用的时光库 / 换一个；顺便告诉你 vault 在哪、密码设了没有 |
 | `npm run dev` | 开发服务器，自动打开浏览器；时光库里加了、改了瞬间会自动加密、自己刷新（`KGT_AUTOSEAL=0` 关掉） |
-| `npm run demo [-- --fresh] [--no-open]` | 生成演示时光库 `demo/library` 并加密到 `demo/vault`（ffmpeg 画的假素材，git 忽略），用它打开，不改 `.env.local`；密码打印在终端里 |
+| `npm run demo [-- --fresh] [--no-open]` | 生成演示时光库 `demo/library` 并加密到 `demo/vault`（ffmpeg 画的假素材，进 git，已经有了就不用 ffmpeg），用它打开，不改 `.env.local`；密码打印在终端里 |
 | `npm run seal [-- --init]` | 把时光库加密进 `vault/`；第一次加 `--init` 生成钥匙 |
 | `npm run seal -- --new-password` / `--rotate` | 换密码（新密码放在环境变量 `TIMELINE_NEW_PASSWORD`）/ 密码泄露了，连主钥匙一起换、全部重新加密 |
 | `npm run typecheck` | `tsc --noEmit` |
@@ -114,7 +114,7 @@ vault/
 
 ## 硬性规矩
 
-- **明文不进 git**：真实的照片、视频、`moment.json`、`notes.md`、`library.json` 只写进时光库，进 git 的只有 `vault/`。测试里用工具现场生成的假素材。`dist/`、`snapshots/`、`private/`、`demo/`、`library/` 都已被忽略，不要改 `.gitignore` 把它们放出来。`notes.md` 不加密进 vault。
+- **明文不进 git**：真实的照片、视频、`moment.json`、`notes.md`、`library.json` 只写进时光库，进 git 的只有 `vault/`。测试里用工具现场生成的假素材。`dist/`、`snapshots/`、`private/`、`library/` 都已被忽略，不要改 `.gitignore` 把它们放出来。`demo/` 是唯一进 git 的明文时光库，里面只能是 `npm run demo` 画的假素材，不要往里放家里的照片。`notes.md` 不加密进 vault。
 - **密码不进 git**：不写进代码、提交信息、PR、日志、截图和测试里（测试和演示用固定的假密码）。只放 `.env.local` 或环境变量。
 - **加密别削弱**：不要调低 `src/vault/crypto.ts` 里 Argon2id 的强度、不要缩短密码下限、不要在 vault 外面放能看出内容的东西（缩略图、文件名、标题都在加密的 index 里）。改加密格式要能读旧的，或者让大人跑 `--rotate`。
 - **发布**：只发布 GitHub Pages（CI 里自动），发出去的是页面和 vault。开发和预览服务器只听 `127.0.0.1`，不要改成 `0.0.0.0`；别的地方要发布，先问大人。

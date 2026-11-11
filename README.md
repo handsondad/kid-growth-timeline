@@ -10,11 +10,11 @@
 
 ## 先看看效果
 
-需要 Node.js 22+ 和 ffmpeg。
+需要 Node.js 22+。
 
 ```bash
 npm install
-npm run demo        # 生成演示时光库 demo/（不进 git），加密，打开网站；密码打印在终端里
+npm run demo        # 用仓库里的演示时光库 demo/（假素材）打开网站；密码打印在终端里
 ```
 
 ## 用起来
@@ -69,7 +69,7 @@ D:/小念/时光轴/
 |---|---|
 | `npm run library [-- <路径>]` | 看 / 换时光库 |
 | `npm run dev` | 本机打开看（自动加密） |
-| `npm run demo [-- --fresh]` | 用演示时光库打开看（要 ffmpeg） |
+| `npm run demo [-- --fresh]` | 用演示时光库打开看（`--fresh` 重新生成，要 ffmpeg） |
 | `npm run seal [-- --init]` | 加密进 `vault/`；`--new-password` 换密码，`--rotate` 连主钥匙一起换 |
 | `npm run moment:new -- <id> [照片或原片…]` | 新收一个瞬间 |
 | `npm run moment:add -- <id> <照片或原片…>` | 往瞬间里加照片、视频（转正、缩小、去掉拍摄信息；视频剪好压好） |

@@ -50,7 +50,8 @@ export function libraryProblem(dir = libraryDir()) {
   if (!existsSync(dir) || !statSync(dir).isDirectory()) return `时光库不存在：${dir}`;
   const rel = relative(root, dir);
   // 放在仓库里面也行，但必须被 git 忽略，不然明文的照片和视频会被提交上去
-  if (!rel.startsWith("..") && !isAbsolute(rel)) {
+  // demo/library 是工具画的假素材，特意提交的
+  if (!rel.startsWith("..") && !isAbsolute(rel) && rel.replaceAll("\\", "/") !== "demo/library") {
     const ignored = spawnSync("git", ["check-ignore", "-q", rel || "."], { cwd: root, windowsHide: true }).status === 0;
     if (!ignored) return `时光库在仓库里面又没被 .gitignore 忽略，明文的照片和视频会被提交上去：${dir}`;
   }

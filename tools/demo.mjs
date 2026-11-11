@@ -1,5 +1,5 @@
 // 演示时光库：用 ffmpeg 现场画照片、画几段视频（都是假的，没有家里的东西），排成一篇篇图文，
-// 放进 demo/library（明文）并加密进 demo/vault，然后用它打开网站。都在 demo/ 下，已被 git 忽略；不动 .env.local。
+// 放进 demo/library（明文）并加密进 demo/vault，然后用它打开网站。都在 demo/ 下，进 git（换台电脑不用 ffmpeg 也能直接打开）；不动 .env.local。
 //
 //   npm run demo               没有就生成，然后打开（密码打印在终端里）
 //   npm run demo -- --fresh    重新生成
