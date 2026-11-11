@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "kdf": {
+    "name": "argon2id",
+    "salt": "1qGijn74WJJsRmzKvva6Aw==",
+    "iterations": 3,
+    "memory": 65536,
+    "parallelism": 1
+  },
+  "wrapped": {
+    "iv": "Vi2HmdWGf2LNgAOx",
+    "data": "Z1VRaOJZDMCrsAnXGVSclIc9lGNwTIAC2wXWddsQzvvIZNqwe/78Hu1B3oB7Kpta"
+  }
+}
