@@ -38,8 +38,28 @@ export default function App() {
   useEffect(() => { window.scrollTo(0, 0); }, [hash]);
 
   if (state.step === "loading") return <div className="app"><p className="loading">正在打开…</p></div>;
-  if (state.step === "failed") return <div className="app"><p className="loading">{state.message}</p></div>;
-  if (state.step === "empty") return <div className="app"><p className="loading">还没有加密好的图集：在项目里 npm run seal -- --init</p></div>;
+  if (state.step === "failed") {
+    return (
+      <div className="app lock">
+        <div className="lock-card" role="alert">
+          <span className="lock-icon" aria-hidden="true">⚠️</span>
+          <h1>打不开时光轴</h1>
+          <p className="lock-error">{state.message}</p>
+        </div>
+      </div>
+    );
+  }
+  if (state.step === "empty") {
+    return (
+      <div className="app lock">
+        <div className="lock-card">
+          <span className="lock-icon" aria-hidden="true">🌱</span>
+          <h1>小念的成长时光轴</h1>
+          <p>还没有加密好的图集：在项目里运行 <code>npm run seal -- --init</code></p>
+        </div>
+      </div>
+    );
+  }
   if (state.step === "locked") return <LockPage keyFile={state.keyFile} onOpen={(library) => setState({ step: "open", library })} />;
 
   const { library } = state;

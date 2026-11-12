@@ -22,9 +22,9 @@ export type LineSize = {
   readonly rowH: number;
 };
 
-export const LINE: LineSize = { tagW: 150, yearW: 160, flagW: 84, gap: 26, pad: 64, sag: 36, top: 28, rowH: 304 };
+export const LINE: LineSize = { tagW: 150, yearW: 160, flagW: 86, gap: 26, pad: 64, sag: 36, top: 28, rowH: 332 };
 /** 手机上挂件小一号 */
-export const COMPACT: LineSize = { tagW: 124, yearW: 132, flagW: 72, gap: 14, pad: 40, sag: 24, top: 24, rowH: 266 };
+export const COMPACT: LineSize = { tagW: 124, yearW: 132, flagW: 74, gap: 14, pad: 40, sag: 24, top: 24, rowH: 288 };
 export const sizeFor = (room: number): LineSize => (room > 0 && room < 560 ? COMPACT : LINE);
 
 export type LineItem<M extends Moment = Moment> =

@@ -15,14 +15,26 @@ type Photo = { readonly name: string; readonly caption?: string };
 
 /** 一个图集的详情：一组照片、视频和文字从上往下排；点照片看大图，← → 换前后一个图集 */
 export function MomentPage({ moment, library }: { moment: SealedMoment; library: Library }) {
+  const { name: kidName, birthday } = library.profile;
   const { prev, next } = neighbors(library.moments, moment.id);
   const prevHref = prev ? `#/moment/${prev.id}` : null;
   const nextHref = next ? `#/moment/${next.id}` : null;
   const back = `#/at/${moment.id}`;
   const photos: Photo[] = moment.blocks.flatMap((b) => ("photos" in b ? b.photos.map((name) => ({ name, caption: b.caption })) : []));
   const [viewing, setViewing] = useState<number | null>(null);
+  const lightboxRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
-  const age = library.profile.birthday ? ageOn(library.profile.birthday, moment.when.date) : null;
+  const age = birthday ? ageOn(birthday, moment.when.date) : null;
+
+  useEffect(() => {
+    document.title = `${moment.title} · ${kidName}的成长时光轴`;
+  }, [moment.title, kidName]);
+
+  const closeLightbox = () => {
+    setViewing(null);
+    requestAnimationFrame(() => openerRef.current?.focus());
+  };
 
   const step = (dir: -1 | 1) => {
     if (viewing !== null) setViewing((v) => (v === null ? v : Math.min(photos.length - 1, Math.max(0, v + dir))));
@@ -36,7 +48,7 @@ export function MomentPage({ moment, library }: { moment: SealedMoment; library:
       if (e.key === "ArrowLeft") step(-1);
       else if (e.key === "ArrowRight") step(1);
       else if (e.key === "Escape") {
-        if (viewing !== null) setViewing(null);
+        if (viewing !== null) closeLightbox();
         else location.hash = back;
       }
     };
@@ -46,8 +58,9 @@ export function MomentPage({ moment, library }: { moment: SealedMoment; library:
 
   useEffect(() => {
     document.body.style.overflow = viewing === null ? "" : "hidden";
+    if (viewing !== null) lightboxRef.current?.focus();
     return () => { document.body.style.overflow = ""; };
-  }, [viewing]);
+  }, [viewing !== null]);
 
   const onTouchStart = (e: TouchEvent) => {
     const t = e.touches[0];
@@ -64,7 +77,10 @@ export function MomentPage({ moment, library }: { moment: SealedMoment; library:
     step(dx < 0 ? 1 : -1);
   };
 
-  const open = (name: string) => setViewing(photos.findIndex((p) => p.name === name));
+  const open = (photoName: string, el: HTMLElement) => {
+    openerRef.current = el;
+    setViewing(photos.findIndex((p) => p.name === photoName));
+  };
 
   return (
     <div className="app" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
@@ -78,14 +94,14 @@ export function MomentPage({ moment, library }: { moment: SealedMoment; library:
           <p className="when">
             {fullDate(moment.when.date)}
             {moment.when.label && <span className="chip">{moment.when.label}</span>}
-            {age && <span className="chip age">小念 {age}</span>}
+            {age && <span className="chip age">{kidName} {age}</span>}
             <span className="ago">{ago(moment.when.date, new Date())}</span>
           </p>
           <h1>{moment.title}</h1>
           <p className="story-about">{moment.about}</p>
         </header>
 
-        {moment.blocks.map((b, i) => <BlockView key={i} block={b} moment={moment} name={library.profile.name} onOpen={open} />)}
+        {moment.blocks.map((b, i) => <BlockView key={i} block={b} moment={moment} name={kidName} onOpen={open} />)}
 
         {(moment.story || moment.work) && (
           <div className="links">
@@ -95,38 +111,62 @@ export function MomentPage({ moment, library }: { moment: SealedMoment; library:
         )}
       </article>
 
-      <div className="pager">
-        {prevHref ? <a className="btn ghost" href={prevHref}>更早</a> : <button className="btn ghost" disabled>更早</button>}
-        {nextHref ? <a className="btn" href={nextHref}>后来</a> : <a className="btn" href={back}>回时光轴</a>}
-      </div>
-      <p className="hint">点照片看大图 · ← → 或左右滑动换一个图集 · Esc 回时光轴</p>
+      <nav className="pager" aria-label="前后图集">
+        {prev ? (
+          <a className="btn ghost pager-btn" href={prevHref!} title={`更早：${prev.title}`}>
+            <span aria-hidden="true">‹</span>
+            <span className="pager-label">{prev.title}</span>
+          </a>
+        ) : (
+          <button type="button" className="btn ghost pager-btn" disabled>已是第一篇</button>
+        )}
+        {next ? (
+          <a className="btn pager-btn" href={nextHref!} title={`后来：${next.title}`}>
+            <span className="pager-label">{next.title}</span>
+            <span aria-hidden="true">›</span>
+          </a>
+        ) : (
+          <a className="btn pager-btn" href={back}>回时光轴</a>
+        )}
+      </nav>
+      <p className="hint">{photos.length > 0 ? "点照片看大图 · " : ""}← → 或左右滑动换一个图集 · Esc 回时光轴</p>
 
       {viewing !== null && photos[viewing] && (
-        <div className="lightbox" role="dialog" aria-modal="true" aria-label="看大图" onClick={(e) => { if (e.target === e.currentTarget) setViewing(null); }}>
+        <div ref={lightboxRef} tabIndex={-1} className="lightbox" role="dialog" aria-modal="true" aria-label="看大图"
+          onClick={(e) => { if (e.target === e.currentTarget) closeLightbox(); }}>
           <VaultImg key={photos[viewing].name} file={moment.files[photos[viewing].name]} alt={photos[viewing].caption ?? moment.title} eager />
-          <p className="lightbox-caption">{photos[viewing].caption}<span>{viewing + 1} / {photos.length}</span></p>
-          <button className="lightbox-btn close" onClick={() => setViewing(null)} aria-label="关上">×</button>
-          {viewing > 0 && <button className="lightbox-btn prev" onClick={() => step(-1)} aria-label="上一张">‹</button>}
-          {viewing < photos.length - 1 && <button className="lightbox-btn next" onClick={() => step(1)} aria-label="下一张">›</button>}
+          <p className="lightbox-caption">
+            {photos[viewing].caption && <em>{photos[viewing].caption}</em>}
+            {photos.length > 1 && <span>{viewing + 1} / {photos.length}</span>}
+          </p>
+          <button type="button" className="lightbox-btn close" onClick={closeLightbox} aria-label="关上">×</button>
+          {photos.length > 1 && (
+            <>
+              <button type="button" className="lightbox-btn prev" disabled={viewing <= 0} onClick={() => step(-1)} aria-label="上一张">‹</button>
+              <button type="button" className="lightbox-btn next" disabled={viewing >= photos.length - 1} onClick={() => step(1)} aria-label="下一张">›</button>
+            </>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-/** 一张竖着的照片别撑满整行：按比例收窄，让它的高不超过一屏 */
-function single(file: FileRef | undefined, count: number): CSSProperties | undefined {
-  if (count !== 1 || !file?.w || !file?.h) return undefined;
-  return { maxWidth: `calc(min(80vh, 720px) * ${(file.w / file.h).toFixed(4)} + 20px)` };
+/** 竖着的单张照片或竖拍视频别撑满整行：按比例收窄，让高不超过一屏，左右不留大黑边 */
+function frameWidth(file: FileRef | undefined, pad = 20): CSSProperties | undefined {
+  if (!file?.w || !file?.h) return undefined;
+  return { maxWidth: `calc(min(80vh, 720px) * ${(file.w / file.h).toFixed(4)} + ${pad}px)` };
 }
 
-function BlockView({ block, moment, name, onOpen }: { block: Block; moment: SealedMoment; name: string; onOpen: (photo: string) => void }) {
+function BlockView({ block, moment, name, onOpen }: { block: Block; moment: SealedMoment; name: string; onOpen: (photo: string, el: HTMLElement) => void }) {
   if ("photos" in block) {
     return (
       <figure className={`story-photos n${block.photos.length}`}>
         <div className="photo-row">
           {block.photos.map((p) => (
-            <button key={p} className="photo-open" onClick={() => onOpen(p)} aria-label="看大图" style={single(moment.files[p], block.photos.length)}>
+            <button key={p} type="button" className="photo-open" onClick={(e) => onOpen(p, e.currentTarget)}
+              aria-label={`看大图：${block.caption ?? moment.title}`}
+              style={block.photos.length === 1 ? frameWidth(moment.files[p]) : undefined}>
               <VaultImg file={moment.files[p]} alt={block.caption ?? moment.title} />
             </button>
           ))}
@@ -136,10 +176,12 @@ function BlockView({ block, moment, name, onOpen }: { block: Block; moment: Seal
     );
   }
   if ("video" in block) {
+    const videoFile = moment.files[block.video];
+    const posterFile = moment.files[posterOf(block.video)];
     return (
       <figure className="story-video">
-        <div className="video-frame">
-          <VaultVideo video={moment.files[block.video]} poster={moment.files[posterOf(block.video)]} label={block.caption ?? moment.title} />
+        <div className="video-frame" style={frameWidth(videoFile ?? posterFile)}>
+          <VaultVideo video={videoFile} poster={posterFile} label={block.caption ?? moment.title} />
         </div>
         {block.caption && <figcaption>{block.caption}</figcaption>}
       </figure>

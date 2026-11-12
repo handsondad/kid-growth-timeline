@@ -25,12 +25,13 @@ export function LockPage({ keyFile, onOpen }: { keyFile: KeyFile; onOpen: (libra
 
   return (
     <div className="app lock">
-      <form className="lock-card" onSubmit={submit}>
+      <form className={`lock-card${error ? " has-error" : ""}`} onSubmit={submit}>
         <span className="lock-icon" aria-hidden="true">🔒</span>
         <h1>小念的成长时光轴</h1>
         <p>照片和视频都锁起来了，输入密码才能看</p>
-        <input className="lock-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-          placeholder="密码" aria-label="密码" autoComplete="current-password" autoFocus />
+        <input className={`lock-input${error ? " invalid" : ""}`} type="password" value={password}
+          onChange={(e) => { setPassword(e.target.value); if (error) setError(null); }}
+          placeholder="输入查看密码" aria-label="密码" aria-invalid={Boolean(error)} autoComplete="current-password" autoFocus />
         <label className="remember">
           <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
           这台设备记住我（别人的手机、电脑别勾）
