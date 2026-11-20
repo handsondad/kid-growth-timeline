@@ -22,15 +22,20 @@ type State =
 export default function App() {
   const [hash, setHash] = useState(window.location.hash);
   const [state, setState] = useState<State>({ step: "loading" });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    let live = true;
     fetchKeyFile()
       .then(async (keyFile) => {
-        if (!keyFile) return setState({ step: "empty" });
+        if (!keyFile) return live && setState({ step: "empty" });
         const library = await resume(keyFile);
-        setState(library ? { step: "open", library } : { step: "locked", keyFile });
+        if (live) setState(library ? { step: "open", library } : { step: "locked", keyFile });
       })
-      .catch((err: Error) => setState({ step: "failed", message: err.message }));
+      .catch((err: Error) => live && setState({ step: "failed", message: err.message }));
+    return () => { live = false; };
+  }, [attempt]);
+  useEffect(() => {
     const onHash = () => setHash(window.location.hash);
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
@@ -45,6 +50,7 @@ export default function App() {
           <span className="lock-icon" aria-hidden="true">⚠️</span>
           <h1>打不开时光轴</h1>
           <p className="lock-error">{state.message}</p>
+          <button type="button" className="btn" onClick={() => { setState({ step: "loading" }); setAttempt((n) => n + 1); }}>再试一次</button>
         </div>
       </div>
     );

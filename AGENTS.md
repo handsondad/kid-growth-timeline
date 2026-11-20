@@ -291,11 +291,11 @@ vault/
 
 代码和工具：
 
-- `src/App.tsx`：读 `vault/key.json` → 输密码（或用记住的钥匙）→ 解开 `index.enc` → 路由
-- `src/library.ts`：解锁、记住钥匙、下载解密 blob（照片有缓存，视频带进度）
-- `src/pages/VaultMedia.tsx`：加密的照片（滚到跟前才解）、加密的视频（封面 → 点了下载解密 → 播放）
+- `src/App.tsx`：读 `vault/key.json` → 输密码（或用记住的钥匙）→ 解开 `index.enc` → 路由；读不到时有「再试一次」
+- `src/library.ts`：解锁、记住钥匙、下载解密 blob（照片有缓存，视频带进度）；`index.enc` 和 `key.json` 一起先下（加密的，没解锁也能下）
+- `src/pages/VaultMedia.tsx`：加密的照片（滚到跟前才解，没下载成功过一会儿、网回来了再试）、加密的视频（封面 → 点了下载解密 → 播放）
 - `src/moment/types.ts`、`src/moment/vocab.ts`：图集、图文段落、vault 目录的类型，文件名规则
-- `src/vault/crypto.ts`：钥匙、加密解密、文件名
+- `src/vault/crypto.ts`：钥匙、加密解密、文件名。Argon2id（`src/vault/argon2.ts`）用到时才下载：用记住的钥匙打开的不下载，停在输密码页时先下好；要按名字从这个文件导入，直接 `import("hash-wasm")` 会把它所有算法都打进包
 - `tools/library.mjs`：找 albums/ 和 vault、读 `.env.local`、读图集、`npm run status`
 - `tools/seal.mjs`：加密 albums/，缩略图（360×360，ffmpeg 做），删掉用不上的 blob，同步标记
 - `tools/unseal.mjs`：把 vault 解回 albums/，不盖掉两边不一样的

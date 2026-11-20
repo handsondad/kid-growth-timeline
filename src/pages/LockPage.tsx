@@ -1,7 +1,10 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { Library } from "../moment/types.ts";
-import { unlock } from "../library.ts";
+import { preloadUnlock, unlock } from "../library.ts";
 import { WrongPassword, type KeyFile } from "../vault/crypto.ts";
+
+/** Argon2id 算的时候页面会卡一下：先让「正在解锁…」画出来再算 */
+const nextPaint = () => new Promise<void>((done) => requestAnimationFrame(() => setTimeout(done)));
 
 /** 照片和视频都是加密的：输对密码，在这台设备上解开 */
 export function LockPage({ keyFile, onOpen }: { keyFile: KeyFile; onOpen: (library: Library) => void }) {
@@ -9,6 +12,7 @@ export function LockPage({ keyFile, onOpen }: { keyFile: KeyFile; onOpen: (libra
   const [remember, setRemember] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useEffect(preloadUnlock, []);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -16,6 +20,7 @@ export function LockPage({ keyFile, onOpen }: { keyFile: KeyFile; onOpen: (libra
     setBusy(true);
     setError(null);
     try {
+      await nextPaint();
       onOpen(await unlock(keyFile, password, remember));
     } catch (err) {
       setError(err instanceof WrongPassword ? "密码不对，再试一次" : (err as Error).message);

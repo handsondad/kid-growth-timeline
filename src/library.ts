@@ -3,24 +3,44 @@
  * 输对密码在浏览器里解开；解开的照片只放在内存里，关掉页面就没了。都是相对路径，GitHub Pages 上也一样。
  */
 import type { FileRef, Library } from "./moment/types.ts";
-import { fromB64, openBytes, openVault, toB64, unwrapMaster, type KeyFile, type Vault } from "./vault/crypto.ts";
+import { fromB64, loadKdf, openBytes, openVault, toB64, unwrapMaster, type KeyFile, type Vault } from "./vault/crypto.ts";
 
 const SAVED = "kgt-key";
 let vault: Vault | null = null;
 
+/** index.enc 是加密的，没解锁也能先下载：和 key.json 一起下，输密码、解钥匙的时候它已经到了。没下载成功下次重新下 */
+let indexJob: Promise<Uint8Array<ArrayBuffer>> | null = null;
+function fetchIndex(): Promise<Uint8Array<ArrayBuffer>> {
+  indexJob ??= fetch("vault/index.enc", { cache: "no-store" })
+    .then(async (res) => {
+      if (!res.ok) throw new Error(`读不到 vault/index.enc（${res.status}）`);
+      return new Uint8Array(await res.arrayBuffer());
+    })
+    .catch((err) => {
+      indexJob = null;
+      throw err;
+    });
+  return indexJob;
+}
+
 /** vault 还没生成（没有 key.json）返回 null */
 export async function fetchKeyFile(): Promise<KeyFile | null> {
+  fetchIndex().catch(() => {});
   const res = await fetch("vault/key.json", { cache: "no-store" });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`读不到 vault/key.json（${res.status}）`);
   return res.json();
 }
 
+/** 停在输密码时先把解锁用的程序下好，点「打开」不用再等 */
+export const preloadUnlock = () => {
+  loadKdf().catch(() => {});
+  fetchIndex().catch(() => {});
+};
+
 async function open(master: Uint8Array<ArrayBuffer>): Promise<Library> {
-  const v = await openVault(master);
-  const res = await fetch("vault/index.enc", { cache: "no-store" });
-  if (!res.ok) throw new Error(`读不到 vault/index.enc（${res.status}）`);
-  const library: Library = JSON.parse(new TextDecoder().decode(await openBytes(v, new Uint8Array(await res.arrayBuffer()))));
+  const [v, data] = await Promise.all([openVault(master), fetchIndex()]);
+  const library: Library = JSON.parse(new TextDecoder().decode(await openBytes(v, data)));
   vault = v;
   return library;
 }

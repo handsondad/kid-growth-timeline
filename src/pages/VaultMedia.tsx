@@ -3,12 +3,14 @@ import type { FileRef } from "../moment/types.ts";
 import { fileUrl } from "../library.ts";
 
 const BLANK = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+const RETRIES = 2;
 
-/** 加密的照片：滚到跟前才下载、解开；解开之前是一块同样大小的底色 */
+/** 加密的照片：滚到跟前才下载、解开；解开之前是一块同样大小的底色。没下载成功过一会儿、或者网回来了再试 */
 export function VaultImg({ file, alt, className = "", eager = false }: { file?: FileRef; alt: string; className?: string; eager?: boolean }) {
   const ref = useRef<HTMLImageElement>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [tries, setTries] = useState(0);
   useEffect(() => {
     setUrl(null);
     setFailed(false);
@@ -30,10 +32,20 @@ export function VaultImg({ file, alt, className = "", eager = false }: { file?: 
       alive = false;
       io.disconnect();
     };
-  }, [file?.blob, eager]);
+  }, [file?.blob, eager, tries]);
+  useEffect(() => {
+    if (!failed) return;
+    const again = () => setTries((n) => n + 1);
+    const timer = tries < RETRIES ? setTimeout(again, 2000 * (tries + 1)) : undefined;
+    window.addEventListener("online", again);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("online", again);
+    };
+  }, [failed, tries]);
   const state = failed ? " img-failed" : url ? "" : " img-wait";
   return (
-    <img ref={ref} src={url ?? BLANK} alt={alt} className={className + state} draggable={false}
+    <img ref={ref} src={url ?? BLANK} alt={alt} className={className + state} draggable={false} decoding="async"
       width={file?.w} height={file?.h} style={file?.w && file?.h ? { aspectRatio: `${file.w} / ${file.h}` } : undefined} />
   );
 }

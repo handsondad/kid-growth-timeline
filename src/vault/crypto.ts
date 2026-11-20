@@ -6,8 +6,6 @@
  * - 主钥匙用 HKDF 分出两把：AES-256-GCM 加文件，HMAC 给文件起名（同一个文件名字不变，不知道钥匙就对不上是哪张照片）
  * - 文件按 1 MB 切块加密，每块单独校验；最后一块打标记，被截短了解得出来
  */
-import { argon2id } from "hash-wasm";
-
 export type Kdf = { readonly name: "argon2id"; readonly salt: string; readonly iterations: number; readonly memory: number; readonly parallelism: number };
 export type KeyFile = { readonly v: 1; readonly kdf: Kdf; readonly wrapped: { readonly iv: string; readonly data: string } };
 export type Vault = { readonly aes: CryptoKey; readonly mac: CryptoKey };
@@ -39,7 +37,21 @@ export function fromB64(text: string): Uint8Array<ArrayBuffer> {
   return Uint8Array.from(atob(text), (c) => c.charCodeAt(0));
 }
 
+/** Argon2id 只有输密码时用得上：用记住的钥匙打开的不用下载它；没下载成功下次重新下 */
+let argon2: Promise<typeof import("./argon2.ts").argon2id> | null = null;
+export function loadKdf() {
+  argon2 ??= import("./argon2.ts").then(
+    (m) => m.argon2id,
+    () => {
+      argon2 = null;
+      throw new Error("解锁用的程序没下载下来，检查一下网络再试");
+    },
+  );
+  return argon2;
+}
+
 async function passwordKey(password: string, kdf: Kdf): Promise<CryptoKey> {
+  const argon2id = await loadKdf();
   const raw = await argon2id({
     password: password.normalize("NFC"),
     salt: fromB64(kdf.salt),
