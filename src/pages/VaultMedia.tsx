@@ -5,7 +5,10 @@ import { fileUrl } from "../library.ts";
 const BLANK = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 const RETRIES = 2;
 
-/** 加密的照片：滚到跟前才下载、解开；解开之前是一块同样大小的底色。没下载成功过一会儿、或者网回来了再试 */
+/**
+ * 加密的照片：滚到跟前才下载、解开；解开之前是一块同样大小的底色。没下载成功过一会儿、或者网回来了再试。
+ * 放在横着滚的容器里时，给容器加 data-lazy-root：按容器算“跟前”，左右各提前 400px 解开，看不见的不下。
+ */
 export function VaultImg({ file, alt, className = "", eager = false }: { file?: FileRef; alt: string; className?: string; eager?: boolean }) {
   const ref = useRef<HTMLImageElement>(null);
   const [url, setUrl] = useState<string | null>(null);
@@ -26,7 +29,7 @@ export function VaultImg({ file, alt, className = "", eager = false }: { file?: 
       if (!entries.some((e) => e.isIntersecting)) return;
       io.disconnect();
       load();
-    }, { rootMargin: "400px" });
+    }, { root: el.closest("[data-lazy-root]"), rootMargin: "400px" });
     io.observe(el);
     return () => {
       alive = false;

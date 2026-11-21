@@ -157,7 +157,7 @@ export function WallPage({ library, at, year }: { library: Library; at?: string;
       </header>
 
       <section className={`line${size === COMPACT ? " compact" : ""}${edges.left ? " more-left" : ""}${edges.right ? " more-right" : ""}`} aria-label="成长时间绳">
-        <div className="line-scroll" ref={scroller} onScroll={updateEdges}>
+        <div className="line-scroll" ref={scroller} onScroll={updateEdges} data-lazy-root>
           <div className="line-track" style={{ width, height: size.rowH }}>
             <svg className="rope" width={width} height={size.top + size.sag + 20} aria-hidden="true">
               <path d={rope} />
@@ -188,7 +188,7 @@ export function WallPage({ library, at, year }: { library: Library; at?: string;
                       <span className="peg" aria-hidden="true" />
                       <span className="card" style={{ background: it.color, ["--tilt" as string]: `${it.tilt}deg` }}>
                         <span className="thumb-wrap">
-                          <VaultImg className="thumb" file={library.years[it.year] ?? last.thumb} alt="" eager />
+                          <VaultImg className="thumb" file={library.years[it.year] ?? last.thumb} alt="" />
                           {age(it.year) && <span className="age-badge">{age(it.year)}</span>}
                         </span>
                         <span className="day">{it.year}</span>
@@ -212,7 +212,7 @@ export function WallPage({ library, at, year }: { library: Library; at?: string;
                     <span className="peg" aria-hidden="true" />
                     <span className="card" style={{ background: it.color, ["--tilt" as string]: `${it.tilt}deg` }}>
                       <span className="thumb-wrap">
-                        <VaultImg className="thumb" file={m.thumb} alt="" eager />
+                        <VaultImg className="thumb" file={m.thumb} alt="" />
                         {m.blocks.some((b) => "video" in b) && <span className="play-badge" aria-label="有小视频">▶</span>}
                       </span>
                       <span className="day">{monthDay(m.when.date)}</span>
